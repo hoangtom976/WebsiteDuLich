@@ -1,0 +1,197 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { useMemo, useState } from "react";
+import {
+  LayoutDashboard,
+  Plane,
+  Users,
+  Ticket,
+  Settings,
+  Mountain,
+  BookOpen,
+  LogOut,
+  Grid3x3,
+  MapPinned,
+  CalendarDays,
+  Map,
+  TicketPercent,
+  MessageCircleMore,
+  CloudSun,
+  ChevronDown,
+  ChevronRight,
+} from "lucide-react";
+import { clearAuthToken, getAuthState } from "@/lib/auth-client";
+
+const navSections = [
+  {
+    key: "overview",
+    label: "Tong quan",
+    icon: LayoutDashboard,
+    items: [{ href: "/dashboard", label: "Dashboard" }],
+  },
+  {
+    key: "product",
+    label: "San pham",
+    icon: Plane,
+    items: [
+      { href: "/dashboard/categories", label: "Danh muc", icon: Grid3x3 },
+      { href: "/dashboard/locations", label: "Dia diem", icon: MapPinned },
+      { href: "/dashboard/tours", label: "Tours", icon: Plane },
+      { href: "/dashboard/schedules", label: "Lich khoi hanh", icon: CalendarDays },
+      { href: "/dashboard/itineraries", label: "Lich trinh tour", icon: Map },
+    ],
+  },
+  {
+    key: "operation",
+    label: "Van hanh",
+    icon: Ticket,
+    items: [
+      { href: "/dashboard/users", label: "Nguoi dung", icon: Users, adminOnly: true },
+      { href: "/dashboard/bookings", label: "Don hang", icon: Ticket },
+      { href: "/dashboard/reviews", label: "Danh gia", icon: MessageCircleMore },
+      { href: "/dashboard/vouchers", label: "Vouchers", icon: TicketPercent },
+    ],
+  },
+  {
+    key: "content",
+    label: "Noi dung",
+    icon: BookOpen,
+    items: [
+      { href: "/dashboard/blog", label: "Blog", icon: BookOpen },
+      { href: "/dashboard/weather", label: "Thoi tiet", icon: CloudSun },
+      { href: "/dashboard/chatbot", label: "Chatbot AI", icon: MessageCircleMore },
+    ],
+  },
+  {
+    key: "system",
+    label: "He thong",
+    icon: Settings,
+    items: [{ href: "/dashboard/settings", label: "Cai dat", icon: Settings, adminOnly: true }],
+  },
+];
+
+export default function AdminSidebar() {
+  const pathname = usePathname();
+  const router = useRouter();
+  const auth = getAuthState();
+  const isStaff = auth.isStaff && !auth.isAdmin;
+  const defaultOpen = useMemo(() => {
+    return navSections.reduce((acc, section) => {
+      acc[section.key] = section.items.some((item) =>
+        item.href === "/dashboard"
+          ? pathname === "/dashboard"
+          : pathname?.startsWith(item.href),
+      );
+      return acc;
+    }, {});
+  }, [pathname]);
+  const [openSections, setOpenSections] = useState(defaultOpen);
+
+  const handleLogout = () => {
+    clearAuthToken();
+    router.push("/dang-nhap");
+    router.refresh();
+  };
+  const toggleSection = (key) => {
+    setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  return (
+    <aside className="sticky top-0 flex h-screen w-72 flex-shrink-0 flex-col overflow-y-auto bg-[#0a2d4d] p-4 text-white">
+      <Link href="/" className="mb-8 flex items-center gap-3 px-4">
+        <Mountain className="h-8 w-8 text-amber-400" />
+        <span className="text-2xl font-bold">Viet Tour</span>
+      </Link>
+
+      <nav className="flex-1 space-y-3">
+        {navSections.map((section) => {
+          const Icon = section.icon;
+          const isActiveGroup = section.items.some((item) =>
+            item.href === "/dashboard"
+              ? pathname === "/dashboard"
+              : pathname?.startsWith(item.href),
+          );
+          const isOpen = openSections[section.key] ?? isActiveGroup;
+
+          return (
+            <div key={section.key} className="rounded-lg bg-white/[0.03]">
+              <button
+                type="button"
+                onClick={() => toggleSection(section.key)}
+                className={`flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-left transition-colors ${
+                  isActiveGroup
+                    ? "bg-white/10 text-white"
+                    : "text-gray-300 hover:bg-white/5 hover:text-white"
+                }`}
+              >
+                <Icon className="h-4 w-4" />
+                <span className="flex-1 text-sm font-semibold">{section.label}</span>
+                {isOpen ? (
+                  <ChevronDown className="h-4 w-4" />
+                ) : (
+                  <ChevronRight className="h-4 w-4" />
+                )}
+              </button>
+
+              {isOpen && (
+                <div className="space-y-1 px-2 pb-2">
+                  {section.items.map((item) => {
+                    const ItemIcon = item.icon;
+                    const isDisabled = isStaff && item.adminOnly;
+                    const isActive =
+                      item.href === "/dashboard"
+                        ? pathname === "/dashboard"
+                        : pathname?.startsWith(item.href);
+
+                    if (isDisabled) {
+                      return (
+                        <div
+                          key={item.href}
+                          title="Chuc nang chi danh cho Admin"
+                          className="flex cursor-not-allowed items-center gap-2 rounded-md px-3 py-2 text-sm text-gray-400 opacity-45"
+                        >
+                          {ItemIcon ? <ItemIcon className="h-4 w-4" /> : null}
+                          <span>{item.label}</span>
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors ${
+                          isActive
+                            ? "bg-blue-500/20 text-white"
+                            : "text-gray-300 hover:bg-white/5 hover:text-white"
+                        }`}
+                      >
+                        {ItemIcon ? <ItemIcon className="h-4 w-4" /> : null}
+                        <span>{item.label}</span>
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          );
+        })}
+
+        <button
+          type="button"
+          onClick={handleLogout}
+          className="flex w-full items-center gap-3 rounded-lg px-4 py-2.5 text-gray-300 transition-colors hover:bg-red-500/15 hover:text-white"
+        >
+          <LogOut className="h-5 w-5" />
+          <span className="font-medium">Dang xuat</span>
+        </button>
+      </nav>
+
+      <div className="mt-auto text-center text-xs text-gray-400">
+        <p>&copy; {new Date().getFullYear()} Viet Tour Admin</p>
+      </div>
+    </aside>
+  );
+}

@@ -1,0 +1,292 @@
+{
+    "info": {
+        "name": "Chatbot API - Việt Tour",
+        "description": "API tests for chatbot functionality with Gemini AI",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Test 1: Tạo phiên chat mới",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test(\"Status code is 200\", function () {",
+                            "    pm.response.to.have.status(200);",
+                            "});",
+                            "",
+                            "pm.test(\"Response has required fields\", function () {",
+                            "    var jsonData = pm.response.json();",
+                            "    pm.expect(jsonData).to.have.property('cauTraLoi');",
+                            "    pm.expect(jsonData).to.have.property('phienChatId');",
+                            "});",
+                            "",
+                            "// Save session ID for next requests",
+                            "var jsonData = pm.response.json();",
+                            "pm.environment.set(\"phienChatId\", jsonData.phienChatId);",
+                            "console.log(\"Saved phienChatId: \" + jsonData.phienChatId);"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ],
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"cauHoi\": \"Xin chào, tôi muốn biết thông tin về các tour du lịch\",\n  \"nguoiDungId\": 1\n}"
+                },
+                "url": {
+                    "raw": "{{baseUrl}}/api/chatbot/hoi",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "api",
+                        "chatbot",
+                        "hoi"
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "Test 2: Tiếp tục hội thoại",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test(\"Status code is 200\", function () {",
+                            "    pm.response.to.have.status(200);",
+                            "});",
+                            "",
+                            "pm.test(\"Same session ID\", function () {",
+                            "    var jsonData = pm.response.json();",
+                            "    pm.expect(jsonData.phienChatId).to.eql(parseInt(pm.environment.get(\"phienChatId\")));",
+                            "});"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ],
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"cauHoi\": \"Tour Hạ Long có những gói nào?\",\n  \"nguoiDungId\": 1,\n  \"phienChatId\": {{phienChatId}}\n}"
+                },
+                "url": {
+                    "raw": "{{baseUrl}}/api/chatbot/hoi",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "api",
+                        "chatbot",
+                        "hoi"
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "Test 3: Hỏi về giá tour",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test(\"Status code is 200\", function () {",
+                            "    pm.response.to.have.status(200);",
+                            "});",
+                            "",
+                            "pm.test(\"Response contains tour info\", function () {",
+                            "    var jsonData = pm.response.json();",
+                            "    pm.expect(jsonData.cauTraLoi).to.be.a('string');",
+                            "    pm.expect(jsonData.cauTraLoi.length).to.be.above(10);",
+                            "});"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ],
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"cauHoi\": \"Cho tôi biết giá tour Sapa 3 ngày 2 đêm\",\n  \"nguoiDungId\": 1,\n  \"phienChatId\": {{phienChatId}}\n}"
+                },
+                "url": {
+                    "raw": "{{baseUrl}}/api/chatbot/hoi",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "api",
+                        "chatbot",
+                        "hoi"
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "Test 4: Người dùng mới",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test(\"Status code is 200\", function () {",
+                            "    pm.response.to.have.status(200);",
+                            "});",
+                            "",
+                            "pm.test(\"New session created\", function () {",
+                            "    var jsonData = pm.response.json();",
+                            "    var oldSessionId = pm.environment.get(\"phienChatId\");",
+                            "    pm.expect(jsonData.phienChatId).to.not.eql(oldSessionId);",
+                            "});"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ],
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"cauHoi\": \"Tour nào phù hợp cho gia đình?\",\n  \"nguoiDungId\": 2\n}"
+                },
+                "url": {
+                    "raw": "{{baseUrl}}/api/chatbot/hoi",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "api",
+                        "chatbot",
+                        "hoi"
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "Test 5: Câu hỏi đơn giản",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test(\"Status code is 200\", function () {",
+                            "    pm.response.to.have.status(200);",
+                            "});",
+                            "",
+                            "pm.test(\"AI responds politely\", function () {",
+                            "    var jsonData = pm.response.json();",
+                            "    pm.expect(jsonData.cauTraLoi).to.include.any.of(['xin chào', 'chào', 'xin kính chào']);",
+                            "});"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ],
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"cauHoi\": \"Xin chào\",\n  \"nguoiDungId\": 1\n}"
+                },
+                "url": {
+                    "raw": "{{baseUrl}}/api/chatbot/hoi",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "api",
+                        "chatbot",
+                        "hoi"
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "Test 6: Câu hỏi không liên quan",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"cauHoi\": \"Thời tiết hôm nay thế nào?\",\n  \"nguoiDungId\": 1\n}"
+                },
+                "url": {
+                    "raw": "{{baseUrl}}/api/chatbot/hoi",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "api",
+                        "chatbot",
+                        "hoi"
+                    ]
+                }
+            },
+            "response": []
+        }
+    ],
+    "variable": [
+        {
+            "key": "baseUrl",
+            "value": "http://localhost:8080",
+            "type": "string"
+        },
+        {
+            "key": "phienChatId",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "nguoiDungId",
+            "value": "1",
+            "type": "string"
+        }
+    ]
+}
