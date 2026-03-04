@@ -1,34 +1,70 @@
 # ===== OS =====
 .DS_Store
 Thumbs.db
+Desktop.ini
 
-# ===== IDE =====
+# ===== IDE / Editor =====
 .vscode/
 .idea/
+*.iml
+
+# ===== Logs =====
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
 
 # ===== ENV =====
 .env
 .env.*
 !.env.example
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
+backend/.env
+backend/.env.*
 
 # ===== Frontend (Next.js) =====
 frontend/node_modules/
 frontend/.next/
 frontend/out/
-frontend/.env.local
-frontend/.env.production
+frontend/.turbo/
+frontend/.cache/
+frontend/coverage/
 frontend/playwright-report/
 frontend/test-results/
 frontend/tsconfig.tsbuildinfo
+frontend/next-env.d.ts
 
 # ===== Backend (Spring Boot / Maven) =====
 backend/target/
 backend/.mvn/wrapper/maven-wrapper.jar
-*.log
+backend/.gradle/
+backend/build/
+backend/logs/
+backend/*.log
+
+# ===== Java =====
+*.class
+*.jar
+*.war
+*.ear
 
 # ===== Database / tools =====
 *.sql.bak
+*.sqlite
+*.db
 
 # ===== Python =====
 __pycache__/
 *.pyc
+
+# ===== Testing / Coverage =====
+.nyc_output/
+coverage/
+
+# ===== Temp =====
+*.tmp
+*.temp
