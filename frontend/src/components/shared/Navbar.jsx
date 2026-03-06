@@ -21,9 +21,8 @@ export default function PremiumHeader() {
 
   return (
     <header
-      className={`fixed z-40 w-full transition-all duration-300 ${
-        isHomePage ? "top-[var(--topbar-height)]" : "top-0"
-      } ${isScrolled || !isHomePage ? "bg-white/90 shadow-md backdrop-blur-lg" : "bg-transparent"} select-none`}
+      className={`fixed z-40 w-full transition-all duration-300 ${isHomePage ? "top-[var(--topbar-height)]" : "top-0"
+        } ${isScrolled || !isHomePage ? "bg-white/90 shadow-md backdrop-blur-lg" : "bg-transparent"} select-none`}
     >
       <div className="container mx-auto flex h-[var(--header-height)] items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link href="/" className="flex items-center gap-2">
@@ -35,7 +34,7 @@ export default function PremiumHeader() {
 
         <nav className="hidden items-center gap-8 font-medium text-gray-700 transition-colors md:flex">
           <Link href="/" className="transition-colors hover:text-amber-400">
-            Trang chu
+            Trang chủ
           </Link>
           <Link href="/tours" className="transition-colors hover:text-amber-400">
             Tours
@@ -44,13 +43,13 @@ export default function PremiumHeader() {
             href="/khuyen-mai"
             className="transition-colors hover:text-amber-400"
           >
-            Khuyen mai
+            Khuyến mãi
           </Link>
           <Link href="/blog" className="transition-colors hover:text-amber-400">
-            Blog du lich
+            Blog du lịch
           </Link>
           <Link href="/lien-he" className="transition-colors hover:text-amber-400">
-            Lien he
+            Liên hệ
           </Link>
           <UserNav />
         </nav>

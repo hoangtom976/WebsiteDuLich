@@ -11,6 +11,7 @@ const normalizeTour = (item = {}) => ({
   diaDiemId: item.dia_diem_id ?? item.diaDiemId ?? null,
   tenDanhMuc: item.ten_danh_muc || item.tenDanhMuc || "",
   tenDiaDiem: item.ten_dia_diem || item.tenDiaDiem || "",
+  lichTrinhs: item.lichTrinhs || item.lich_trinhs || [],
 });
 
 export const getAdminTours = async () => {

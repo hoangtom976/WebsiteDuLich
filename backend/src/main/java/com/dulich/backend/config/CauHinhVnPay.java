@@ -11,7 +11,7 @@ import java.util.Random;
 public class CauHinhVnPay {
 
     public static final String VNP_PAY_URL = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
-    public static final String VNP_RETURN_URL = "http://localhost:8080/api/thanh-toan/vnpay-return";
+    public static final String VNP_RETURN_URL = "http://localhost:8081/api/thanh-toan/vnpay-return";
     public static final String VNP_TMN_CODE = "7Z7VOASM";
     public static final String VNP_HASH_SECRET = "205LIK3T8GTJ9T26XQ95RG5O3SEOPDNQ";
     public static final String VNP_API_URL = "https://sandbox.vnpayment.vn/merchant_webapi/api/transaction";

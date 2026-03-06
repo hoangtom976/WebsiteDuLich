@@ -20,4 +20,5 @@ public class TourChiTietDTO {
     // Các thuộc tính bổ sung
     private List<String> danhSachAnh;
     private List<LichKhoiHanhDTO> danhSachLich;
+    private List<LichTrinhTourDTO> lichTrinhs;
 }

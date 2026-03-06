@@ -1,13 +1,14 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://localhost:8080/api",
+  baseURL: "http://localhost:8081/api",
 });
 
 // Thêm một interceptor để tự động gắn token vào header của mỗi request
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("accessToken");
+    const token =
+      typeof window !== "undefined" ? window.localStorage.getItem("accessToken") : null;
     if (token) {
       config.headers["Authorization"] = `Bearer ${token}`;
     }

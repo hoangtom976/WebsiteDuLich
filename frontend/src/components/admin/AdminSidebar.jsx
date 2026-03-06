@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   LayoutDashboard,
   Plane,
@@ -52,6 +52,7 @@ const navSections = [
       { href: "/dashboard/bookings", label: "Don hang", icon: Ticket },
       { href: "/dashboard/reviews", label: "Danh gia", icon: MessageCircleMore },
       { href: "/dashboard/vouchers", label: "Vouchers", icon: TicketPercent },
+      { href: "/dashboard/flash-sales", label: "Flash Sale", icon: TicketPercent },
     ],
   },
   {
@@ -73,10 +74,19 @@ const navSections = [
 ];
 
 export default function AdminSidebar() {
+  const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
-  const auth = getAuthState();
+
+  // useEffect này chỉ chạy trên Client sau khi component đã mount
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Chỉ lấy auth state sau khi mount để tránh hydration mismatch
+  const auth = mounted ? getAuthState() : { isLoggedIn: false, roles: [], isAdmin: false, isStaff: false };
   const isStaff = auth.isStaff && !auth.isAdmin;
+
   const defaultOpen = useMemo(() => {
     return navSections.reduce((acc, section) => {
       acc[section.key] = section.items.some((item) =>
@@ -87,6 +97,7 @@ export default function AdminSidebar() {
       return acc;
     }, {});
   }, [pathname]);
+
   const [openSections, setOpenSections] = useState(defaultOpen);
 
   const handleLogout = () => {
@@ -94,9 +105,31 @@ export default function AdminSidebar() {
     router.push("/dang-nhap");
     router.refresh();
   };
+
   const toggleSection = (key) => {
     setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }));
   };
+
+  // Nếu chưa mounted (render Server hoặc render Client lần đầu), trả về UI tối giản 
+  // để khớp chính xác HTML giữa Server và Client (Hydration bit-for-bit match)
+  if (!mounted) {
+    return (
+      <aside className="sticky top-0 flex h-screen w-72 flex-shrink-0 flex-col bg-[#0a2d4d] p-4 text-white">
+        <div className="mb-8 flex items-center gap-3 px-4">
+          <Mountain className="h-8 w-8 text-amber-400 opacity-50" />
+          <span className="text-2xl font-bold opacity-50">Viet Tour</span>
+        </div>
+        <div className="flex-1 space-y-4 animate-pulse">
+          <div className="h-10 w-full rounded bg-white/5" />
+          <div className="h-10 w-full rounded bg-white/5" />
+          <div className="h-10 w-full rounded bg-white/5" />
+        </div>
+        <div className="mt-auto text-center text-xs text-gray-400 opacity-30">
+          <p>&copy; 2026 Viet Tour Admin</p>
+        </div>
+      </aside>
+    );
+  }
 
   return (
     <aside className="sticky top-0 flex h-screen w-72 flex-shrink-0 flex-col overflow-y-auto bg-[#0a2d4d] p-4 text-white">
@@ -120,11 +153,10 @@ export default function AdminSidebar() {
               <button
                 type="button"
                 onClick={() => toggleSection(section.key)}
-                className={`flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-left transition-colors ${
-                  isActiveGroup
-                    ? "bg-white/10 text-white"
-                    : "text-gray-300 hover:bg-white/5 hover:text-white"
-                }`}
+                className={`flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-left transition-colors ${isActiveGroup
+                  ? "bg-white/10 text-white"
+                  : "text-gray-300 hover:bg-white/5 hover:text-white"
+                  }`}
               >
                 <Icon className="h-4 w-4" />
                 <span className="flex-1 text-sm font-semibold">{section.label}</span>
@@ -162,11 +194,10 @@ export default function AdminSidebar() {
                       <Link
                         key={item.href}
                         href={item.href}
-                        className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors ${
-                          isActive
-                            ? "bg-blue-500/20 text-white"
-                            : "text-gray-300 hover:bg-white/5 hover:text-white"
-                        }`}
+                        className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors ${isActive
+                          ? "bg-blue-500/20 text-white"
+                          : "text-gray-300 hover:bg-white/5 hover:text-white"
+                          }`}
                       >
                         {ItemIcon ? <ItemIcon className="h-4 w-4" /> : null}
                         <span>{item.label}</span>

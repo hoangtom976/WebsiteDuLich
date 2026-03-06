@@ -20,6 +20,9 @@ import {
   getAdminTourImages,
   uploadAdminTourImage,
 } from "@/services/adminTourImageService";
+import { Calendar } from "lucide-react";
+import Link from "next/link";
+import { formatDuration } from "@/lib/utils";
 
 const EMPTY_FORM = {
   tenTour: "",
@@ -32,7 +35,7 @@ const EMPTY_FORM = {
 };
 
 function formatCurrency(value) {
-  return `${new Intl.NumberFormat("vi-VN").format(Number(value || 0))} đ`;
+  return `${new Intl.NumberFormat("vi-VN").format(Number(value || 0) * 1000000)} đ`;
 }
 
 function extractApiError(error, fallback) {
@@ -60,6 +63,7 @@ export default function AdminToursPage() {
   const [modalMode, setModalMode] = useState("create");
   const [modalForm, setModalForm] = useState(EMPTY_FORM);
   const [modalTourId, setModalTourId] = useState(null);
+  const [modalItinerary, setModalItinerary] = useState([]); // Thêm state quản lý lịch trình trong Modal
   const [modalImageFile, setModalImageFile] = useState(null);
   const [modalImageFiles, setModalImageFiles] = useState([]);
   const [modalImages, setModalImages] = useState([]);
@@ -113,9 +117,34 @@ export default function AdminToursPage() {
     setModalMode("create");
     setModalForm(EMPTY_FORM);
     setModalTourId(null);
+    setModalItinerary([]); // Reset lịch trình
     resetModalImageState();
     setModalOpen(true);
   };
+
+  // Tự động đồng bộ số ngày trong lịch trình khi thay đổi ô "Số ngày"
+  useEffect(() => {
+    const daysCount = parseInt(modalForm.soNgay) || 0;
+    if (daysCount <= 0) {
+      setModalItinerary([]);
+      return;
+    }
+
+    setModalItinerary((prev) => {
+      const newIti = [...prev];
+      // Nếu số ngày nhập vào nhiều hơn số ngày hiện tại, thêm mới
+      if (daysCount > newIti.length) {
+        for (let i = newIti.length + 1; i <= daysCount; i++) {
+          newIti.push({ ngayThu: i, tieuDe: "", moTa: "" });
+        }
+      }
+      // Nếu ít hơn, cắt bớt (hoặc để nguyên tùy logic, ở đây chọn cắt bớt cho chuẩn UI)
+      else if (daysCount < newIti.length) {
+        return newIti.slice(0, daysCount);
+      }
+      return newIti;
+    });
+  }, [modalForm.soNgay]);
 
   const openEditModal = async (tour) => {
     setModalMode("edit");
@@ -129,6 +158,8 @@ export default function AdminToursPage() {
       trangThai: !!tour.trangThai,
     });
     setModalTourId(tour.id);
+    setModalItinerary(tour.lichTrinhs || []); // Load lịch trình từ tour
+    resetModalImageState(); // Sửa tại đây: Reset trạng thái ảnh trước khi tải mới
     setModalOpen(true);
     setModalImagesLoading(true);
     setModalImageError("");
@@ -165,6 +196,7 @@ export default function AdminToursPage() {
         danhMucId: Number(modalForm.danhMucId),
         diaDiemId: Number(modalForm.diaDiemId),
         trangThai: modalForm.trangThai,
+        lichTrinhs: modalItinerary, // Gửi kèm mảng lịch trình
       };
 
       if (modalMode === "create") {
@@ -341,21 +373,25 @@ export default function AdminToursPage() {
                     <td className="px-4 py-3 font-medium">{tour.tenTour}</td>
                     <td className="px-4 py-3">{tour.tenDanhMuc || "-"}</td>
                     <td className="px-4 py-3">{tour.tenDiaDiem || "-"}</td>
-                    <td className="px-4 py-3">{tour.soNgay} ngày</td>
+                    <td className="px-4 py-3">{formatDuration(tour.soNgay)}</td>
                     <td className="px-4 py-3 font-semibold text-blue-700">{formatCurrency(tour.gia)}</td>
                     <td className="px-4 py-3">
                       <span
-                        className={`rounded-full px-2 py-1 text-xs font-semibold ${
-                          tour.trangThai
-                            ? "bg-emerald-100 text-emerald-700"
-                            : "bg-red-100 text-red-700"
-                        }`}
+                        className={`rounded-full px-2 py-1 text-xs font-semibold ${tour.trangThai
+                          ? "bg-emerald-100 text-emerald-700"
+                          : "bg-red-100 text-red-700"
+                          }`}
                       >
                         {tour.trangThai ? "Đang hiển thị" : "Đang ẩn"}
                       </span>
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex gap-2">
+                        <Link href={`/tours/${tour.id}`} target="_blank">
+                          <Button size="sm" variant="secondary">
+                            Xem
+                          </Button>
+                        </Link>
                         <Button size="sm" variant="outline" onClick={() => openEditModal(tour)}>
                           Sửa
                         </Button>
@@ -406,13 +442,20 @@ export default function AdminToursPage() {
               value={modalForm.gia}
               onChange={(e) => setModalForm((p) => ({ ...p, gia: e.target.value }))}
             />
-            <Input
-              type="number"
-              min={1}
-              placeholder="Số ngày"
-              value={modalForm.soNgay}
-              onChange={(e) => setModalForm((p) => ({ ...p, soNgay: e.target.value }))}
-            />
+            <div className="relative">
+              <Input
+                type="number"
+                min={1}
+                placeholder="Số ngày"
+                value={modalForm.soNgay}
+                onChange={(e) => setModalForm((p) => ({ ...p, soNgay: e.target.value }))}
+              />
+              {modalForm.soNgay && (
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">
+                  ({formatDuration(modalForm.soNgay)})
+                </span>
+              )}
+            </div>
             <select
               className="rounded-md border px-3 py-2"
               value={modalForm.danhMucId}
@@ -454,6 +497,47 @@ export default function AdminToursPage() {
             </div>
           </div>
 
+          <div className="rounded-lg border p-4 bg-slate-50/50">
+            <h3 className="mb-4 font-semibold text-blue-800 flex items-center gap-2">
+              <Calendar className="w-5 h-5 text-blue-600" />
+              Lịch trình chi tiết ({modalItinerary.length} ngày)
+            </h3>
+            {modalItinerary.length === 0 ? (
+              <p className="text-sm text-slate-500 italic">Số ngày chưa được đặt hoặc bằng 0.</p>
+            ) : (
+              <div className="space-y-4">
+                {modalItinerary.map((day, idx) => (
+                  <div key={idx} className="bg-white rounded border p-3 shadow-sm space-y-3">
+                    <div className="flex items-center gap-2 font-medium text-slate-700">
+                      <span className="flex items-center justify-center w-6 h-6 rounded bg-blue-600 text-white text-xs">
+                        {day.ngayThu}
+                      </span>
+                      <span>Ngày thứ {day.ngayThu}</span>
+                    </div>
+                    <Input
+                      placeholder="Tiêu đề ngày (ví dụ: Hà Nội - Hạ Long)"
+                      value={day.tieuDe}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setModalItinerary(prev => prev.map((it, i) => i === idx ? { ...it, tieuDe: val } : it));
+                      }}
+                    />
+                    <textarea
+                      placeholder="Mô tả trải nghiệm trong ngày này..."
+                      className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                      rows={3}
+                      value={day.moTa}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setModalItinerary(prev => prev.map((it, i) => i === idx ? { ...it, moTa: val } : it));
+                      }}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
           <div className="rounded-lg border p-3">
             <h3 className="mb-2 font-semibold">Hình ảnh tour</h3>
             {modalMode === "create" ? (
@@ -481,13 +565,36 @@ export default function AdminToursPage() {
                   <Input
                     type="file"
                     accept="image/*"
-                    onChange={(e) => setModalImageFile(e.target.files?.[0] || null)}
+                    multiple
+                    onChange={(e) => setModalImageFiles(Array.from(e.target.files || []))}
                   />
                   <Button
-                    onClick={uploadImageInModal}
-                    disabled={!modalImageFile || modalImageActionKey === "upload"}
+                    onClick={async () => {
+                      if (!modalTourId || modalImageFiles.length === 0) return;
+                      setModalImageActionKey("upload-batch");
+                      setModalImageMessage("");
+                      setModalImageError("");
+                      try {
+                        const results = await Promise.allSettled(
+                          modalImageFiles.map(file => uploadAdminTourImage(modalTourId, file))
+                        );
+                        const success = results.filter(r => r.status === 'fulfilled').map(r => r.value);
+                        setModalImages(prev => [...success, ...prev]);
+                        setModalImageFiles([]);
+                        if (success.length === results.length) {
+                          setModalImageMessage(`Đã tải lên thành công ${success.length} ảnh.`);
+                        } else {
+                          setModalImageError(`Tải lên ${success.length}/${results.length} ảnh thành công.`);
+                        }
+                      } catch (err) {
+                        setModalImageError("Có lỗi xảy ra khi tải ảnh.");
+                      } finally {
+                        setModalImageActionKey("");
+                      }
+                    }}
+                    disabled={modalImageFiles.length === 0 || modalImageActionKey === "upload-batch"}
                   >
-                    {modalImageActionKey === "upload" ? "Đang tải..." : "Upload ảnh"}
+                    {modalImageActionKey === "upload-batch" ? "Đang tải..." : `Tải lên ${modalImageFiles.length} ảnh`}
                   </Button>
                 </div>
 

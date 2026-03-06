@@ -13,6 +13,7 @@ import {
   ShieldCheck,
   User,
   CircleUserRound,
+  MessageCircleMore,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -38,6 +39,7 @@ function menuByRole(auth) {
       { href: "/ho-so", label: "Thông tin cá nhân", icon: User },
       { href: "/dashboard/users", label: "Quản lý người dùng", icon: ShieldCheck },
       { href: "/dashboard/settings", label: "Cài đặt hệ thống", icon: Settings },
+      { href: "/dashboard/chatbot", label: "Quản lý Chatbot AI", icon: MessageCircleMore },
     ];
   }
 
@@ -67,7 +69,15 @@ export default function UserNav() {
   const router = useRouter();
   usePathname();
   const auth = getAuthState();
-  const [fullName, setFullName] = useState(getProfileFullName());
+  const [fullName, setFullName] = useState(() => {
+    if (typeof window !== "undefined") return getProfileFullName();
+    return "";
+  });
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   useEffect(() => {
     if (!auth.isLoggedIn) return;
@@ -112,7 +122,7 @@ export default function UserNav() {
     }
   };
 
-  if (!auth.isLoggedIn) {
+  if (!isMounted || !auth.isLoggedIn) {
     return (
       <div className="flex items-center gap-2">
         <Button variant="outline" size="sm" asChild>
@@ -134,7 +144,6 @@ export default function UserNav() {
         <button
           type="button"
           draggable={false}
-          onSelectStart={(e) => e.preventDefault()}
           onDragStart={(e) => e.preventDefault()}
           onMouseDown={clearTextSelection}
           onClick={clearTextSelection}

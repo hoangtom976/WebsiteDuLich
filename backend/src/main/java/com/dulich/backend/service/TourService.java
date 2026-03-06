@@ -110,6 +110,19 @@ public class TourService {
         tour.setDiaDiem(diaDiem);
 
         Tour savedTour = tourRepository.save(tour);
+
+        // Lưu lịch trình nếu có
+        if (req.getLichTrinhs() != null && !req.getLichTrinhs().isEmpty()) {
+            req.getLichTrinhs().forEach(lt -> {
+                com.dulich.backend.entity.LichTrinhTour entity = new com.dulich.backend.entity.LichTrinhTour();
+                entity.setTour(savedTour);
+                entity.setNgayThu(lt.getNgayThu());
+                entity.setTieuDe(lt.getTieuDe());
+                entity.setMoTa(lt.getMoTa());
+                lichTrinhTourRepository.save(entity);
+            });
+        }
+
         return convertToDTO(savedTour);
     }
 
@@ -146,6 +159,20 @@ public class TourService {
         tour.setDiaDiem(diaDiem);
 
         Tour updatedTour = tourRepository.save(tour);
+
+        // Cập nhật lịch trình: Xóa cũ, thêm mới
+        if (req.getLichTrinhs() != null) {
+            lichTrinhTourRepository.deleteByTourId(id);
+            req.getLichTrinhs().forEach(lt -> {
+                com.dulich.backend.entity.LichTrinhTour entity = new com.dulich.backend.entity.LichTrinhTour();
+                entity.setTour(updatedTour);
+                entity.setNgayThu(lt.getNgayThu());
+                entity.setTieuDe(lt.getTieuDe());
+                entity.setMoTa(lt.getMoTa());
+                lichTrinhTourRepository.save(entity);
+            });
+        }
+
         return convertToDTO(updatedTour);
     }
 
@@ -211,6 +238,37 @@ public class TourService {
             dto.setTenDiaDiem(tour.getDiaDiem().getTenDiaDiem());
         }
 
+        List<HinhAnhTour> anhs = hinhAnhTourRepository.findByTourId(tour.getId());
+        if (!anhs.isEmpty()) {
+            dto.setHinhAnh(anhs.get(0).getUrlHinhAnh());
+        }
+
+        // Lấy danh sách lịch trình
+        List<com.dulich.backend.dto.LichTrinhTourDTO> lts = lichTrinhTourRepository.findByTourId(tour.getId()).stream()
+                .map(lt -> {
+                    com.dulich.backend.dto.LichTrinhTourDTO ltDto = new com.dulich.backend.dto.LichTrinhTourDTO();
+                    ltDto.setId(lt.getId());
+                    ltDto.setNgayThu(lt.getNgayThu());
+                    ltDto.setTieuDe(lt.getTieuDe());
+                    ltDto.setMoTa(lt.getMoTa());
+                    ltDto.setTourId(tour.getId());
+                    return ltDto;
+                })
+                .collect(Collectors.toList());
+        dto.setLichTrinhs(lts);
+
+        // Lấy đánh giá sao
+        Object[] ratingData = danhGiaRepository.getAverageRatingAndCountByTourId(tour.getId());
+        if (ratingData != null && ratingData.length > 0) {
+            Double avg = (Double) ratingData[0];
+            Long count = (Long) ratingData[1];
+            dto.setSoSaoTrungBinh(avg != null ? Math.round(avg * 10.0) / 10.0 : 0.0);
+            dto.setTongDanhGia(count != null ? count.intValue() : 0);
+        } else {
+            dto.setSoSaoTrungBinh(0.0);
+            dto.setTongDanhGia(0);
+        }
+
         return dto;
     }
 
@@ -245,6 +303,21 @@ public class TourService {
 
         dto.setDanhSachAnh(anhs);
         dto.setDanhSachLich(lichs);
+
+        // Lấy lịch trình chi tiết
+        List<com.dulich.backend.dto.LichTrinhTourDTO> lts = lichTrinhTourRepository.findByTourId(tour.getId()).stream()
+                .map(lt -> {
+                    com.dulich.backend.dto.LichTrinhTourDTO ltDto = new com.dulich.backend.dto.LichTrinhTourDTO();
+                    ltDto.setId(lt.getId());
+                    ltDto.setNgayThu(lt.getNgayThu());
+                    ltDto.setTieuDe(lt.getTieuDe());
+                    ltDto.setMoTa(lt.getMoTa());
+                    ltDto.setTourId(tour.getId());
+                    return ltDto;
+                })
+                .collect(Collectors.toList());
+        dto.setLichTrinhs(lts);
+
         return dto;
     }
 }

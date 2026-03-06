@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -10,52 +10,199 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { MessageSquare, X, Send } from "lucide-react";
+import { MessageSquare, X, Send, Bot, User, Loader2 } from "lucide-react";
+import { askChatbot, getSuggestedQuestions } from "@/services/chatbotService";
 
 export default function Chatbox() {
   const [isOpen, setIsOpen] = useState(false);
+  const [messages, setMessages] = useState([]);
+  const [inputValue, setInputValue] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [phienChatId, setPhienChatId] = useState(null);
+  const [suggestions, setSuggestions] = useState([]);
+
+  const messagesEndRef = useRef(null);
+
+  // Fetch suggestions on first open if no messages
+  useEffect(() => {
+    if (isOpen && messages.length === 0 && suggestions.length === 0) {
+      getSuggestedQuestions()
+        .then(data => setSuggestions(data))
+        .catch(err => console.error("Could not fetch suggestions", err));
+    }
+  }, [isOpen]);
+
+  // Scroll to bottom on new message
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, isLoading]);
+
+  const handleSend = async (text) => {
+    if (!text.trim()) return;
+
+    const newMessages = [...messages, { role: "USER", content: text }];
+    setMessages(newMessages);
+    setInputValue("");
+    setIsLoading(true);
+    setSuggestions([]); // hide suggestions when chat starts
+
+    try {
+      const requestData = {
+        cauHoi: text,
+        phienChatId: phienChatId,
+        nguoiDungId: null // Can be updated later with actual user ID if auth is implemented
+      };
+
+      const response = await askChatbot(requestData);
+
+      if (!phienChatId && response.phienChatId) {
+        setPhienChatId(response.phienChatId);
+      }
+
+      setMessages([...newMessages, { role: "AI", content: response.cauTraLoi }]);
+    } catch (error) {
+      console.error("Chatbot API error:", error);
+      setMessages([...newMessages, { role: "AI", content: "Xin lỗi anh/chị, hệ thống đang bận. Vui lòng thử lại sau!" }]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const onSubmit = (e) => {
+    e.preventDefault();
+    handleSend(inputValue);
+  };
+
+  const renderMessageContent = (content) => {
+    // Preserve line breaks from backend response
+    return content.split('\n').map((line, i) => (
+      <span key={i}>
+        {line}
+        <br />
+      </span>
+    ));
+  };
 
   return (
     <>
-      {/* Nút bấm nổi */}
       <div className="fixed bottom-6 right-6 z-50">
         <Button
           size="icon"
-          className="rounded-full w-14 h-14 shadow-lg"
+          className="rounded-full w-14 h-14 shadow-lg bg-green-500 hover:bg-green-600"
           onClick={() => setIsOpen(!isOpen)}
         >
           {isOpen ? (
-            <X className="w-7 h-7" />
+            <X className="w-7 h-7 text-white" />
           ) : (
-            <MessageSquare className="w-7 h-7" />
+            <MessageSquare className="w-7 h-7 text-white" />
           )}
         </Button>
       </div>
 
-      {/* Cửa sổ chat */}
       {isOpen && (
         <div className="fixed bottom-24 right-6 z-50 animate-in slide-in-from-bottom-5 fade-in-50">
-          <Card className="w-80 shadow-xl">
-            <CardHeader className="flex flex-row items-center justify-between bg-gray-100 p-4">
-              <CardTitle className="text-lg">Việt Tour AI</CardTitle>
-              <div className="flex items-center gap-1.5">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-                </span>
-                <p className="text-xs text-muted-foreground">Online</p>
+          <Card className="w-80 md:w-96 shadow-2xl flex flex-col h-[500px] border-0">
+            <CardHeader className="flex flex-row items-center justify-between bg-gradient-to-r from-green-500 to-green-600 p-4 text-white rounded-t-xl">
+              <div className="flex items-center gap-3">
+                <div className="bg-white p-2 rounded-full">
+                  <Bot className="w-6 h-6 text-green-600" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg font-bold">Việt Tour AI</CardTitle>
+                  <div className="flex items-center gap-1.5 mt-1">
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-200 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-green-300"></span>
+                    </span>
+                    <p className="text-xs text-green-100">Đang hoạt động</p>
+                  </div>
+                </div>
               </div>
             </CardHeader>
-            <CardContent className="p-4 h-80 overflow-y-auto">
-              <p className="text-sm text-center text-gray-500 mt-4">
-                Bắt đầu cuộc trò chuyện...
-              </p>
+            <CardContent className="p-4 flex-1 overflow-y-auto bg-gray-50 flex flex-col gap-4">
+              {messages.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-full text-center space-y-4">
+                  <Bot className="w-12 h-12 text-gray-300" />
+                  <p className="text-sm text-gray-500">
+                    Xin chào! Em là trợ lý AI của Việt Tour. Em có thể giúp gì cho anh/chị?
+                  </p>
+                  {suggestions.length > 0 && (
+                    <div className="flex flex-col gap-2 w-full mt-4">
+                      {suggestions.map((q, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => handleSend(q)}
+                          className="text-xs bg-white border border-green-200 text-green-700 p-2 rounded-lg hover:bg-green-50 transition-colors text-left"
+                        >
+                          {q}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                messages.map((msg, index) => (
+                  <div
+                    key={index}
+                    className={`flex items-end gap-2 ${msg.role === "USER" ? "justify-end" : "justify-start"
+                      }`}
+                  >
+                    {msg.role === "AI" && (
+                      <div className="w-8 h-8 rounded-full flex-shrink-0 bg-green-100 flex items-center justify-center mb-1">
+                        <Bot className="w-5 h-5 text-green-600" />
+                      </div>
+                    )}
+                    <div
+                      className={`max-w-[75%] p-3 rounded-2xl text-sm ${msg.role === "USER"
+                          ? "bg-green-500 text-white rounded-br-none"
+                          : "bg-white border text-gray-700 rounded-bl-none shadow-sm"
+                        }`}
+                    >
+                      {renderMessageContent(msg.content)}
+                    </div>
+                    {msg.role === "USER" && (
+                      <div className="w-8 h-8 rounded-full flex-shrink-0 bg-gray-200 flex items-center justify-center mb-1">
+                        <User className="w-5 h-5 text-gray-500" />
+                      </div>
+                    )}
+                  </div>
+                ))
+              )}
+
+              {isLoading && (
+                <div className="flex items-end gap-2 justify-start">
+                  <div className="w-8 h-8 rounded-full flex-shrink-0 bg-green-100 flex items-center justify-center mb-1">
+                    <Bot className="w-5 h-5 text-green-600" />
+                  </div>
+                  <div className="bg-white border text-gray-500 p-3 rounded-2xl rounded-bl-none shadow-sm flex gap-1">
+                    <span className="w-2 h-2 rounded-full bg-gray-400 animate-bounce"></span>
+                    <span className="w-2 h-2 rounded-full bg-gray-400 animate-bounce delay-100"></span>
+                    <span className="w-2 h-2 rounded-full bg-gray-400 animate-bounce delay-200"></span>
+                  </div>
+                </div>
+              )}
+              <div ref={messagesEndRef} />
             </CardContent>
-            <CardFooter className="p-2 border-t">
-              <form className="w-full flex items-center gap-2">
-                <Input placeholder="Nhập câu hỏi..." />
-                <Button type="submit" size="icon">
-                  <Send className="w-4 h-4" />
+            <CardFooter className="p-3 bg-white border-t rounded-b-xl">
+              <form onSubmit={onSubmit} className="w-full flex items-center gap-2">
+                <Input
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  placeholder="Nhập câu hỏi..."
+                  className="flex-1 rounded-full border-gray-300 focus-visible:ring-green-500"
+                  disabled={isLoading}
+                />
+                <Button
+                  type="submit"
+                  size="icon"
+                  className="rounded-full bg-green-500 hover:bg-green-600 flex-shrink-0"
+                  disabled={isLoading || !inputValue.trim()}
+                >
+                  {isLoading ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Send className="w-4 h-4" />
+                  )}
                 </Button>
               </form>
             </CardFooter>

@@ -1,13 +1,10 @@
+"use client";
+
 import Link from "next/link";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import {
-  adminBlogs,
-  adminCategories,
-  adminSchedules,
-  adminTours,
-  adminVouchers,
-} from "@/lib/admin-mock";
+import { getDashboardStatistics } from "@/services/statisticService";
 import {
   Users,
   MapPinned,
@@ -21,10 +18,34 @@ import {
   CloudSun,
   ShieldCheck,
   ArrowRight,
-  Clock3,
+  RefreshCcw,
 } from "lucide-react";
 
-function StatCard({ title, value, subtitle, icon: Icon }) {
+const EMPTY_STATS = {
+  tongTour: 0,
+  tourDangHoatDong: 0,
+  tongDanhMuc: 0,
+  tongDiaDiem: 0,
+  tongLichKhoiHanh: 0,
+  tongDonDatTour: 0,
+  tongBaiViet: 0,
+  tongVoucher: 0,
+  voucherDangHoatDong: 0,
+  tongNguoiDung: 0,
+  nguoiDungDangHoatDong: 0,
+};
+
+function extractApiError(error, fallback) {
+  const status = error?.response?.status;
+  const data = error?.response?.data;
+  if (typeof data === "string" && data.trim()) return data;
+  if (data?.message) return data.message;
+  if (status === 401) return "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.";
+  if (status === 403) return "Bạn không có quyền xem thống kê dashboard.";
+  return fallback;
+}
+
+function StatCard({ title, value, subtitle, icon: Icon, loading }) {
   return (
     <Card className="border-slate-200 shadow-sm">
       <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -32,7 +53,7 @@ function StatCard({ title, value, subtitle, icon: Icon }) {
         <Icon className="h-4 w-4 text-slate-500" />
       </CardHeader>
       <CardContent>
-        <p className="text-2xl font-bold text-slate-900">{value}</p>
+        <p className="text-2xl font-bold text-slate-900">{loading ? "..." : value}</p>
         <p className="mt-1 text-xs text-slate-500">{subtitle}</p>
       </CardContent>
     </Card>
@@ -52,7 +73,7 @@ function ModuleCard({ title, desc, href, icon: Icon }) {
         <p className="min-h-12 text-sm text-slate-600">{desc}</p>
         <Button asChild variant="ghost" className="mt-2 h-8 px-0 text-slate-800">
           <Link href={href}>
-            Truy cap <ArrowRight className="ml-1 h-4 w-4" />
+            Truy cập <ArrowRight className="ml-1 h-4 w-4" />
           </Link>
         </Button>
       </CardContent>
@@ -61,78 +82,85 @@ function ModuleCard({ title, desc, href, icon: Icon }) {
 }
 
 export default function DashboardPage() {
-  const totalTours = adminTours.length;
-  const activeTours = adminTours.filter((tour) => tour.trangThai).length;
-  const totalCategories = adminCategories.length;
-  const totalPosts = adminBlogs.length;
-  const activeVouchers = adminVouchers.filter((voucher) => voucher.trangThai).length;
-  const activeSchedules = adminSchedules.length;
+  const [stats, setStats] = useState(EMPTY_STATS);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
+
+  const loadDashboardStats = useCallback(async (showSuccess = false) => {
+    setLoading(true);
+    setError("");
+    try {
+      const data = await getDashboardStatistics();
+      setStats(data);
+      if (showSuccess) setMessage("Đã cập nhật dữ liệu dashboard.");
+    } catch (err) {
+      setError(extractApiError(err, "Không thể tải dữ liệu dashboard."));
+      setMessage("");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadDashboardStats();
+  }, [loadDashboardStats]);
 
   const moduleCards = [
     {
-      title: "Quan ly Tour",
-      desc: "Tao, cap nhat, an/hien tour, quan ly hinh anh va lich trinh.",
+      title: "Quản lý Tour",
+      desc: "Tạo, cập nhật, ẩn/hiện tour, quản lý hình ảnh và lịch trình.",
       href: "/dashboard/tours",
       icon: Plane,
     },
     {
-      title: "Quan ly Lich khoi hanh",
-      desc: "Thiet lap ngay khoi hanh, tong so cho va theo doi con trong.",
+      title: "Quản lý Lịch khởi hành",
+      desc: "Thiết lập ngày khởi hành, tổng số chỗ và theo dõi còn trống.",
       href: "/dashboard/schedules",
       icon: CalendarDays,
     },
     {
-      title: "Quan ly Lich trinh tour",
-      desc: "Quan ly timeline theo ngay cua tour: tao, sua, xoa noi dung chi tiet.",
+      title: "Quản lý Lịch trình tour",
+      desc: "Quản lý timeline theo ngày của tour: tạo, sửa, xóa nội dung chi tiết.",
       href: "/dashboard/itineraries",
       icon: Map,
     },
     {
-      title: "Quan ly Don dat",
-      desc: "Duyet don, cap nhat trang thai thanh toan va xuat danh sach khach.",
+      title: "Quản lý Đơn đặt",
+      desc: "Duyệt đơn, cập nhật trạng thái thanh toán và xuất danh sách khách.",
       href: "/dashboard/bookings",
       icon: Wallet,
     },
     {
-      title: "Quan ly Blog",
-      desc: "Tao va quan ly bai viet, noi dung truyen thong va SEO.",
+      title: "Quản lý Blog",
+      desc: "Tạo và quản lý bài viết, nội dung truyền thông và SEO.",
       href: "/dashboard/blog",
       icon: BookOpenText,
     },
     {
-      title: "Voucher va Marketing",
-      desc: "Tao ma giam gia, kiem soat thoi han va trang thai voucher.",
+      title: "Voucher và Marketing",
+      desc: "Tạo mã giảm giá, kiểm soát thời hạn và trạng thái voucher.",
       href: "/dashboard/vouchers",
       icon: TicketPercent,
     },
     {
-      title: "Nguoi dung va Quyen",
-      desc: "Phan quyen USER/STAFF/ADMIN, khoa/mo khoa tai khoan.",
+      title: "Người dùng và Quyền",
+      desc: "Phân quyền USER/STAFF/ADMIN, khóa/mở khóa tài khoản.",
       href: "/dashboard/users",
       icon: Users,
     },
     {
-      title: "Thoi tiet va diem den",
-      desc: "Theo doi du bao thoi tiet va thong tin dia diem du lich.",
+      title: "Thời tiết và điểm đến",
+      desc: "Theo dõi dự báo thời tiết và thông tin địa điểm du lịch.",
       href: "/dashboard/weather",
       icon: CloudSun,
     },
     {
       title: "Chatbot AI",
-      desc: "Theo doi phien chat, toi uu prompt va du lieu RAG.",
+      desc: "Theo dõi phiên chat, tối ưu prompt và dữ liệu RAG.",
       href: "/dashboard/chatbot",
       icon: Bot,
     },
-  ];
-
-  const priorityFeatures = [
-    "CN10 Quan ly tour",
-    "CN16 Quan ly lich khoi hanh",
-    "CN19 Dat tour",
-    "CN22 Duyet don hang",
-    "CN24 Thanh toan VNPAY",
-    "CN29 Quan ly voucher",
-    "CN32 Chatbot AI tu van",
   ];
 
   return (
@@ -142,47 +170,59 @@ export default function DashboardPage() {
           <div>
             <h2 className="text-2xl font-bold text-slate-900">Admin Dashboard</h2>
             <p className="mt-1 text-sm text-slate-600">
-              Tong quan he thong Website du lich va cac module quan tri.
+              Tổng quan hệ thống Website du lịch và các module quản trị.
             </p>
           </div>
-          <div className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
-            <ShieldCheck className="h-4 w-4" />
-            JWT + Spring Security
+          <div className="flex items-center gap-2">
+            <Button variant="outline" onClick={() => loadDashboardStats(true)} disabled={loading}>
+              <RefreshCcw className="mr-2 h-4 w-4" />
+              {loading ? "Đang tải..." : "Làm mới dữ liệu"}
+            </Button>
+            <div className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
+              <ShieldCheck className="h-4 w-4" />
+              JWT + Spring Security
+            </div>
           </div>
         </div>
+        {message ? <p className="mt-3 text-sm text-emerald-600">{message}</p> : null}
+        {error ? <p className="mt-3 text-sm text-red-600">{error}</p> : null}
       </section>
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
-          title="Tong so tour"
-          value={totalTours}
-          subtitle={`${activeTours} tour dang hoat dong`}
+          title="Tổng số tour"
+          value={stats.tongTour}
+          subtitle={`${stats.tourDangHoatDong} tour đang hoạt động`}
           icon={Plane}
+          loading={loading}
         />
         <StatCard
-          title="Danh muc"
-          value={totalCategories}
-          subtitle="Quan ly bo loc va nhom tour"
+          title="Danh mục"
+          value={stats.tongDanhMuc}
+          subtitle={`${stats.tongDiaDiem} địa điểm du lịch`}
           icon={MapPinned}
+          loading={loading}
         />
         <StatCard
-          title="Voucher hoat dong"
-          value={activeVouchers}
-          subtitle="Voucher co the ap dung"
+          title="Voucher hoạt động"
+          value={stats.voucherDangHoatDong}
+          subtitle={`${stats.tongVoucher} voucher trong hệ thống`}
           icon={TicketPercent}
+          loading={loading}
         />
         <StatCard
-          title="Lich khoi hanh"
-          value={activeSchedules}
-          subtitle="Tong so lich dang duoc khai bao"
+          title="Lịch khởi hành"
+          value={stats.tongLichKhoiHanh}
+          subtitle={`${stats.tongDonDatTour} đơn đặt tour`}
           icon={CalendarDays}
+          loading={loading}
         />
       </section>
 
-      <section className="grid gap-4 lg:grid-cols-3">
-        <Card className="border-slate-200 shadow-sm lg:col-span-2">
+      <section>
+        <Card className="border-slate-200 shadow-sm">
           <CardHeader>
-            <CardTitle className="text-lg">Module quan tri</CardTitle>
+            <CardTitle className="text-lg">Module quản trị</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid gap-4 md:grid-cols-2">
@@ -192,63 +232,30 @@ export default function DashboardPage() {
             </div>
           </CardContent>
         </Card>
-
-        <Card className="border-slate-200 shadow-sm">
-          <CardHeader>
-            <CardTitle className="text-lg">Uu tien trien khai</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {priorityFeatures.map((feature) => (
-              <div
-                key={feature}
-                className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700"
-              >
-                {feature}
-              </div>
-            ))}
-
-            <SeparatorLine />
-
-            <div className="rounded-md bg-slate-900 p-3 text-slate-100">
-              <p className="text-xs text-slate-300">Trang thai he thong</p>
-              <div className="mt-2 flex items-center gap-2 text-sm font-semibold">
-                <Clock3 className="h-4 w-4" />
-                San sang mo rong cac trang admin tiep theo
-              </div>
-              <p className="mt-2 text-xs text-slate-300">
-                De xuat tiep theo: Users, Tours, Bookings, Vouchers.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
       </section>
 
       <section className="grid gap-4 sm:grid-cols-2">
         <Card className="border-slate-200 shadow-sm">
           <CardHeader>
-            <CardTitle className="text-base">Noi dung & truyen thong</CardTitle>
+            <CardTitle className="text-base">Nội dung và truyền thông</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-slate-600">
-              Hien co <span className="font-semibold text-slate-900">{totalPosts}</span>{" "}
-              bai viet trong he thong blog.
+              Hiện có <span className="font-semibold text-slate-900">{loading ? "..." : stats.tongBaiViet}</span>{" "}
+              bài viết trong hệ thống blog.
             </p>
           </CardContent>
         </Card>
         <Card className="border-slate-200 shadow-sm">
           <CardHeader>
-            <CardTitle className="text-base">Cong nghe su dung</CardTitle>
+            <CardTitle className="text-base">Người dùng</CardTitle>
           </CardHeader>
           <CardContent className="text-sm text-slate-600">
-            Frontend: Next.js + Tailwind + Axios. Backend: Spring Boot + JWT +
-            JPA + MySQL.
+            Tổng người dùng: <span className="font-semibold text-slate-900">{loading ? "..." : stats.tongNguoiDung}</span>.{" "}
+            Đang hoạt động: <span className="font-semibold text-slate-900">{loading ? "..." : stats.nguoiDungDangHoatDong}</span>.
           </CardContent>
         </Card>
       </section>
     </div>
   );
-}
-
-function SeparatorLine() {
-  return <div className="my-1 h-px w-full bg-slate-200" />;
 }

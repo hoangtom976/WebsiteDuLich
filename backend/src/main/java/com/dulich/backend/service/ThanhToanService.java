@@ -94,15 +94,18 @@ public class ThanhToanService {
             Long donHangId = Long.parseLong(vnp_TxnRef);
             DonDatTour donDatTour = donDatTourRepository.findById(donHangId)
                     .orElseThrow(() -> new TaiNguyenKhongTonTaiException("Không tìm thấy đơn hàng: " + donHangId));
-            
+
             donDatTour.setTrangThai("DA_THANH_TOAN");
             donDatTourRepository.save(donDatTour);
 
-            // Gửi email thông báo thanh toán thành công
-            guiEmailService.guiEmailThanhToanThanhCong(
-                    donDatTour.getNguoiDung().getEmail(),
-                    String.valueOf(donHangId)
-            );
+            try {
+                // Gửi email thông báo thanh toán thành công
+                guiEmailService.guiEmailThanhToanThanhCong(
+                        donDatTour.getNguoiDung().getEmail(),
+                        String.valueOf(donHangId));
+            } catch (Exception e) {
+                System.err.println("Lỗi khi gửi email xác nhận thanh toán: " + e.getMessage());
+            }
             return "Thanh toán thành công";
         } else {
             return "Thanh toán thất bại";

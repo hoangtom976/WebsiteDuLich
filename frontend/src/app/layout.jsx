@@ -13,11 +13,12 @@ const inter = Inter({ subsets: ["latin"] });
 
 export default function RootLayout({ children }) {
   const pathname = usePathname();
+
   const isAdminRoute = pathname?.startsWith("/dashboard");
 
   return (
-    <html lang="vi">
-      <body className={inter.className}>
+    <html lang="vi" suppressHydrationWarning>
+      <body className={inter.className} suppressHydrationWarning>
         <AuthGate>
           {!isAdminRoute && <PremiumHeader />}
           <MainLayout>{children}</MainLayout>

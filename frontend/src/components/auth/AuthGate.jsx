@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { getAuthState, getDefaultPathByRoles, setAuthToken } from "@/lib/auth-client";
 
@@ -16,9 +16,18 @@ function startsWithAny(pathname, prefixes) {
 export default function AuthGate({ children }) {
   const pathname = usePathname() || "/";
   const router = useRouter();
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const decision = useMemo(() => {
-    const auth = getAuthState();
+    // Để khắc phục lỗi Hydration Mismatch: Render lần đầu trên browser phải KHỚP 100% với Server Render
+    const auth = isClient
+      ? getAuthState()
+      : { isLoggedIn: false, roles: [], payload: null, token: null };
+
 
     const isAdminRoute = pathname.startsWith("/dashboard");
     const isAuthRequiredRoute = startsWithAny(pathname, AUTH_REQUIRED_PREFIXES);

@@ -38,11 +38,11 @@ export default function CinematicHero() {
       <div className="absolute inset-0 z-10 flex h-full select-none flex-col items-center justify-center px-4 pt-[calc(var(--header-height)+1rem)] text-center text-white">
         <div className="mx-auto flex max-w-7xl flex-col items-center gap-4 px-6 md:gap-7">
           <h1 className="text-4xl font-bold tracking-tight md:text-6xl lg:text-7xl animate-fade-in-down">
-            Tinh hoa du lich Viet Nam
+            Tinh hoa du lịch Việt Nam
           </h1>
           <p className="max-w-3xl text-base text-white/90 md:text-lg lg:text-xl animate-fade-in-up">
-            Hon 500+ hanh trinh chon loc, san sang dua ban den nhung diem den
-            tuyet voi.
+            Hơn 500+ hành trình chọn lọc, sẵn sàng đưa bạn đến những điểm đến
+            tuyệt vời.
           </p>
 
           <div className="w-full select-text">

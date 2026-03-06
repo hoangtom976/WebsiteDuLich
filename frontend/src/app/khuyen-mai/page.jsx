@@ -9,7 +9,7 @@ function VoucherCard({ voucher }) {
 
   return (
     <div className="bg-white rounded-lg shadow-lg overflow-hidden flex flex-col md:flex-row items-center transition-all duration-300 hover:shadow-xl">
-      <div className="p-6 bg-amber-500 text-white flex flex-col items-center justify-center md:w-48">
+      <div className="p-6 bg-amber-500 text-white flex flex-col items-center justify-center md:w-48 h-full">
         <h3 className="text-4xl font-bold">{voucher.phanTramGiam}%</h3>
         <p className="font-semibold">GIẢM GIÁ</p>
       </div>
@@ -18,7 +18,9 @@ function VoucherCard({ voucher }) {
         <p className="text-2xl font-bold text-gray-800 tracking-widest my-2">
           {voucher.maVoucher}
         </p>
-        <p className="text-gray-600 text-sm mb-4">{voucher.moTa}</p>
+        <p className="text-gray-600 text-sm mb-4">
+          {voucher.moTa || "Áp dụng cho mọi tour nội địa. Nhanh tay kẻo lỡ!"}
+        </p>
         <p className="text-xs text-red-600">Hạn sử dụng: {formattedExpiry}</p>
       </div>
     </div>

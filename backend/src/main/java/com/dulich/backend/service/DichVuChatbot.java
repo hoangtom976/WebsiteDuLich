@@ -1,5 +1,19 @@
 package com.dulich.backend.service;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.dulich.backend.dto.PhienChatQuanTriDTO;
 import com.dulich.backend.dto.TaiNguyenKhongTonTaiException;
 import com.dulich.backend.dto.YeuCauChatDTO;
 import com.dulich.backend.entity.PhienChat;
@@ -8,18 +22,8 @@ import com.dulich.backend.entity.Tour;
 import com.dulich.backend.repository.PhienChatRepository;
 import com.dulich.backend.repository.TinNhanChatRepository;
 import com.dulich.backend.repository.TourRepository;
-import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 public class DichVuChatbot {
 
         private static final Logger logger = LoggerFactory.getLogger(DichVuChatbot.class);
@@ -28,6 +32,17 @@ public class DichVuChatbot {
         private final PhienChatRepository phienChatRepository;
         private final TinNhanChatRepository tinNhanChatRepository;
         private final TourRepository tourRepository;
+
+        // Constructor injection thủ công để sửa lỗi Lombok không nhận diện
+        public DichVuChatbot(GroqApiService groqApiService,
+                        PhienChatRepository phienChatRepository,
+                        TinNhanChatRepository tinNhanChatRepository,
+                        TourRepository tourRepository) {
+                this.groqApiService = groqApiService;
+                this.phienChatRepository = phienChatRepository;
+                this.tinNhanChatRepository = tinNhanChatRepository;
+                this.tourRepository = tourRepository;
+        }
 
         private static final String SYSTEM_INSTRUCTION = """
                         Bạn là trợ lý ảo AI của Việt Tour.
@@ -40,7 +55,7 @@ public class DichVuChatbot {
                         4. Nếu không tìm thấy: Xin lỗi và gợi ý liên hệ hotline 1900-1234.
                         """;
 
-        @Transactional
+        // Xóa @Transactional để tránh giữ kết nối DB khi đang gọi API AI (thường mất nhiều thời gian)
         public Map<String, Object> xuLyChat(YeuCauChatDTO req) {
                 // 1. Lấy/Tạo phiên chat
                 PhienChat phienChat = layHoacTaoPhienChat(req);
@@ -64,6 +79,63 @@ public class DichVuChatbot {
                 response.put("phienChatId", phienChat.getId());
                 return response;
         }
+
+        @Transactional(readOnly = true)
+        public List<Map<String, Object>> layLichSuChat(Long phienChatId) {
+                // Sử dụng findAll và lọc trong Java để đảm bảo hoạt động ổn định
+                List<TinNhanChat> all = tinNhanChatRepository.findAll();
+                return all.stream()
+                        .filter(t -> t.getPhienChat().getId().equals(phienChatId))
+                        .sorted(Comparator.comparing(TinNhanChat::getThoiGianGui))
+                        .map(t -> {
+                                Map<String, Object> map = new HashMap<>();
+                                map.put("nguoiGui", t.getNguoiGui());
+                                map.put("noiDung", t.getNoiDung());
+                                map.put("thoiGian", t.getThoiGianGui());
+                                return map;
+                        })
+                        .collect(Collectors.toList());
+        }
+
+        @Transactional
+        public void xoaPhienChat(Long phienChatId) {
+                if (!phienChatRepository.existsById(phienChatId)) {
+                        throw new TaiNguyenKhongTonTaiException("Không tìm thấy phiên chat với ID: " + phienChatId);
+                }
+
+                // Tìm và xóa các tin nhắn thuộc phiên chat này trước
+                List<TinNhanChat> tinNhans = tinNhanChatRepository.findAll().stream()
+                                .filter(t -> t.getPhienChat().getId().equals(phienChatId))
+                                .collect(Collectors.toList());
+                tinNhanChatRepository.deleteAll(tinNhans);
+                phienChatRepository.deleteById(phienChatId);
+        }
+
+        @Transactional(readOnly = true)
+        public List<PhienChatQuanTriDTO> layTatCaPhienChat() {
+                // Lấy tất cả và sắp xếp giảm dần theo thời gian bắt đầu
+                return phienChatRepository.findAll().stream()
+                                .sorted(Comparator.comparing(PhienChat::getThoiGianBatDau).reversed())
+                                .map(p -> PhienChatQuanTriDTO.builder()
+                                                .id(p.getId())
+                                                .tieuDe(p.getTieuDe())
+                                                .nguoiDungId(p.getNguoiDungId())
+                                                .thoiGianBatDau(p.getThoiGianBatDau())
+                                                .build())
+                                .collect(Collectors.toList());
+        }
+
+        public List<String> layDanhSachCauHoiGoiY() {
+                return List.of(
+                                "Làm sao để đặt tour du lịch?",
+                                "Chính sách hủy tour như thế nào?",
+                                "Có tour nào đi Đà Lạt giá rẻ không?",
+                                "Tôi muốn xem các tour đang khuyến mãi",
+                                "Quy định về hành lý khi đi tour?",
+                                "Liên hệ hỗ trợ khẩn cấp ở đâu?");
+        }
+
+
 
         private PhienChat layHoacTaoPhienChat(YeuCauChatDTO req) {
                 Long phienChatId = req.getPhienChatId();
@@ -95,22 +167,22 @@ public class DichVuChatbot {
         }
 
         private String timKiemDuLieuLienQuan(String cauHoi) {
-                String tuKhoa = cauHoi.toLowerCase();
+                String tuKhoa = cauHoi.toLowerCase().trim();
                 List<Tour> all = tourRepository.findAll();
                 List<Tour> matches = new ArrayList<>();
 
                 for (Tour t : all) {
-                        if (!Boolean.TRUE.equals(t.getTrangThai()))
-                                continue;
+                        if (!Boolean.TRUE.equals(t.getTrangThai())) continue;
 
-                        String tenTour = t.getTenTour() == null ? "" : t.getTenTour().toLowerCase();
+                        String tenTour = t.getTenTour() != null ? t.getTenTour().toLowerCase().trim() : "";
                         String tenDiaDiem = (t.getDiaDiem() != null && t.getDiaDiem().getTenDiaDiem() != null)
-                                        ? t.getDiaDiem().getTenDiaDiem().toLowerCase()
-                                        : "";
+                                        ? t.getDiaDiem().getTenDiaDiem().toLowerCase().trim() : "";
 
-                        // Logic: Nếu câu hỏi chứa tên địa điểm HOẶC chứa tên tour
-                        // Ví dụ: tuKhoa="du lịch đà lạt" -> contains "đà lạt" -> match
-                        if ((!tenDiaDiem.isEmpty() && tuKhoa.contains(tenDiaDiem)) || tuKhoa.contains(tenTour)) {
+                        // Sửa lỗi logic: Kiểm tra chuỗi không rỗng trước khi contains để tránh match sai
+                        boolean matchTenTour = !tenTour.isEmpty() && (tenTour.contains(tuKhoa) || tuKhoa.contains(tenTour));
+                        boolean matchDiaDiem = !tenDiaDiem.isEmpty() && (tenDiaDiem.contains(tuKhoa) || tuKhoa.contains(tenDiaDiem));
+
+                        if (matchTenTour || matchDiaDiem) {
                                 matches.add(t);
                         }
                 }

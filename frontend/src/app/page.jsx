@@ -1,15 +1,16 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { ShieldCheck, Wallet, Headset, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import TourCard from "@/components/shared/TourCard";
 import BlogCard from "@/components/shared/BlogCard";
-import { getPopularTours, getAllTours } from "@/services/tourService";
+import { getPopularTours, getAllTours, getTourById } from "@/services/tourService";
 import { getRecentPosts } from "@/services/blogService";
 import { getFlashDeal } from "@/services/promotionService";
 import FlashDealSection from "@/components/shared/FlashDealSection";
 import CinematicHero from "@/components/home/CinematicHero";
 import CustomerReviews from "@/components/home/CustomerReviews";
 import LuxuryTopBar from "@/components/shared/LuxuryTopBar";
+import FeaturedCategories from "@/components/home/FeaturedCategories";
 
 async function PopularToursSection() {
   const popularTours = await getPopularTours();
@@ -17,20 +18,14 @@ async function PopularToursSection() {
   return (
     <section className="bg-white py-10 sm:py-12">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        <h2 className="mb-8 text-center text-4xl font-bold">Cac tour noi bat</h2>
+        <h2 className="mb-8 text-center text-4xl font-bold">Các tour nổi bật</h2>
         <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-4">
-          {(popularTours || []).slice(0, 8).map((tour) => (
+          {(popularTours || []).slice(0, 4).map((tour) => (
             <div
               key={tour.id}
               className="rounded-lg transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl"
             >
-              <TourCard
-                tour={{
-                  ...tour,
-                  hinhAnh:
-                    "https://images.unsplash.com/photo-1506744038136-46273834b3fb",
-                }}
-              />
+              <TourCard tour={tour} />
             </div>
           ))}
         </div>
@@ -45,20 +40,14 @@ async function NewestToursSection() {
   return (
     <section className="bg-white pb-10 pt-0 sm:pb-12">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        <h2 className="mb-8 text-center text-4xl font-bold">Tour moi nhat</h2>
+        <h2 className="mb-8 text-center text-4xl font-bold">Tour mới nhất</h2>
         <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-4">
           {(newestTours || []).slice(0, 4).map((tour) => (
             <div
               key={tour.id}
               className="rounded-lg transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl"
             >
-              <TourCard
-                tour={{
-                  ...tour,
-                  hinhAnh:
-                    "https://images.unsplash.com/photo-1506744038136-46273834b3fb",
-                }}
-              />
+              <TourCard tour={tour} />
             </div>
           ))}
         </div>
@@ -69,7 +58,7 @@ async function NewestToursSection() {
             variant="outline"
             className="border-amber-500 text-amber-600 hover:bg-amber-50 hover:text-amber-700"
           >
-            <Link href="/tours">Xem tat ca tour</Link>
+            <Link href="/tours">Xem tất cả tour</Link>
           </Button>
         </div>
       </div>
@@ -81,23 +70,23 @@ function WhyChooseUs() {
   const reasons = [
     {
       icon: ShieldCheck,
-      title: "An toan tuyet doi",
-      desc: "Bao hiem du lich va cac bien phap an toan luon duoc dat len hang dau.",
+      title: "An toàn tuyệt đối",
+      desc: "Bảo hiểm du lịch và các biện pháp an toàn luôn được đặt lên hàng đầu.",
     },
     {
       icon: Star,
-      title: "Dich vu cao cap",
-      desc: "Doi ngu chuyen nghiep, tan tam, san sang ho tro 24/7.",
+      title: "Dịch vụ cao cấp",
+      desc: "Đội ngũ chuyên nghiệp, tận tâm, sẵn sàng hỗ trợ 24/7.",
     },
     {
       icon: Wallet,
-      title: "Gia ca toi uu",
-      desc: "Luon co nhung uu dai tot nhat cho cac hanh trinh chat luong.",
+      title: "Giá cả tối ưu",
+      desc: "Luôn có những ưu đãi tốt nhất cho các hành trình chất lượng.",
     },
     {
       icon: Headset,
-      title: "Ho tro tan tam",
-      desc: "Tu van va giai dap moi thac mac cua ban mot cach nhanh chong.",
+      title: "Hỗ trợ tận tâm",
+      desc: "Tư vấn và giải đáp mọi thắc mắc của bạn một cách nhanh chóng.",
     },
   ];
 
@@ -105,7 +94,7 @@ function WhyChooseUs() {
     <section className="bg-gray-50 py-10 sm:py-12">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <h2 className="mb-8 text-center text-4xl font-bold">
-          Vi sao chon Viet Tour?
+          Vì sao chọn Việt Tour?
         </h2>
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
           {reasons.map((reason) => (
@@ -128,65 +117,45 @@ function WhyChooseUs() {
   );
 }
 
-function FeaturedCategories() {
-  const regions = [
-    { name: "Mien Bac", img: "https://images.unsplash.com/photo-1506744038136-46273834b3fb" },
-    { name: "Mien Trung", img: "https://images.unsplash.com/photo-1506744038136-46273834b3fb" },
-    { name: "Mien Nam", img: "https://images.unsplash.com/photo-1506744038136-46273834b3fb" },
-    { name: "Tay Nguyen", img: "https://images.unsplash.com/photo-1506744038136-46273834b3fb" },
-    { name: "Bien Dao", img: "https://images.unsplash.com/photo-1506744038136-46273834b3fb" },
-  ];
 
-  return (
-    <section className="bg-white py-10 sm:py-12">
-      <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        <h2 className="mb-8 text-center text-4xl font-bold">Kham pha theo vung mien</h2>
-        <div className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-5">
-          {regions.map((region) => (
-            <Link
-              href={`/tours?region=${region.name}`}
-              key={region.name}
-              className="group relative h-64 overflow-hidden rounded-lg shadow-lg transition-transform duration-300 hover:scale-105"
-            >
-              <img
-                src={region.img}
-                alt={region.name}
-                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-              />
-              <div className="absolute inset-0 bg-black/40" />
-              <h3 className="absolute bottom-4 left-4 text-2xl font-bold text-white">
-                {region.name}
-              </h3>
-            </Link>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
+async function LuxuryBanner() {
+  const tour = await getTourById(8).catch(() => null);
 
-function LuxuryBanner() {
+  // Lấy ảnh đầu tiên trong danhSachAnh (bảng hinh_anh_tour) hoặc ảnh hinhAnh, nếu không có thì dùng ảnh mặc định
+  const getBannerImage = () => {
+    if (tour?.danhSachAnh && tour.danhSachAnh.length > 0) {
+      const firstImage = tour.danhSachAnh[0];
+      return firstImage.startsWith('http')
+        ? firstImage
+        : `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8081/api'}/files/image/${firstImage}`;
+    }
+    if (tour?.hinhAnh) {
+      return tour.hinhAnh.startsWith('http')
+        ? tour.hinhAnh
+        : `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8081/api'}/files/image/${tour.hinhAnh}`;
+    }
+    return "https://images.unsplash.com/photo-1599708149101-01748aeb896b?q=80&w=1920&auto=format&fit=crop";
+  };
+
+  const bgImage = getBannerImage();
+
   return (
     <section
       className="relative bg-fixed bg-cover bg-center py-14 sm:py-16"
-      style={{
-        backgroundImage:
-          "url('https://images.unsplash.com/photo-1528127269322-539801943592?q=80&w=2070&auto=format&fit=crop')",
-      }}
+      style={{ backgroundImage: `url('${bgImage}')` }}
     >
       <div className="absolute inset-0 bg-black/50" />
       <div className="relative z-10 mx-auto max-w-7xl px-6 text-center text-white lg:px-8">
-        <h2 className="text-4xl font-bold">Trai nghiem du thuyen dang cap</h2>
-        <p className="mx-auto mt-4 max-w-2xl">
-          Kham pha Vinh Ha Long tren du thuyen 5 sao voi dich vu tron goi va
-          nhung hoat dong hap dan.
+        <h2 className="text-4xl font-bold">{tour?.tenTour || "Khám phá Cố đô Huế"}</h2>
+        <p className="mx-auto mt-4 max-w-2xl text-lg">
+          {tour?.moTa || "Hành trình di sản văn hóa đặc sắc với Đại Nội, lăng tẩm và nét cổ kính của xứ Huế."}
         </p>
         <Button
           asChild
           size="lg"
           className="mt-5 rounded-full bg-amber-500 px-8 font-bold text-black hover:bg-amber-600"
         >
-          <Link href="/tours/1">Xem chi tiet</Link>
+          <Link href="/tours/8">Xem chi tiết</Link>
         </Button>
       </div>
     </section>
@@ -222,7 +191,7 @@ async function TravelBlog() {
   return (
     <section className="bg-gray-50 py-10 sm:py-12">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        <h2 className="mb-8 text-center text-4xl font-bold">Cam nang du lich</h2>
+        <h2 className="mb-8 text-center text-4xl font-bold">Cẩm nang du lịch</h2>
         <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-3">
           {(recentPosts || []).map((post) => (
             <div
@@ -242,10 +211,10 @@ function Newsletter() {
   return (
     <section className="bg-[#0a2d4d] py-10 text-white sm:py-12">
       <div className="mx-auto max-w-4xl px-6 text-center lg:px-8">
-        <h2 className="text-4xl font-bold">Nhan uu dai doc quyen</h2>
+        <h2 className="text-4xl font-bold">Nhận ưu đãi độc quyền</h2>
         <p className="mx-auto mt-4 max-w-2xl text-white/80">
-          Tro thanh thanh vien cua Viet Tour de nhan ngay voucher giam gia va
-          cap nhat nhung hanh trinh moi nhat.
+          Trở thành thành viên của Viet Tour để nhận ngay voucher giảm giá và
+          cập nhật những hành trình mới nhất.
         </p>
         <div className="mt-5 flex justify-center gap-4">
           <Button
@@ -253,7 +222,7 @@ function Newsletter() {
             size="lg"
             className="bg-amber-500 font-bold text-black hover:bg-amber-600"
           >
-            <Link href="/dang-ky">Dang ky ngay</Link>
+            <Link href="/dang-ky">Đăng ký ngay</Link>
           </Button>
         </div>
       </div>
@@ -280,3 +249,4 @@ export default function Home() {
     </>
   );
 }
+

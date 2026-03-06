@@ -12,6 +12,7 @@ import {
   getAdminBookings,
   getBookingStatusLabel,
 } from "@/services/adminBookingService";
+import { taoThanhToanVnPay } from "@/services/datTourService";
 
 const STATUS_OPTIONS = [
   { value: "", label: "Tất cả trạng thái" },
@@ -104,6 +105,29 @@ export default function AdminBookingsPage() {
       await fetchBookings();
     } catch (err) {
       setError(extractApiError(err, "Xác nhận thanh toán thất bại."));
+    } finally {
+      setActionKey("");
+    }
+  };
+
+  const handleVNPayPayment = async (item) => {
+    setMessage("");
+    setError("");
+    setActionKey(`vnpay-${item.id}`);
+    try {
+      const vnPayUrl = await taoThanhToanVnPay({
+        soTien: item.tongTien,
+        noiDung: `Thanh toan tour ${item.tenTour || ''} - Ma don: ${item.id}`,
+        maDonHang: item.id
+      });
+
+      if (vnPayUrl) {
+        window.location.href = vnPayUrl;
+      } else {
+        setError("Không nhận được URL thanh toán từ server.");
+      }
+    } catch (err) {
+      setError(extractApiError(err, "Không thể tạo liên kết thanh toán VNPay."));
     } finally {
       setActionKey("");
     }
@@ -260,7 +284,16 @@ export default function AdminBookingsPage() {
                               onClick={() => handleConfirmPayment(item)}
                               disabled={actionKey === `pay-${item.id}`}
                             >
-                              {actionKey === `pay-${item.id}` ? "Đang xử lý..." : "Xác nhận thanh toán"}
+                              {actionKey === `pay-${item.id}` ? "Đang xử lý..." : "Xác nhận đã thu tiền"}
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="secondary"
+                              onClick={() => handleVNPayPayment(item)}
+                              disabled={actionKey === `vnpay-${item.id}`}
+                              className="bg-blue-100 text-blue-700 hover:bg-blue-200"
+                            >
+                              {actionKey === `vnpay-${item.id}` ? "Đang tạo link..." : "Thanh toán VNPay"}
                             </Button>
                             <Button
                               size="sm"

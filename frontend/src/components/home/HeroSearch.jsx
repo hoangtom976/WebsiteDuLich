@@ -51,10 +51,10 @@ export default function HeroSearch() {
         <div className="grid grid-cols-1 items-end gap-3 md:grid-cols-2 xl:grid-cols-[1.4fr_1fr_1fr_1fr_auto]">
           <div className="rounded-2xl border border-slate-200/80 bg-white/92 px-4 py-3 text-left shadow-sm">
             <label className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-600">
-              <MapPin size={14} /> Diem den
+              <MapPin size={14} /> Điểm đến
             </label>
             <Input
-              placeholder="Ban muon di dau?"
+              placeholder="Bạn muốn đi đâu?"
               className="h-8 border-0 bg-transparent p-0 text-black shadow-none focus-visible:ring-0"
               value={filters.destination}
               onChange={(e) => handleInputChange("destination", e.target.value)}
@@ -63,7 +63,7 @@ export default function HeroSearch() {
 
           <div className="rounded-2xl border border-slate-200/80 bg-white/92 px-4 py-3 text-left shadow-sm">
             <label className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-600">
-              <Calendar size={14} /> Ngay khoi hanh
+              <Calendar size={14} /> Ngày khởi hành
             </label>
             <Input
               type="date"
@@ -77,10 +77,10 @@ export default function HeroSearch() {
 
           <div className="rounded-2xl border border-slate-200/80 bg-white/92 px-4 py-3 text-left shadow-sm">
             <label className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-600">
-              <ChevronDown size={14} /> Ngan sach
+              <ChevronDown size={14} /> Ngân sách
             </label>
             <Input
-              placeholder="VD: 3-5 trieu"
+              placeholder="VD: 3-5 triệu"
               className="h-8 border-0 bg-transparent p-0 text-black shadow-none placeholder:text-slate-500 focus-visible:ring-0"
               value={filters.budget}
               onChange={(e) => handleInputChange("budget", e.target.value)}
@@ -89,10 +89,10 @@ export default function HeroSearch() {
 
           <div className="rounded-2xl border border-slate-200/80 bg-white/92 px-4 py-3 text-left shadow-sm">
             <label className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-600">
-              <LayoutGrid size={14} /> Loai tour
+              <LayoutGrid size={14} /> Loại tour
             </label>
             <Input
-              placeholder="VD: Nghi duong"
+              placeholder="VD: Nghỉ dưỡng"
               className="h-8 border-0 bg-transparent p-0 text-black shadow-none placeholder:text-slate-500 focus-visible:ring-0"
               value={filters.category}
               onChange={(e) => handleInputChange("category", e.target.value)}
@@ -102,10 +102,10 @@ export default function HeroSearch() {
           <Button
             type="submit"
             className="h-[66px] w-full rounded-2xl bg-amber-500 text-base font-bold text-slate-950 hover:bg-amber-400 xl:w-[180px]"
-            aria-label="Tim kiem tour"
+            aria-label="Tìm kiếm tour"
           >
             <Search className="mr-2 h-5 w-5" />
-            Tim tour
+            Tìm tour
           </Button>
         </div>
       </form>

@@ -14,10 +14,30 @@ const normalizePost = (post = {}) => ({
   tenTacGia: post.ten_tac_gia || post.tenTacGia || "",
 });
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8081/api";
+
+async function serverFetchJson(path) {
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    throw new Error(`Request failed: ${response.status}`);
+  }
+
+  return response.json();
+}
+
 export const getRecentPosts = async (limit = 3) => {
   try {
-    const response = await api.get(`/cong-khai/bai-viet?page=0&size=${limit}`);
-    const content = Array.isArray(response.data?.content) ? response.data.content : [];
+    const data =
+      typeof window === "undefined"
+        ? await serverFetchJson(`/cong-khai/bai-viet?page=0&size=${limit}`)
+        : (await api.get(`/cong-khai/bai-viet?page=0&size=${limit}`)).data;
+
+    const content = Array.isArray(data?.content) ? data.content : [];
     return content.map(normalizePost);
   } catch (error) {
     console.error("Failed to fetch recent posts:", error);
@@ -27,8 +47,12 @@ export const getRecentPosts = async (limit = 3) => {
 
 export const getAllPosts = async () => {
   try {
-    const response = await api.get("/cong-khai/bai-viet");
-    const content = Array.isArray(response.data?.content) ? response.data.content : [];
+    const data =
+      typeof window === "undefined"
+        ? await serverFetchJson("/cong-khai/bai-viet")
+        : (await api.get("/cong-khai/bai-viet")).data;
+
+    const content = Array.isArray(data?.content) ? data.content : [];
     return content.map(normalizePost);
   } catch (error) {
     console.error("Failed to fetch posts:", error);
@@ -38,8 +62,12 @@ export const getAllPosts = async () => {
 
 export const getPostBySlug = async (slug) => {
   try {
-    const response = await api.get(`/cong-khai/bai-viet/${slug}`);
-    return normalizePost(response.data);
+    const data =
+      typeof window === "undefined"
+        ? await serverFetchJson(`/cong-khai/bai-viet/${slug}`)
+        : (await api.get(`/cong-khai/bai-viet/${slug}`)).data;
+
+    return normalizePost(data);
   } catch (error) {
     console.error("Failed to fetch post detail:", error);
     return mockPosts.find((p) => p.slug === slug) || null;

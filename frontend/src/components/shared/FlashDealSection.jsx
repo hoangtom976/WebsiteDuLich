@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { formatPrice } from "@/lib/utils";
 
 export default function FlashDealSection({ deal }) {
   const calculateTimeLeft = () => {
@@ -19,16 +20,25 @@ export default function FlashDealSection({ deal }) {
     return timeLeft;
   };
 
-  const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
+  const [timeLeft, setTimeLeft] = useState({});
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
+    setIsMounted(true);
+    setTimeLeft(calculateTimeLeft());
+
+    const timer = setInterval(() => {
       setTimeLeft(calculateTimeLeft());
     }, 1000);
-    return () => clearTimeout(timer);
-  });
 
-  const giaKhuyenMai = deal.giaGoc - deal.giaGoc * (deal.phanTramGiam / 100);
+    return () => clearInterval(timer);
+  }, [deal.ngayKetThuc]);
+
+  if (!isMounted) {
+    return null; // Or a loading skeleton to avoid layout shift
+  }
+
+  const giaKhuyenMai = deal.giaKhuyenMai || (deal.giaGoc - deal.giaGoc * (deal.phanTramGiam / 100));
 
   return (
     <section id="flash-sale" className="scroll-mt-20">
@@ -46,10 +56,10 @@ export default function FlashDealSection({ deal }) {
           <p className="text-gray-600 mt-4">{deal.moTa}</p>
           <div className="flex items-center gap-4 mt-4">
             <span className="text-gray-500 line-through text-2xl">
-              {new Intl.NumberFormat("vi-VN").format(deal.giaGoc)}đ
+              {formatPrice(deal.giaGoc)}
             </span>
             <span className="text-red-600 font-bold text-4xl">
-              {new Intl.NumberFormat("vi-VN").format(giaKhuyenMai)}đ
+              {formatPrice(giaKhuyenMai)}
             </span>
           </div>
           <div className="flex gap-4 mt-6">

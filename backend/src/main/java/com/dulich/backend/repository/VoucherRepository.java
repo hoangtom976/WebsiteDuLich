@@ -9,4 +9,5 @@ import java.util.Optional;
 @Repository
 public interface VoucherRepository extends JpaRepository<Voucher, Long> {
     Optional<Voucher> findByMaVoucher(String maVoucher);
+    long countByTrangThaiTrue();
 }

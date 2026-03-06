@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Data
 public class TourDTO {
@@ -34,4 +35,10 @@ public class TourDTO {
     // Các trường hiển thị (Read-only)
     private String tenDanhMuc;
     private String tenDiaDiem;
+    private String hinhAnh;
+
+    private List<LichTrinhTourDTO> lichTrinhs;
+
+    private Double soSaoTrungBinh;
+    private Integer tongDanhGia;
 }

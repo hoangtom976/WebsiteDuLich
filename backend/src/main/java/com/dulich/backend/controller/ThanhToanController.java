@@ -3,7 +3,9 @@ package com.dulich.backend.controller;
 import com.dulich.backend.dto.TaoThanhToanDTO;
 import com.dulich.backend.service.ThanhToanService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,8 +24,14 @@ public class ThanhToanController {
     }
 
     @GetMapping("/vnpay-return")
-    public ResponseEntity<String> vnpayReturn(HttpServletRequest request) {
+    public void vnpayReturn(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String ketQua = thanhToanService.xuLyKetQuaThanhToan(request);
-        return ResponseEntity.ok(ketQua);
+        String orderId = request.getParameter("vnp_TxnRef");
+
+        if ("Thanh toán thành công".equals(ketQua)) {
+            response.sendRedirect("http://localhost:3000/thanh-toan/ket-qua?status=success&orderId=" + orderId);
+        } else {
+            response.sendRedirect("http://localhost:3000/thanh-toan/ket-qua?status=failed&orderId=" + orderId);
+        }
     }
 }

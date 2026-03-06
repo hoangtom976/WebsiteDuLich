@@ -14,6 +14,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -27,18 +30,29 @@ public class ChiTietNguoiDungService implements UserDetailsService {
         NguoiDung nguoiDung = nguoiDungRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy người dùng với email: " + email));
 
-        // Xử lý vai trò: Đảm bảo luôn có tiền tố ROLE_ và không bị null/khoảng trắng
-        String vaiTro = nguoiDung.getVaiTro();
-        if (vaiTro == null || vaiTro.trim().isEmpty()) {
-            vaiTro = "ROLE_USER"; // Fallback nếu DB lỗi
-        }
-        vaiTro = vaiTro.trim(); // Xóa khoảng trắng thừa
-        if (!vaiTro.startsWith("ROLE_")) {
-            vaiTro = "ROLE_" + vaiTro; // Tự động thêm ROLE_ nếu thiếu (ví dụ DB lưu "ADMIN")
+        // Xử lý vai trò: Thu thập từ cả cột vai_tro (String) và bảng quan hệ vai_tros
+        // (Set)
+        Set<String> roles = new HashSet<>();
+
+        // 1. Lấy từ cột vai_tro
+        if (nguoiDung.getVaiTro() != null && !nguoiDung.getVaiTro().trim().isEmpty()) {
+            roles.add(nguoiDung.getVaiTro().trim().toUpperCase());
         }
 
-        List<GrantedAuthority> authorities = Collections.singletonList(
-                new SimpleGrantedAuthority(vaiTro));
+        // 2. Lấy từ bảng quan hệ vai_tros
+        if (nguoiDung.getVaiTros() != null) {
+            nguoiDung.getVaiTros().forEach(vt -> roles.add(vt.getTenVaiTro().trim().toUpperCase()));
+        }
+
+        // Nếu không có vai trò nào, mặc định là USER
+        if (roles.isEmpty()) {
+            roles.add("USER");
+        }
+
+        List<GrantedAuthority> authorities = roles.stream()
+                .map(role -> role.startsWith("ROLE_") ? role : "ROLE_" + role)
+                .map(SimpleGrantedAuthority::new)
+                .collect(Collectors.toList());
 
         return new User(
                 nguoiDung.getEmail(),

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -35,7 +35,7 @@ import {
 
 const createSection = (index = 1) => ({
   id: `section-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-  title: `Tieu de muc ${index}`,
+  title: `Tiêu đề mục ${index}`,
   imageUrl: "",
   imageDataUrl: "",
   content: "",
@@ -53,8 +53,8 @@ function extractApiError(error, fallback) {
   const data = error?.response?.data;
   if (typeof data === "string" && data.trim()) return data;
   if (data?.message) return data.message;
-  if (status === 401) return "Phien dang nhap da het han. Vui long dang nhap lai.";
-  if (status === 403) return "Ban khong co quyen quan ly bai viet.";
+  if (status === 401) return "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.";
+  if (status === 403) return "Bạn không có quyền quản lý bài viết.";
   return fallback;
 }
 
@@ -112,7 +112,7 @@ function htmlToSections(html) {
     return [
       {
         ...createSection(1),
-        title: "Noi dung chinh",
+        title: "Nội dung chính",
         content: html,
       },
     ];
@@ -128,7 +128,7 @@ function htmlToSections(html) {
     if (cloneImg) cloneImg.remove();
     return {
       ...createSection(idx + 1),
-      title: titleEl?.textContent?.trim() || `Tieu de muc ${idx + 1}`,
+      title: titleEl?.textContent?.trim() || `Tiêu đề mục ${idx + 1}`,
       imageUrl: imgEl?.getAttribute("src") || "",
       imageDataUrl: "",
       content: clone.innerHTML?.trim() || "",
@@ -144,7 +144,7 @@ function StatusBadge({ status }) {
         isPublished ? "bg-emerald-100 text-emerald-700" : "bg-slate-200 text-slate-700"
       }`}
     >
-      {isPublished ? "Xuat ban" : "Ban nhap"}
+      {isPublished ? "Xuất bản" : "Bản nháp"}
     </span>
   );
 }
@@ -210,7 +210,7 @@ function EditorToolbar({ onCommand, disabled }) {
         onClick={() => onCommand("removeFormat")}
         disabled={disabled}
       >
-        Xoa dinh dang
+        Xóa định dạng
       </Button>
     </div>
   );
@@ -240,7 +240,7 @@ export default function AdminBlogPage() {
       const data = await getAdminBlogs();
       setBlogs(data);
     } catch (err) {
-      setError(extractApiError(err, "Khong the tai danh sach bai viet."));
+      setError(extractApiError(err, "Không thể tải danh sách bài viết."));
     } finally {
       setLoading(false);
     }
@@ -364,7 +364,7 @@ export default function AdminBlogPage() {
     activeEditor.focus();
 
     if (command === "createLink") {
-      const url = window.prompt("Nhap duong dan link:");
+      const url = window.prompt("Nhập đường dẫn link:");
       if (url) document.execCommand("createLink", false, url);
       return;
     }
@@ -397,7 +397,7 @@ export default function AdminBlogPage() {
     };
 
     if (!payload.tieuDe || !payload.noiDung.trim()) {
-      setError("Tieu de va noi dung khong duoc de trong.");
+      setError("Tiêu đề và nội dung không được để trống.");
       return;
     }
 
@@ -410,18 +410,18 @@ export default function AdminBlogPage() {
       if (modalMode === "create") {
         const created = await createAdminBlog(payload);
         setBlogs((prev) => [created, ...prev]);
-        setMessage("Them bai viet thanh cong.");
+        setMessage("Thêm bài viết thành công.");
       } else {
         const updated = await updateAdminBlog(modalId, payload);
         setBlogs((prev) => prev.map((item) => (item.id === modalId ? updated : item)));
-        setMessage("Cap nhat bai viet thanh cong.");
+        setMessage("Cập nhật bài viết thành công.");
       }
       closeModal();
     } catch (err) {
       setError(
         extractApiError(
           err,
-          modalMode === "create" ? "Them bai viet that bai." : "Cap nhat bai viet that bai.",
+          modalMode === "create" ? "Thêm bài viết that bai." : "Cập nhật bài viết thất bại.",
         ),
       );
     } finally {
@@ -430,7 +430,7 @@ export default function AdminBlogPage() {
   };
 
   const removeBlog = async (blog) => {
-    const ok = window.confirm(`Xoa bai viet "${blog.tieuDe}"?`);
+    const ok = window.confirm(`Xóa bai viet "${blog.tieuDe}"?`);
     if (!ok) return;
 
     setMessage("");
@@ -439,9 +439,9 @@ export default function AdminBlogPage() {
     try {
       await deleteAdminBlog(blog.id);
       setBlogs((prev) => prev.filter((item) => item.id !== blog.id));
-      setMessage("Xoa bai viet thanh cong.");
+      setMessage("Xóa bài viết thành công.");
     } catch (err) {
-      setError(extractApiError(err, "Xoa bai viet that bai."));
+      setError(extractApiError(err, "Xóa bài viết thất bại."));
     } finally {
       setActionKey("");
     }
@@ -451,20 +451,20 @@ export default function AdminBlogPage() {
     <div className="space-y-4">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Quan ly bai viet</CardTitle>
+          <CardTitle>Quản lý bài viết</CardTitle>
           <div className="flex items-center gap-2">
             <Button variant="outline" onClick={fetchBlogs} disabled={loading}>
               <RefreshCcw className="mr-2 h-4 w-4" />
-              {loading ? "Dang tai..." : "Lam moi du lieu"}
+              {loading ? "Đang tải..." : "Làm mới dữ liệu"}
             </Button>
-            <Button onClick={openCreateModal}>Them bai viet</Button>
+            <Button onClick={openCreateModal}>Thêm bài viết</Button>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
           <Input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Tim theo tieu de, slug, tac gia..."
+            placeholder="Tìm theo tiêu đề, slug, tác giả..."
             className="max-w-md"
           />
           {message && <p className="text-sm text-emerald-600">{message}</p>}
@@ -475,25 +475,25 @@ export default function AdminBlogPage() {
               <thead className="bg-slate-50 text-left">
                 <tr>
                   <th className="px-4 py-3">ID</th>
-                  <th className="px-4 py-3">Tieu de</th>
+                  <th className="px-4 py-3">Tiêu đề</th>
                   <th className="px-4 py-3">Slug</th>
-                  <th className="px-4 py-3">Tac gia</th>
-                  <th className="px-4 py-3">Ngay tao</th>
-                  <th className="px-4 py-3">Trang thai</th>
-                  <th className="px-4 py-3">Tac vu</th>
+                  <th className="px-4 py-3">Tác giả</th>
+                  <th className="px-4 py-3">Ngày tạo</th>
+                  <th className="px-4 py-3">Trạng thái</th>
+                  <th className="px-4 py-3">Tác vụ</th>
                 </tr>
               </thead>
               <tbody>
                 {loading ? (
                   <tr>
                     <td colSpan={7} className="px-4 py-8 text-center text-slate-500">
-                      Dang tai du lieu...
+                      Đang tải dữ liệu...
                     </td>
                   </tr>
                 ) : filteredBlogs.length === 0 ? (
                   <tr>
                     <td colSpan={7} className="px-4 py-8 text-center text-slate-500">
-                      Khong co bai viet phu hop.
+                      Không có bài viết phù hợp.
                     </td>
                   </tr>
                 ) : (
@@ -518,7 +518,7 @@ export default function AdminBlogPage() {
                             onClick={() => removeBlog(item)}
                             disabled={actionKey === `delete-${item.id}`}
                           >
-                            {actionKey === `delete-${item.id}` ? "Dang xoa..." : "Xoa"}
+                            {actionKey === `delete-${item.id}` ? "Đang xóa..." : "Xóa"}
                           </Button>
                         </div>
                       </td>
@@ -534,34 +534,34 @@ export default function AdminBlogPage() {
       <Dialog open={modalOpen} onOpenChange={(open) => (open ? setModalOpen(true) : closeModal())}>
         <DialogContent className="max-h-[92vh] overflow-y-auto sm:max-w-6xl">
           <DialogHeader>
-            <DialogTitle>{modalMode === "create" ? "Them bai viet" : `Chinh sua bai viet #${modalId}`}</DialogTitle>
+            <DialogTitle>{modalMode === "create" ? "Thêm bài viết" : `Chinh sua bai viet #${modalId}`}</DialogTitle>
             <DialogDescription>
-              Soan noi dung theo tung muc. Anh trong moi muc se hien thi cung kich thuoc de dong deu va ro net.
+              Soạn nội dung theo từng mục. Ảnh trong mỗi mục sẽ hiển thị cùng kích thước để đồng đều và rõ nét.
             </DialogDescription>
           </DialogHeader>
 
           <div className="grid gap-3 md:grid-cols-3">
             <div className="space-y-2 md:col-span-2">
-              <label className="text-sm font-medium">Tieu de bai viet</label>
+              <label className="text-sm font-medium">Tiêu đề bài viết</label>
               <Input
                 value={modalForm.tieuDe}
                 onChange={(e) => setModalForm((prev) => ({ ...prev, tieuDe: e.target.value }))}
-                placeholder="Nhap tieu de bai viet..."
+                placeholder="Nhập tiêu đề bài viết..."
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium">Trang thai</label>
+              <label className="text-sm font-medium">Trạng thái</label>
               <select
                 value={modalForm.trangThai}
                 onChange={(e) => setModalForm((prev) => ({ ...prev, trangThai: e.target.value }))}
                 className="h-10 w-full rounded-md border px-3 text-sm"
               >
-                <option value="BAN_NHAP">Ban nhap</option>
-                <option value="XUAT_BAN">Xuat ban</option>
+                <option value="BAN_NHAP">Bản nháp</option>
+                <option value="XUAT_BAN">Xuất bản</option>
               </select>
             </div>
             <div className="space-y-2 md:col-span-3">
-              <label className="text-sm font-medium">Anh bia (URL)</label>
+              <label className="text-sm font-medium">Ảnh bìa (URL)</label>
               <Input
                 value={modalForm.anhBia}
                 onChange={(e) => setModalForm((prev) => ({ ...prev, anhBia: e.target.value }))}
@@ -583,7 +583,7 @@ export default function AdminBlogPage() {
                     <Input
                       value={section.title}
                       onChange={(e) => updateSection(section.id, { title: e.target.value })}
-                      placeholder={`Tieu de muc ${index + 1}`}
+                      placeholder={`Tiêu đề mục ${index + 1}`}
                     />
                     <Button type="button" variant="outline" size="icon" onClick={() => moveSection(section.id, "up")}>
                       <ChevronUp className="h-4 w-4" />
@@ -603,11 +603,11 @@ export default function AdminBlogPage() {
                   </div>
 
                   <div className="mb-3 space-y-2">
-                    <p className="text-sm text-slate-600">Anh minh hoa cho muc nay</p>
+                    <p className="text-sm text-slate-600">Ảnh minh họa cho mục này</p>
                     <div className="flex flex-wrap gap-2">
                       <label className="inline-flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 text-sm font-medium hover:bg-slate-50">
                         <ImagePlus className="h-4 w-4" />
-                        Chon anh
+                        Chọn ảnh
                         <input
                           type="file"
                           accept="image/*"
@@ -618,7 +618,7 @@ export default function AdminBlogPage() {
                       <Input
                         value={section.imageUrl}
                         onChange={(e) => updateSection(section.id, { imageUrl: e.target.value })}
-                        placeholder="Hoac dan URL anh..."
+                        placeholder="Hoặc dán URL ảnh..."
                         className="max-w-md"
                       />
                     </div>
@@ -633,7 +633,7 @@ export default function AdminBlogPage() {
                     ) : null}
                   </div>
 
-                  <p className="mb-2 text-sm text-slate-600">Noi dung muc</p>
+                  <p className="mb-2 text-sm text-slate-600">Nội dung mục</p>
                   <div className="overflow-hidden rounded-md border">
                     <EditorToolbar onCommand={onEditorCommand} disabled={!isActive} />
                     <div
@@ -654,19 +654,19 @@ export default function AdminBlogPage() {
 
             <Button type="button" variant="outline" className="h-12 w-full border-dashed text-base" onClick={addSection}>
               <Plus className="mr-2 h-5 w-5" />
-              Them muc moi
+              Thêm mục mới
             </Button>
           </div>
 
           {previewOpen ? (
             <div className="mt-3 rounded-xl border bg-slate-50 p-4">
-              <p className="mb-3 text-sm font-semibold text-slate-700">Xem truoc bai viet</p>
+              <p className="mb-3 text-sm font-semibold text-slate-700">Xem trước bài viết</p>
               <article className="rounded-lg border bg-white p-4">
-                <h1 className="mb-3 text-2xl font-bold text-slate-900">{modalForm.tieuDe?.trim() || "Tieu de bai viet"}</h1>
+                <h1 className="mb-3 text-2xl font-bold text-slate-900">{modalForm.tieuDe?.trim() || "Tiêu đề bài viết"}</h1>
                 {modalForm.anhBia?.trim() ? (
                   <img
                     src={modalForm.anhBia}
-                    alt={modalForm.tieuDe || "Anh bia"}
+                    alt={modalForm.tieuDe || "Ảnh bìa"}
                     className="mb-4 h-72 w-full rounded-xl border object-cover"
                     loading="eager"
                     decoding="sync"
@@ -674,7 +674,7 @@ export default function AdminBlogPage() {
                 ) : null}
                 <div
                   className="prose max-w-none prose-img:my-3 prose-img:h-80 prose-img:w-full prose-img:rounded-xl prose-img:border prose-img:object-cover"
-                  dangerouslySetInnerHTML={{ __html: previewHtml || "<p>Chua co noi dung.</p>" }}
+                  dangerouslySetInnerHTML={{ __html: previewHtml || "<p>Chưa có nội dung.</p>" }}
                 />
               </article>
             </div>
@@ -682,17 +682,17 @@ export default function AdminBlogPage() {
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => setPreviewOpen((prev) => !prev)}>
-              {previewOpen ? "An xem truoc" : "Xem truoc"}
+              {previewOpen ? "Ẩn xem trước" : "Xem trước"}
             </Button>
             <Button variant="outline" onClick={closeModal}>
-              Huy
+              Hủy
             </Button>
             <Button onClick={saveBlog} disabled={actionKey === "create" || actionKey === `save-${modalId}`}>
               {actionKey === "create" || actionKey === `save-${modalId}`
-                ? "Dang luu..."
+                ? "Đang lưu..."
                 : modalMode === "create"
-                  ? "Dang bai viet"
-                  : "Luu thay doi"}
+                  ? "Đăng bài viết"
+                  : "Lưu thay đổi"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -700,3 +700,4 @@ export default function AdminBlogPage() {
     </div>
   );
 }
+

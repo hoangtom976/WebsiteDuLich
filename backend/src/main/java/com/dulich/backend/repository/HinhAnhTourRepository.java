@@ -9,5 +9,6 @@ import java.util.List;
 @Repository
 public interface HinhAnhTourRepository extends JpaRepository<HinhAnhTour, Long> {
     List<HinhAnhTour> findByTourId(Long tourId);
+
     boolean existsByTourId(Long tourId);
 }
