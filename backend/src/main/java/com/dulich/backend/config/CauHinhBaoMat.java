@@ -61,7 +61,7 @@ public class CauHinhBaoMat {
                         .requestMatchers("/api/hinh-anh/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_STAFF")
                         .requestMatchers(HttpMethod.GET, "/api/cong-khai/he-thong/cai-dat").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/quan-tri/he-thong/cai-dat").permitAll()
-                        .requestMatchers("/api/quan-tri/nguoi-dung/khach-hang")
+                        .requestMatchers("/api/quan-tri/nguoi-dung/khach-hang", "/api/quan-tri/chat/**")
                         .hasAnyAuthority("ROLE_ADMIN", "ROLE_STAFF")
                         .requestMatchers("/api/quan-tri/**").hasAuthority("ROLE_ADMIN")
                         .requestMatchers("/api/thanh-toan/**").permitAll()
@@ -80,6 +80,7 @@ public class CauHinhBaoMat {
                         .requestMatchers("/api/chatbot/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/flash-sales/**").permitAll()
                         .requestMatchers("/api/flash-sales/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_STAFF")
+                        .requestMatchers("/api/thong-bao/**").authenticated()
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtLocXacThuc, UsernamePasswordAuthenticationFilter.class);

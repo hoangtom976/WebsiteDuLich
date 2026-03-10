@@ -16,9 +16,11 @@ public class TourChiTietDTO {
 
     private String tenDanhMuc;
     private String tenDiaDiem;
+    private DiaDiemDTO diaDiem;
 
     // Các thuộc tính bổ sung
     private List<String> danhSachAnh;
     private List<LichKhoiHanhDTO> danhSachLich;
     private List<LichTrinhTourDTO> lichTrinhs;
+    private Boolean daYeuThich;
 }

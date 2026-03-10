@@ -4,17 +4,47 @@ import { getPopularTours } from "./tourService";
 
 const API_URL = "/flash-sales";
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:8081/api";
+
+async function serverFetchJson(path) {
+  const url = `${API_BASE_URL}${path}`;
+  try {
+    const response = await fetch(url, {
+      method: "GET",
+      headers: { Accept: "application/json" },
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      throw new Error(`Request failed: ${response.status}`);
+    }
+
+    if (response.status === 204) {
+      return null;
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error(`Server fetch error for ${url}:`, error);
+    throw error;
+  }
+}
+
 /**
  * Lấy thông tin về chương trình Flash Deal hiện tại từ backend.
  */
 export const getFlashDeal = async () => {
   try {
-    const response = await api.get(`${API_URL}/active`);
-    if (response.status === 204 || !response.data) {
+    const data =
+      typeof window === "undefined"
+        ? await serverFetchJson(`${API_URL}/active`)
+        : (await api.get(`${API_URL}/active`)).data;
+
+    if (!data) {
       return null;
     }
 
-    const deal = response.data;
+    const deal = data;
     return {
       id: deal.id,
       tourId: deal.tourId,
@@ -39,11 +69,12 @@ export const getFlashDeal = async () => {
  */
 export const getActiveFlashSaleForTour = async (tourId) => {
   try {
-    const response = await api.get(`${API_URL}/tour/${tourId}`);
-    if (response.status === 204 || !response.data) {
-      return null;
-    }
-    return response.data;
+    const data =
+      typeof window === "undefined"
+        ? await serverFetchJson(`${API_URL}/tour/${tourId}`)
+        : (await api.get(`${API_URL}/tour/${tourId}`)).data;
+
+    return data || null;
   } catch (error) {
     console.error(`Lỗi khi lấy Flash Sale cho tour ${tourId}:`, error);
     return null;

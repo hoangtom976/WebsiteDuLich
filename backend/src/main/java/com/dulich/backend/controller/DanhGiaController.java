@@ -33,8 +33,14 @@ public class DanhGiaController {
 
     @GetMapping("/tour/{tourId}")
     public ResponseEntity<List<HienThiDanhGiaDTO>> layDanhGiaCuaTour(@PathVariable Long tourId) {
-        // API này public, lỗi sẽ được GlobalExceptionHandler bắt nếu có (ví dụ tour không tồn tại)
+        // API này public, lỗi sẽ được GlobalExceptionHandler bắt nếu có (ví dụ tour
+        // không tồn tại)
         // Hoặc có thể dùng try-catch nếu muốn custom response
         return ResponseEntity.ok(danhGiaService.layDanhGiaCuaTour(tourId));
+    }
+
+    @GetMapping("/cua-toi")
+    public ResponseEntity<List<HienThiDanhGiaDTO>> layDanhGiaCuaToi() {
+        return ResponseEntity.ok(danhGiaService.layDanhGiaCuaToi());
     }
 }

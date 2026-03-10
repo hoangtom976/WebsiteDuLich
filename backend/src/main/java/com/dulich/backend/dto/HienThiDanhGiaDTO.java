@@ -18,4 +18,7 @@ public class HienThiDanhGiaDTO {
     private String noiDungPhanHoi;
     private String tenNhanVienPhanHoi;
     private LocalDateTime ngayPhanHoi;
+
+    private Long tourId;
+    private String tenTour;
 }

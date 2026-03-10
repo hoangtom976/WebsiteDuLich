@@ -1,5 +1,5 @@
 ﻿import Link from "next/link";
-import { ShieldCheck, Wallet, Headset, Star } from "lucide-react";
+import { ShieldCheck, Wallet, Headset, Star, Flame, Clock, BookOpen, Map, Sparkles, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import TourCard from "@/components/shared/TourCard";
 import BlogCard from "@/components/shared/BlogCard";
@@ -11,19 +11,25 @@ import CinematicHero from "@/components/home/CinematicHero";
 import CustomerReviews from "@/components/home/CustomerReviews";
 import LuxuryTopBar from "@/components/shared/LuxuryTopBar";
 import FeaturedCategories from "@/components/home/FeaturedCategories";
+import SectionHeader from "@/components/shared/SectionHeader";
 
 async function PopularToursSection() {
   const popularTours = await getPopularTours();
 
   return (
-    <section className="bg-white py-10 sm:py-12">
+    <section className="bg-white py-6 sm:py-8">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        <h2 className="mb-8 text-center text-4xl font-bold">Các tour nổi bật</h2>
+        <SectionHeader
+          title="Tour nổi bật"
+          subtitle="Những hành trình đẳng cấp, được lựa chọn kỹ lưỡng để mang đến cho khách hàng trải nghiệm tuyệt vời nhất."
+          icon={Flame}
+          badgeText="Xu hướng"
+        />
         <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-4">
-          {(popularTours || []).slice(0, 4).map((tour) => (
+          {(popularTours || []).slice(0, 8).map((tour) => (
             <div
               key={tour.id}
-              className="rounded-lg transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl"
+              className="group overflow-hidden rounded-2xl transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_50px_rgba(0,0,0,0.1)]"
             >
               <TourCard tour={tour} />
             </div>
@@ -38,14 +44,19 @@ async function NewestToursSection() {
   const newestTours = await getAllTours();
 
   return (
-    <section className="bg-white pb-10 pt-0 sm:pb-12">
+    <section className="bg-slate-50/50 py-6 sm:py-8">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        <h2 className="mb-8 text-center text-4xl font-bold">Tour mới nhất</h2>
+        <SectionHeader
+          title="Tour mới nhất"
+          subtitle="Cập nhật những điểm đến mới, hành trình mới lạ vừa được ra mắt để bạn thỏa sức khám phá."
+          icon={Clock}
+          badgeText="Mới cập nhật"
+        />
         <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-4">
           {(newestTours || []).slice(0, 4).map((tour) => (
             <div
               key={tour.id}
-              className="rounded-lg transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl"
+              className="group overflow-hidden rounded-2xl transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_50px_rgba(0,0,0,0.1)]"
             >
               <TourCard tour={tour} />
             </div>
@@ -55,10 +66,14 @@ async function NewestToursSection() {
           <Button
             asChild
             size="lg"
-            variant="outline"
-            className="border-amber-500 text-amber-600 hover:bg-amber-50 hover:text-amber-700"
+            className="group relative overflow-hidden rounded-full bg-slate-900 border-none px-8 py-6 text-white hover:bg-slate-800"
           >
-            <Link href="/tours">Xem tất cả tour</Link>
+            <Link href="/tours">
+              <span className="relative z-10 flex items-center gap-2 font-bold">
+                Khám phá tất cả hành trình
+                <TrendingUp className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+              </span>
+            </Link>
           </Button>
         </div>
       </div>
@@ -74,7 +89,7 @@ function WhyChooseUs() {
       desc: "Bảo hiểm du lịch và các biện pháp an toàn luôn được đặt lên hàng đầu.",
     },
     {
-      icon: Star,
+      icon: Sparkles,
       title: "Dịch vụ cao cấp",
       desc: "Đội ngũ chuyên nghiệp, tận tâm, sẵn sàng hỗ trợ 24/7.",
     },
@@ -91,24 +106,29 @@ function WhyChooseUs() {
   ];
 
   return (
-    <section className="bg-gray-50 py-10 sm:py-12">
+    <section className="relative overflow-hidden bg-white py-6 sm:py-8">
+      <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-transparent via-amber-200 to-transparent opacity-30" />
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        <h2 className="mb-8 text-center text-4xl font-bold">
-          Vì sao chọn Việt Tour?
-        </h2>
+        <SectionHeader
+          title="Vì sao chọn Việt Tour?"
+          subtitle="Chúng tôi cam kết mang lại giá trị thực và những kỷ niệm khó quên cho mỗi chuyến đi của bạn."
+          badgeText="Giá trị cốt lõi"
+          centered={true}
+        />
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
           {reasons.map((reason) => (
             <div
               key={reason.title}
-              className="rounded-xl p-6 text-center transition-all duration-300 hover:bg-white hover:shadow-lg"
+              className="group rounded-3xl border border-slate-100 p-8 text-center transition-all duration-300 hover:bg-slate-50 hover:shadow-xl"
             >
-              <div className="mb-4 flex justify-center">
-                <div className="rounded-full bg-amber-100 p-4">
-                  <reason.icon className="h-8 w-8 text-amber-500" />
+              <div className="mb-6 flex justify-center">
+                <div className="relative rounded-2xl bg-amber-50 p-5 transition-transform duration-500 group-hover:scale-110 group-hover:bg-amber-100">
+                  <reason.icon className="h-8 w-8 text-amber-600" />
+                  <div className="absolute -inset-1 rounded-2xl bg-amber-500/10 blur-sm opacity-0 group-hover:opacity-100 transition-opacity" />
                 </div>
               </div>
-              <h3 className="mb-2 text-xl font-semibold">{reason.title}</h3>
-              <p className="text-muted-foreground">{reason.desc}</p>
+              <h3 className="mb-3 text-xl font-black text-slate-900">{reason.title}</h3>
+              <p className="text-slate-500 leading-relaxed text-sm">{reason.desc}</p>
             </div>
           ))}
         </div>
@@ -141,7 +161,7 @@ async function LuxuryBanner() {
 
   return (
     <section
-      className="relative bg-fixed bg-cover bg-center py-14 sm:py-16"
+      className="relative bg-fixed bg-cover bg-center py-10 sm:py-12"
       style={{ backgroundImage: `url('${bgImage}')` }}
     >
       <div className="absolute inset-0 bg-black/50" />
@@ -167,7 +187,7 @@ async function FlashDealHomeSection() {
   if (!deal) return null;
 
   return (
-    <section className="bg-gray-50 py-10 sm:py-12">
+    <section className="bg-gray-50 py-4 sm:py-6">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <FlashDealSection deal={deal} />
       </div>
@@ -189,14 +209,19 @@ async function TravelBlog() {
   const recentPosts = await getRecentPosts(3);
 
   return (
-    <section className="bg-gray-50 py-10 sm:py-12">
+    <section className="bg-white py-6 sm:py-8">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        <h2 className="mb-8 text-center text-4xl font-bold">Cẩm nang du lịch</h2>
+        <SectionHeader
+          title="Cẩm nang du lịch"
+          subtitle="Khám phá những kinh nghiệm quý báu, bí kíp hành trình để chuyến đi của bạn thêm phần trọn vẹn."
+          icon={BookOpen}
+          badgeText="Blog & Tin tức"
+        />
         <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-3">
           {(recentPosts || []).map((post) => (
             <div
               key={post.id}
-              className="rounded-lg transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl"
+              className="group overflow-hidden rounded-2xl transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_50px_rgba(0,0,0,0.1)]"
             >
               <BlogCard post={{ ...post, anhBia: post.anhBia }} />
             </div>
@@ -207,28 +232,6 @@ async function TravelBlog() {
   );
 }
 
-function Newsletter() {
-  return (
-    <section className="bg-[#0a2d4d] py-10 text-white sm:py-12">
-      <div className="mx-auto max-w-4xl px-6 text-center lg:px-8">
-        <h2 className="text-4xl font-bold">Nhận ưu đãi độc quyền</h2>
-        <p className="mx-auto mt-4 max-w-2xl text-white/80">
-          Trở thành thành viên của Viet Tour để nhận ngay voucher giảm giá và
-          cập nhật những hành trình mới nhất.
-        </p>
-        <div className="mt-5 flex justify-center gap-4">
-          <Button
-            asChild
-            size="lg"
-            className="bg-amber-500 font-bold text-black hover:bg-amber-600"
-          >
-            <Link href="/dang-ky">Đăng ký ngay</Link>
-          </Button>
-        </div>
-      </div>
-    </section>
-  );
-}
 
 export default function Home() {
   return (
@@ -244,7 +247,6 @@ export default function Home() {
         <WhyChooseUs />
         <CustomerReviewsSection />
         <TravelBlog />
-        <Newsletter />
       </div>
     </>
   );

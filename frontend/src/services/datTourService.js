@@ -46,3 +46,13 @@ export const taoThanhToanVnPay = async (payload) => {
     const response = await api.post("/thanh-toan/tao-url", payload);
     return response.data; // Url is returned as string
 };
+
+/**
+ * Lấy chi tiết đơn đặt tour - GET /api/dat-tour/{id}
+ * @param {number} id 
+ * @returns {Promise<Object>}
+ */
+export const layChiTietDonHang = async (id) => {
+    const response = await api.get(`/dat-tour/${id}`);
+    return response.data;
+};

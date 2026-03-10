@@ -11,24 +11,34 @@ export default function BlogCard({ post }) {
   });
 
   return (
-    <Link href={`/blog/${post.slug}`} className="group">
-      <Card className="overflow-hidden h-full flex flex-col hover:shadow-lg transition-shadow duration-300">
-        <img
-          src={post.anhBia || "https://via.placeholder.com/400x250"}
-          alt={post.tieuDe}
-          width={400}
-          height={250}
-          className="w-full h-48 object-cover"
-        />
-        <CardContent className="p-4 flex flex-col flex-grow">
-          <h3 className="text-lg font-semibold mb-2 group-hover:text-blue-600 transition-colors flex-grow">
+    <Link href={`/blog/${post.slug}`} className="group block h-full">
+      <Card className="overflow-hidden h-full flex flex-col hover:shadow-2xl transition-all duration-500 border-none bg-white rounded-2xl">
+        <div className="relative overflow-hidden aspect-[16/10]">
+          <img
+            src={post.anhBia || "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?q=80&w=800&auto=format&fit=crop"}
+            alt={post.tieuDe}
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent group-hover:from-black/40 transition-colors" />
+        </div>
+        <CardContent className="p-6 flex flex-col flex-grow">
+          <div className="flex items-center text-xs font-medium text-amber-600 mb-3 bg-amber-50 w-fit px-2 py-1 rounded-md">
+            <Calendar className="w-3.5 h-3.5 mr-1.5" />
+            {formattedDate} • 5 phút đọc
+          </div>
+          <h3 className="text-xl font-bold mb-3 group-hover:text-amber-600 transition-colors line-clamp-2 leading-snug">
             {post.tieuDe}
           </h3>
-          <div className="flex items-center text-sm text-muted-foreground mt-4">
-            <Calendar className="w-4 h-4 mr-2" /> {formattedDate}
+          <p className="text-gray-600 text-sm line-clamp-3 mb-6 flex-grow leading-relaxed">
+            {post.moTa || (post.content ? post.content.replace(/<[^>]*>/g, '').substring(0, 150) + "..." : "Khám phá bài viết thú vị về những hành trình du lịch đầy cảm hứng.")}
+          </p>
+          <div className="flex items-center text-amber-600 font-bold text-sm tracking-wide group/btn">
+            ĐỌC TIẾP
+            <span className="ml-2 transition-transform duration-300 group-hover/btn:translate-x-1">→</span>
           </div>
         </CardContent>
       </Card>
     </Link>
+
   );
 }

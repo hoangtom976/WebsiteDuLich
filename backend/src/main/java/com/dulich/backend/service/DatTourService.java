@@ -1,5 +1,6 @@
 package com.dulich.backend.service;
 
+import com.dulich.backend.dto.DonDatTourChiTietDTO;
 import com.dulich.backend.dto.DuyetDonDTO;
 import com.dulich.backend.dto.KhachDiCungDTO;
 import com.dulich.backend.dto.LichSuDatTourDTO;
@@ -45,8 +46,10 @@ public class DatTourService {
     private final DonDatTourRepository donDatTourRepository;
     private final LichKhoiHanhRepository lichKhoiHanhRepository;
     private final NguoiDungRepository nguoiDungRepository;
+    private final com.dulich.backend.repository.HinhAnhTourRepository hinhAnhTourRepository;
     private final GuiEmailService guiEmailService;
     private final VoucherService voucherService;
+    private final ThongBaoService thongBaoService;
 
     @Transactional
     public DonDatTour datTour(YeuCauDatTourDTO req) {
@@ -83,6 +86,11 @@ public class DatTourService {
         donDatTour.setTongTien(tongTien);
         donDatTour.setTrangThai(CHO_THANH_TOAN);
 
+        if (req.getMaVoucher() != null && !req.getMaVoucher().isEmpty()) {
+            Voucher voucher = voucherService.kiemTraVoucher(req.getMaVoucher());
+            donDatTour.setVoucher(voucher);
+        }
+
         List<ChiTietDatTour> chiTiets = new ArrayList<>();
         for (KhachDiCungDTO khach : req.getDanhSachKhach()) {
             ChiTietDatTour chiTiet = new ChiTietDatTour();
@@ -103,6 +111,12 @@ public class DatTourService {
                 String.valueOf(savedDonDatTour.getId()),
                 lich.getTour().getTenTour(),
                 tongTien.doubleValue());
+
+        thongBaoService.taoThongBao(
+                nguoiDung,
+                "Đơn đặt tour mới",
+                "Bạn đã đặt tour " + lich.getTour().getTenTour() + " thành công. Vui lòng thanh toán để xác nhận.",
+                "DON_HANG");
 
         return savedDonDatTour;
     }
@@ -129,6 +143,12 @@ public class DatTourService {
         congLaiSoCho(donDatTour);
         donDatTourRepository.save(donDatTour);
 
+        thongBaoService.taoThongBao(
+                donDatTour.getNguoiDung(),
+                "Hủy đơn đặt tour",
+                "Đơn đặt tour #" + donHangId + " đã được hủy thành công.",
+                "DON_HANG");
+
         return "Hủy đơn hàng thành công!";
     }
 
@@ -146,6 +166,12 @@ public class DatTourService {
 
         donDatTour.setTrangThai(DA_THANH_TOAN);
         donDatTourRepository.save(donDatTour);
+
+        thongBaoService.taoThongBao(
+                donDatTour.getNguoiDung(),
+                "Thanh toán thành công",
+                "Đơn đặt tour #" + donHangId + " đã được xác nhận thanh toán thành công.",
+                "THANH_TOAN");
 
         return "Đã xác nhận thanh toán thủ công cho đơn hàng " + donHangId;
     }
@@ -168,6 +194,43 @@ public class DatTourService {
                         .trangThai(donHang.getTrangThai())
                         .build())
                 .collect(Collectors.toList());
+    }
+
+    public DonDatTourChiTietDTO layChiTietDonHang(Long id) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        DonDatTour don = donDatTourRepository.findById(id)
+                .orElseThrow(() -> new TaiNguyenKhongTonTaiException("Không tìm thấy đơn hàng #" + id));
+
+        if (!don.getNguoiDung().getEmail().equals(email)) {
+            throw new LoiBadRequestException("Bạn không có quyền xem đơn hàng này.");
+        }
+
+        LichKhoiHanh lich = don.getLichKhoiHanh();
+
+        List<KhachDiCungDTO> khachDTOs = don.getChiTiets().stream()
+                .map(ct -> new KhachDiCungDTO(ct.getTenKhach(), ct.getSoDienThoai()))
+                .collect(Collectors.toList());
+
+        String hinhAnh = "";
+        List<com.dulich.backend.entity.HinhAnhTour> anhs = hinhAnhTourRepository.findByTourId(lich.getTour().getId());
+        if (!anhs.isEmpty()) {
+            hinhAnh = anhs.get(0).getUrlHinhAnh();
+        }
+
+        return DonDatTourChiTietDTO.builder()
+                .id(don.getId())
+                .ngayDat(don.getNgayDat())
+                .trangThai(don.getTrangThai())
+                .tongTien(don.getTongTien())
+                .tourId(lich.getTour().getId())
+                .tenTour(lich.getTour().getTenTour())
+                .hinhAnh(hinhAnh)
+                .ngayKhoiHanh(lich.getNgayKhoiHanh())
+                .tenDiaDiem(lich.getTour().getDiaDiem() != null ? lich.getTour().getDiaDiem().getTenDiaDiem() : "")
+                .danhSachKhach(khachDTOs)
+                .maVoucher(don.getVoucher() != null ? don.getVoucher().getMaVoucher() : null)
+                .phanTramGiam(don.getVoucher() != null ? don.getVoucher().getPhanTramGiam() : 0)
+                .build();
     }
 
     public List<QuanLyDonDatTourDTO> layDanhSachDonQuanTri(String tuKhoa, String trangThai) {
@@ -202,8 +265,14 @@ public class DatTourService {
             if (!DA_THANH_TOAN.equals(current)) {
                 throw new LoiBadRequestException("Chỉ duyệt đơn khi đơn đã thanh toán.");
             }
-            donDatTour.setTrangThai(DA_XAC_NHAN);
             donDatTourRepository.save(donDatTour);
+
+            thongBaoService.taoThongBao(
+                    donDatTour.getNguoiDung(),
+                    "Đơn đặt tour đã xác nhận",
+                    "Đơn đặt tour #" + id + " của bạn đã được quản trị viên xác nhận.",
+                    "DON_HANG");
+
             return "Duyệt đơn hàng thành công.";
         }
 

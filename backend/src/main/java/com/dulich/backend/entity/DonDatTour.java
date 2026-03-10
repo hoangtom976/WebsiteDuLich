@@ -39,6 +39,10 @@ public class DonDatTour {
     @Column(name = "tong_tien")
     private BigDecimal tongTien;
 
+    @ManyToOne
+    @JoinColumn(name = "voucher_id")
+    private Voucher voucher;
+
     @OneToMany(mappedBy = "donDatTour", cascade = CascadeType.ALL)
     @ToString.Exclude
     private List<ChiTietDatTour> chiTiets;

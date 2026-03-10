@@ -62,20 +62,22 @@ export default async function TourReviews({ tourId }) {
               <StarRating rating={review.soSao} />
               <p className="mt-2 text-gray-700">{review.binhLuan}</p>
 
-              {review.phanHoi && (
+              {review.noiDungPhanHoi && (
                 <div className="mt-4 ml-4 p-4 bg-gray-100 rounded-lg border">
                   <div className="flex items-center justify-between">
                     <p className="font-semibold text-sm text-blue-600">
-                      Phản hồi từ Việt Tour
+                      Phản hồi từ {review.tenNhanVienPhanHoi || "Việt Tour"}
                     </p>
-                    <span className="text-xs text-muted-foreground">
-                      {new Date(review.phanHoi.ngayPhanHoi).toLocaleDateString(
-                        "vi-VN",
-                      )}
-                    </span>
+                    {review.ngayPhanHoi && (
+                      <span className="text-xs text-muted-foreground">
+                        {new Date(review.ngayPhanHoi).toLocaleDateString(
+                          "vi-VN",
+                        )}
+                      </span>
+                    )}
                   </div>
                   <p className="mt-1 text-sm text-gray-600">
-                    {review.phanHoi.noiDung}
+                    {review.noiDungPhanHoi}
                   </p>
                 </div>
               )}

@@ -1,5 +1,6 @@
 package com.dulich.backend.service;
 
+import com.dulich.backend.dto.DiaDiemDTO;
 import com.dulich.backend.dto.LichKhoiHanhDTO;
 import com.dulich.backend.dto.LoiBadRequestException;
 import com.dulich.backend.dto.TaiNguyenKhongTonTaiException;
@@ -22,10 +23,13 @@ import com.dulich.backend.repository.TourRepository;
 import com.dulich.backend.repository.YeuThichRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -61,7 +65,8 @@ public class TourService {
                 .map(HinhAnhTour::getUrlHinhAnh)
                 .collect(Collectors.toList());
 
-        List<LichKhoiHanhDTO> danhSachLich = lichKhoiHanhRepository.findByTourId(id).stream()
+        List<LichKhoiHanhDTO> danhSachLich = lichKhoiHanhRepository
+                .findByTourIdAndNgayKhoiHanhGreaterThanEqual(id, LocalDate.now()).stream()
                 .map(this::convertLichToDTO)
                 .collect(Collectors.toList());
 
@@ -236,6 +241,7 @@ public class TourService {
         if (tour.getDiaDiem() != null) {
             dto.setDiaDiemId(tour.getDiaDiem().getId());
             dto.setTenDiaDiem(tour.getDiaDiem().getTenDiaDiem());
+            dto.setDiaDiem(convertDiaDiemToDTO(tour.getDiaDiem()));
         }
 
         List<HinhAnhTour> anhs = hinhAnhTourRepository.findByTourId(tour.getId());
@@ -258,18 +264,34 @@ public class TourService {
         dto.setLichTrinhs(lts);
 
         // Lấy đánh giá sao
-        Object[] ratingData = danhGiaRepository.getAverageRatingAndCountByTourId(tour.getId());
-        if (ratingData != null && ratingData.length > 0) {
-            Double avg = (Double) ratingData[0];
-            Long count = (Long) ratingData[1];
-            dto.setSoSaoTrungBinh(avg != null ? Math.round(avg * 10.0) / 10.0 : 0.0);
-            dto.setTongDanhGia(count != null ? count.intValue() : 0);
+        List<Object[]> ratingDataList = danhGiaRepository.getAverageRatingAndCountByTourId(tour.getId());
+        if (ratingDataList != null && !ratingDataList.isEmpty()) {
+            Object[] ratingData = ratingDataList.get(0);
+            Number avgNum = (Number) ratingData[0];
+            Number countNum = (Number) ratingData[1];
+
+            Double avg = (avgNum != null) ? avgNum.doubleValue() : 0.0;
+            Long count = (countNum != null) ? countNum.longValue() : 0L;
+
+            dto.setSoSaoTrungBinh(Math.round(avg * 10.0) / 10.0);
+            dto.setTongDanhGia(count.intValue());
         } else {
             dto.setSoSaoTrungBinh(0.0);
             dto.setTongDanhGia(0);
         }
 
+        dto.setDaYeuThich(kiemTraYeuThich(tour.getId()));
+
         return dto;
+    }
+
+    private boolean kiemTraYeuThich(Long tourId) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated() || auth.getPrincipal().equals("anonymousUser")) {
+            return false;
+        }
+        String email = auth.getName();
+        return yeuThichRepository.existsByNguoiDungEmailAndTourId(email, tourId);
     }
 
     private LichKhoiHanhDTO convertLichToDTO(LichKhoiHanh lich) {
@@ -299,6 +321,7 @@ public class TourService {
         }
         if (tour.getDiaDiem() != null) {
             dto.setTenDiaDiem(tour.getDiaDiem().getTenDiaDiem());
+            dto.setDiaDiem(convertDiaDiemToDTO(tour.getDiaDiem()));
         }
 
         dto.setDanhSachAnh(anhs);
@@ -317,7 +340,20 @@ public class TourService {
                 })
                 .collect(Collectors.toList());
         dto.setLichTrinhs(lts);
+        dto.setDaYeuThich(kiemTraYeuThich(tour.getId()));
 
+        return dto;
+    }
+
+    private DiaDiemDTO convertDiaDiemToDTO(DiaDiem diaDiem) {
+        if (diaDiem == null)
+            return null;
+        DiaDiemDTO dto = new DiaDiemDTO();
+        dto.setId(diaDiem.getId());
+        dto.setTenDiaDiem(diaDiem.getTenDiaDiem());
+        dto.setMoTa(diaDiem.getMoTa());
+        dto.setLatitude(diaDiem.getLatitude());
+        dto.setLongitude(diaDiem.getLongitude());
         return dto;
     }
 }

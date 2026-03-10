@@ -29,3 +29,12 @@ export const checkVoucher = async (maVoucher) => {
   const response = await api.get(`/voucher/kiem-tra/${encodeURIComponent(maVoucher)}`);
   return response.data;
 };
+export const getMyVouchers = async () => {
+  try {
+    const response = await api.get("/voucher/cua-toi");
+    return response.data;
+  } catch (error) {
+    console.error("Lỗi khi tải voucher của tôi:", error);
+    return [];
+  }
+};

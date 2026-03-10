@@ -35,6 +35,6 @@ public interface TourRepository extends JpaRepository<Tour, Long> {
                         "WHERE t.trang_thai = true " +
                         "GROUP BY t.id " +
                         "ORDER BY COUNT(ddt.id) DESC, t.id DESC " +
-                        "LIMIT 4", nativeQuery = true)
+                        "LIMIT 8", nativeQuery = true)
         List<Tour> timTourPhoBien();
 }

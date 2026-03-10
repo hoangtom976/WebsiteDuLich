@@ -18,6 +18,10 @@ import com.dulich.backend.entity.BaiViet;
 import com.dulich.backend.entity.NguoiDung;
 import com.dulich.backend.repository.BaiVietRepository;
 import com.dulich.backend.repository.NguoiDungRepository;
+import com.dulich.backend.repository.BinhLuanBaiVietRepository;
+import com.dulich.backend.entity.BinhLuanBaiViet;
+import com.dulich.backend.dto.BinhLuanYeuCauDTO;
+import com.dulich.backend.dto.BinhLuanPhanHoiDTO;
 
 import lombok.RequiredArgsConstructor;
 
@@ -27,13 +31,15 @@ public class BaiVietService {
 
     private final BaiVietRepository baiVietRepository;
     private final NguoiDungRepository nguoiDungRepository;
+    private final BinhLuanBaiVietRepository binhLuanBaiVietRepository;
 
     private static final Pattern NONLATIN = Pattern.compile("[^\\w-]");
     private static final Pattern WHITESPACE = Pattern.compile("[\\s]");
 
     /**
      * Tạo một bài viết mới.
-     * @param yeuCau DTO chứa thông tin bài viết mới.
+     * 
+     * @param yeuCau     DTO chứa thông tin bài viết mới.
      * @param nhanVienId ID của nhân viên tạo bài.
      * @return DTO của bài viết đã được tạo.
      */
@@ -64,6 +70,7 @@ public class BaiVietService {
 
     /**
      * Lấy danh sách các bài viết đã xuất bản, có phân trang.
+     * 
      * @param pageable Đối tượng phân trang.
      * @return Một trang các bài viết DTO.
      */
@@ -80,6 +87,7 @@ public class BaiVietService {
 
     /**
      * Lấy chi tiết một bài viết và tăng lượt xem.
+     * 
      * @param slug Slug của bài viết.
      * @return DTO chi tiết của bài viết.
      */
@@ -97,7 +105,8 @@ public class BaiVietService {
 
     /**
      * Cập nhật một bài viết đã có.
-     * @param id ID của bài viết cần sửa.
+     * 
+     * @param id     ID của bài viết cần sửa.
      * @param yeuCau DTO chứa thông tin cập nhật.
      * @return DTO của bài viết sau khi đã cập nhật.
      */
@@ -126,6 +135,7 @@ public class BaiVietService {
 
     /**
      * Xóa một bài viết theo ID.
+     * 
      * @param id ID của bài viết cần xóa.
      */
     @Transactional
@@ -137,11 +147,46 @@ public class BaiVietService {
     }
 
     private String taoSlug(String input) {
-        if (input == null) return "";
+        if (input == null)
+            return "";
         String nowhitespace = WHITESPACE.matcher(input).replaceAll("-");
         String normalized = Normalizer.normalize(nowhitespace, Normalizer.Form.NFD);
         String slug = NONLATIN.matcher(normalized).replaceAll("");
         return slug.toLowerCase(Locale.ENGLISH);
+    }
+
+    @Transactional
+    public BinhLuanPhanHoiDTO themBinhLuan(Long baiVietId, BinhLuanYeuCauDTO yeuCau, Long nguoiDungId) {
+        BaiViet baiViet = baiVietRepository.findById(baiVietId)
+                .orElseThrow(() -> new TaiNguyenKhongTonTaiException("Không tìm thấy bài viết với ID: " + baiVietId));
+        NguoiDung nguoiDung = nguoiDungRepository.findById(nguoiDungId)
+                .orElseThrow(
+                        () -> new TaiNguyenKhongTonTaiException("Không tìm thấy người dùng với ID: " + nguoiDungId));
+
+        BinhLuanBaiViet binhLuan = BinhLuanBaiViet.builder()
+                .baiViet(baiViet)
+                .nguoiDung(nguoiDung)
+                .noiDung(yeuCau.getNoiDung())
+                .build();
+
+        BinhLuanBaiViet saved = binhLuanBaiVietRepository.save(binhLuan);
+        return convertToBinhLuanDTO(saved);
+    }
+
+    public List<BinhLuanPhanHoiDTO> layDanhSachBinhLuan(Long baiVietId) {
+        return binhLuanBaiVietRepository.findByBaiVietIdOrderByNgayTaoDesc(baiVietId).stream()
+                .map(this::convertToBinhLuanDTO)
+                .toList();
+    }
+
+    private BinhLuanPhanHoiDTO convertToBinhLuanDTO(BinhLuanBaiViet binhLuan) {
+        return BinhLuanPhanHoiDTO.builder()
+                .id(binhLuan.getId())
+                .nguoiDungId(binhLuan.getNguoiDung().getId())
+                .tenNguoiDung(binhLuan.getNguoiDung().getHoTen())
+                .noiDung(binhLuan.getNoiDung())
+                .ngayTao(binhLuan.getNgayTao())
+                .build();
     }
 
     private BaiVietPhanHoiDTO convertToPhanHoiDTO(BaiViet baiViet) {

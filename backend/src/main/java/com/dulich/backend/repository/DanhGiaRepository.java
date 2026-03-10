@@ -12,6 +12,8 @@ import java.util.List;
 public interface DanhGiaRepository extends JpaRepository<DanhGia, Long> {
     List<DanhGia> findByTourIdOrderByNgayDanhGiaDesc(Long tourId);
 
+    List<DanhGia> findByNguoiDungIdOrderByNgayDanhGiaDesc(Long nguoiDungId);
+
     boolean existsByNguoiDungIdAndTourId(Long userId, Long tourId);
 
     boolean existsByTourId(Long tourId);
@@ -19,5 +21,5 @@ public interface DanhGiaRepository extends JpaRepository<DanhGia, Long> {
     void deleteByTourId(Long tourId);
 
     @Query("SELECT AVG(d.soSao), COUNT(d) FROM DanhGia d WHERE d.tour.id = :tourId")
-    Object[] getAverageRatingAndCountByTourId(@Param("tourId") Long tourId);
+    List<Object[]> getAverageRatingAndCountByTourId(@Param("tourId") Long tourId);
 }

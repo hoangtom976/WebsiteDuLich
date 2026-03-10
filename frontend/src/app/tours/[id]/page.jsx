@@ -11,6 +11,8 @@ import TourCard from "@/components/shared/TourCard";
 import TourGallery from "@/components/tours/TourGallery";
 import { formatDuration, formatPrice } from "@/lib/utils";
 import Link from "next/link";
+import TourWeather from "@/components/tours/TourWeather";
+import WishlistButton from "@/components/tours/WishlistButton";
 
 export default async function TourDetailPage({ params }) {
   const awaitedParams = await params;
@@ -68,7 +70,12 @@ export default async function TourDetailPage({ params }) {
         </div>
       </div>
 
-      {/* ★ DepartureDatePicker sẽ được render bởi TourBookingWrapper tại đây ★ */}
+      {/* Weather Forecast */}
+      <TourWeather
+        lat={tour.diaDiem?.latitude}
+        lon={tour.diaDiem?.longitude}
+        destinationName={tour.tenDiaDiem}
+      />
 
       {/* Itinerary */}
       <div className="bg-white rounded-2xl shadow-lg shadow-black/5 border border-gray-100 overflow-hidden">
@@ -182,17 +189,17 @@ export default async function TourDetailPage({ params }) {
   const rightContent = (
     <>
       {/* Why Viet Tour */}
-      <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl p-6 text-white shadow-xl shadow-blue-600/20">
+      <div className="bg-[#0a2d4d] rounded-2xl p-6 text-white shadow-xl shadow-[#0a2d4d]/20">
         <h3 className="text-lg font-bold mb-5">Vì sao chọn Viet Tour?</h3>
         <div className="space-y-4">
           {[
-            { icon: Shield, title: "An toàn tuyệt đối", desc: "Bảo hiểm du lịch trọn gói & xe đời mới." },
-            { icon: Star, title: "Dịch vụ 5 sao", desc: "Cam kết trải nghiệm tốt nhất cho bạn." },
-            { icon: Heart, title: "HDV tận tâm", desc: "Đội ngũ am hiểu văn hóa địa phương." },
-            { icon: Utensils, title: "Ẩm thực đặc sắc", desc: "Thưởng thức món ngon vùng miền." },
+            { icon: Shield, title: "An toàn tuyệt đối", desc: "Bảo hiểm du lịch trọn gói & xe đời mới.", color: "bg-emerald-500/20 text-emerald-400" },
+            { icon: Star, title: "Dịch vụ 5 sao", desc: "Cam kết trải nghiệm tốt nhất cho bạn.", color: "bg-amber-500/20 text-amber-400" },
+            { icon: Heart, title: "HDV tận tâm", desc: "Đội ngũ am hiểu văn hóa địa phương.", color: "bg-rose-500/20 text-rose-400" },
+            { icon: Utensils, title: "Ẩm thực đặc sắc", desc: "Thưởng thức món ngon vùng miền.", color: "bg-orange-500/20 text-orange-400" },
           ].map((item, i) => (
             <div key={i} className="flex items-start gap-3">
-              <div className="w-9 h-9 rounded-xl bg-white/15 flex items-center justify-center flex-shrink-0">
+              <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${item.color}`}>
                 <item.icon className="w-4 h-4" />
               </div>
               <div>
@@ -205,7 +212,7 @@ export default async function TourDetailPage({ params }) {
       </div>
       <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 text-center">
         <p className="text-sm text-amber-800 font-medium">🔥 Ưu đãi có hạn! Đặt ngay để nhận giá tốt nhất.</p>
-        <p className="text-xs text-amber-600 mt-1">Miễn phí hủy trước 7 ngày khởi hành</p>
+        <p className="text-xs text-amber-600 mt-1">Hỗ trợ tư vấn 24/7 & Lên lịch trình riêng theo yêu cầu</p>
       </div>
     </>
   );
@@ -213,11 +220,20 @@ export default async function TourDetailPage({ params }) {
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
       {/* ═══ HERO ═══ */}
-      <section className="relative h-[55vh] min-h-[420px] max-h-[600px] overflow-hidden">
-        <img src={coverImage} alt={tour.tenTour} className="absolute inset-0 w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
-        <div className="absolute top-0 left-0 right-0 z-10">
-          <div className="container mx-auto px-4 pt-6">
+      {/* ═══ HERO ═══ */}
+      <section className="relative h-[60vh] min-h-[500px] w-full bg-slate-900">
+        <div className="absolute inset-0 w-full h-full">
+          <img
+            src={coverImage}
+            alt={tour.tenTour}
+            className="w-full h-full object-cover object-center"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-black/30" />
+        </div>
+
+        {/* Breadcrumb */}
+        <div className="absolute top-0 left-0 right-0 z-10 pt-6">
+          <div className="container mx-auto px-4">
             <nav className="flex items-center text-sm text-white/80 font-medium">
               <Link href="/" className="hover:text-white flex items-center gap-1 transition-colors"><Home className="w-4 h-4" /> Trang chủ</Link>
               <ChevronRight className="w-4 h-4 mx-1.5 text-white/50" />
@@ -227,22 +243,51 @@ export default async function TourDetailPage({ params }) {
             </nav>
           </div>
         </div>
-        <div className="absolute bottom-0 left-0 right-0 z-10">
-          <div className="container mx-auto px-4 pb-8">
-            <div className="max-w-3xl">
-              <div className="flex items-center gap-2 mb-3">
+
+        {/* Main Hero Content */}
+        <div className="absolute bottom-12 left-0 right-0 z-10">
+          <div className="container mx-auto px-4">
+            <div className="max-w-4xl">
+              <div className="flex flex-wrap items-center gap-2 mb-4">
                 <span className="px-3 py-1 bg-amber-500 text-white text-xs font-bold rounded-full uppercase tracking-wider">{tour.tenDanhMuc}</span>
-                <span className="px-3 py-1 bg-white/20 backdrop-blur-sm text-white text-xs font-medium rounded-full"><MapPin className="w-3 h-3 inline mr-1" />{tour.tenDiaDiem}</span>
+                <span className="px-3 py-1 bg-white/20 backdrop-blur-md text-white text-xs font-medium rounded-full flex items-center gap-1">
+                  <MapPin className="w-3 h-3" />{tour.tenDiaDiem}
+                </span>
               </div>
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-tight tracking-tight">{tour.tenTour}</h1>
-              <div className="mt-4 flex flex-wrap items-center gap-4 text-white/90 text-sm sm:text-base">
-                <div className="flex items-center gap-1.5"><Clock className="w-4 h-4 text-amber-400" /><span className="font-medium">{formatDuration(tour.soNgay)}</span></div>
-                <div className="flex items-center gap-1.5"><Star className="w-4 h-4 fill-amber-400 text-amber-400" /><span className="font-bold">4.8</span><span className="text-white/60">(124 đánh giá)</span></div>
-                <div className="flex items-center gap-1.5"><Users className="w-4 h-4 text-emerald-400" /><span>10-25 khách</span></div>
+
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white leading-tight text-shadow-sm">
+                  {tour.tenTour}
+                </h1>
+                <WishlistButton tourId={tour.id} initialStatus={tour.daYeuThich} />
               </div>
-              <div className="mt-5">
-                <p className="text-white/60 text-xs uppercase tracking-wider mb-1">Giá từ</p>
-                <p className="text-3xl sm:text-4xl font-extrabold text-white">{formattedPrice}<span className="text-base font-normal text-white/60 ml-1">/ khách</span></p>
+
+              <div className="flex flex-wrap items-center gap-6 text-white/90">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center backdrop-blur-sm">
+                    <Clock className="w-4 h-4 text-amber-400" />
+                  </div>
+                  <span className="font-medium">{formatDuration(tour.soNgay)}</span>
+                </div>
+
+                {tour.soSaoTrungBinh > 0 && (
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center backdrop-blur-sm">
+                      <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+                    </div>
+                    <div>
+                      <span className="font-bold">{tour.soSaoTrungBinh}</span>
+                      <span className="text-white/60 text-sm ml-1">({tour.tongDanhGia} đánh giá)</span>
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center backdrop-blur-sm">
+                    <Users className="w-4 h-4 text-emerald-400" />
+                  </div>
+                  <span className="font-medium">10 - 25 khách</span>
+                </div>
               </div>
             </div>
           </div>

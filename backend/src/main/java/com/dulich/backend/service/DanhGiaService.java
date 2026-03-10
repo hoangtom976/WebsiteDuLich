@@ -101,22 +101,35 @@ public class DanhGiaService {
         }
 
         return danhGiaRepository.findByTourIdOrderByNgayDanhGiaDesc(tourId).stream()
-                .map(dg -> {
-                    HienThiDanhGiaDTO.HienThiDanhGiaDTOBuilder builder = HienThiDanhGiaDTO.builder()
-                            .id(dg.getId())
-                            .tenNguoiDung(dg.getNguoiDung().getHoTen())
-                            // .avatarNguoiDung(...) // Nếu có
-                            .soSao(dg.getSoSao())
-                            .binhLuan(dg.getBinhLuan())
-                            .ngayDanhGia(dg.getNgayDanhGia());
-
-                    if (dg.getPhanHoi() != null) {
-                        builder.noiDungPhanHoi(dg.getPhanHoi().getNoiDung())
-                                .tenNhanVienPhanHoi(dg.getPhanHoi().getNhanVien().getHoTen())
-                                .ngayPhanHoi(dg.getPhanHoi().getNgayPhanHoi());
-                    }
-                    return builder.build();
-                })
+                .map(this::convertToHienThiDTO)
                 .collect(Collectors.toList());
+    }
+
+    public List<HienThiDanhGiaDTO> layDanhGiaCuaToi() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        NguoiDung nguoiDung = nguoiDungRepository.findByEmail(email)
+                .orElseThrow(() -> new TaiNguyenKhongTonTaiException("Không tìm thấy người dùng: " + email));
+
+        return danhGiaRepository.findByNguoiDungIdOrderByNgayDanhGiaDesc(nguoiDung.getId()).stream()
+                .map(this::convertToHienThiDTO)
+                .collect(Collectors.toList());
+    }
+
+    private HienThiDanhGiaDTO convertToHienThiDTO(DanhGia dg) {
+        HienThiDanhGiaDTO.HienThiDanhGiaDTOBuilder builder = HienThiDanhGiaDTO.builder()
+                .id(dg.getId())
+                .tenNguoiDung(dg.getNguoiDung().getHoTen())
+                .soSao(dg.getSoSao())
+                .binhLuan(dg.getBinhLuan())
+                .ngayDanhGia(dg.getNgayDanhGia())
+                .tenTour(dg.getTour().getTenTour())
+                .tourId(dg.getTour().getId());
+
+        if (dg.getPhanHoi() != null) {
+            builder.noiDungPhanHoi(dg.getPhanHoi().getNoiDung())
+                    .tenNhanVienPhanHoi(dg.getPhanHoi().getNhanVien().getHoTen())
+                    .ngayPhanHoi(dg.getPhanHoi().getNgayPhanHoi());
+        }
+        return builder.build();
     }
 }

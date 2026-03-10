@@ -23,6 +23,14 @@ export default function KetQuaThanhToanPage() {
 
         setStatus(s);
         setOrderId(oId);
+
+        // Tự động chuyển hướng sau 5 giây nếu thành công
+        if (s === "success" && oId) {
+            const timer = setTimeout(() => {
+                router.push(`/ho-so/don-hang/${oId}`);
+            }, 5000);
+            return () => clearTimeout(timer);
+        }
     }, [searchParams, router]);
 
     if (!status) {
@@ -58,7 +66,7 @@ export default function KetQuaThanhToanPage() {
 
                 <p className="text-gray-500 mb-8 text-lg">
                     {isSuccess
-                        ? "Cảm ơn bạn đã đặt tour. Vui lòng kiểm tra email để xem thông tin chi tiết."
+                        ? "Cảm ơn bạn đã đặt tour. Trang sẽ tự động chuyển đến chi tiết đơn hàng sau 5 giây."
                         : "Đã có lỗi xảy ra trong quá trình thanh toán. Vui lòng thử lại sau."}
                 </p>
 
@@ -77,7 +85,7 @@ export default function KetQuaThanhToanPage() {
                     </Link>
 
                     {isSuccess && (
-                        <Link href="/ho-so">
+                        <Link href={`/ho-so/don-hang/${orderId}`}>
                             <Button className="w-full sm:w-auto px-8 h-12 rounded-xl bg-blue-600 hover:bg-blue-700">
                                 Xem đơn hàng <ArrowRight className="w-4 h-4 ml-2" />
                             </Button>

@@ -20,4 +20,7 @@ public class DiaDiem {
 
     @Column(name = "mo_ta", columnDefinition = "TEXT")
     private String moTa;
+
+    private Double latitude;
+    private Double longitude;
 }

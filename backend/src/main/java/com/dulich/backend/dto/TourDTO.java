@@ -35,10 +35,12 @@ public class TourDTO {
     // Các trường hiển thị (Read-only)
     private String tenDanhMuc;
     private String tenDiaDiem;
+    private DiaDiemDTO diaDiem;
     private String hinhAnh;
 
     private List<LichTrinhTourDTO> lichTrinhs;
 
     private Double soSaoTrungBinh;
     private Integer tongDanhGia;
+    private Boolean daYeuThich;
 }

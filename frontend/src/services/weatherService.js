@@ -21,12 +21,8 @@ export const getCurrentWeather = async (lat, lon) => {
 export const getWeather = getCurrentWeather;
 
 export const getForecast = async (lat, lon) => {
-  const current = await getCurrentWeather(lat, lon);
-  const today = new Date();
-
-  return Array.from({ length: 5 }, (_, idx) => ({
-    ...current,
-    ngay: new Date(today.getFullYear(), today.getMonth(), today.getDate() + idx).toISOString(),
-    nhietDo: Math.round(current.nhietDo + (idx % 2 === 0 ? idx : -idx * 0.5)),
-  }));
+  const response = await api.get("/thoi-tiet/du-bao", {
+    params: { lat, lon },
+  });
+  return response.data;
 };

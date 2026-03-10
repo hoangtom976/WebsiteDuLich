@@ -20,6 +20,7 @@ public class DiaDiemService {
 
     private final DiaDiemRepository diaDiemRepository;
     private final TourRepository tourRepository;
+    private final DichVuThoiTiet dichVuThoiTiet;
 
     public List<DiaDiem> layTatCa() {
         return diaDiemRepository.findAll();
@@ -42,6 +43,14 @@ public class DiaDiemService {
         DiaDiem diaDiem = new DiaDiem();
         diaDiem.setTenDiaDiem(tenDiaDiem);
         diaDiem.setMoTa(req.getMoTa() == null ? "" : req.getMoTa().trim());
+
+        // Tự động lấy tọa độ
+        Double[] toaDo = dichVuThoiTiet.layToaDoTuTenDiaDiem(tenDiaDiem);
+        if (toaDo != null) {
+            diaDiem.setLatitude(toaDo[0]);
+            diaDiem.setLongitude(toaDo[1]);
+        }
+
         return diaDiemRepository.save(diaDiem);
     }
 
@@ -64,7 +73,40 @@ public class DiaDiemService {
 
         diaDiem.setTenDiaDiem(tenDiaDiemMoi);
         diaDiem.setMoTa(req.getMoTa() == null ? "" : req.getMoTa().trim());
+
+        // Cập nhật lại tọa độ nếu tên đổi hoặc tọa độ đang trống
+        if (diaDiem.getLatitude() == null || diaDiem.getLongitude() == null) {
+            Double[] toaDo = dichVuThoiTiet.layToaDoTuTenDiaDiem(tenDiaDiemMoi);
+            if (toaDo != null) {
+                diaDiem.setLatitude(toaDo[0]);
+                diaDiem.setLongitude(toaDo[1]);
+            }
+        }
+
         return diaDiemRepository.save(diaDiem);
+    }
+
+    public int capNhatToaDoChoTatCa() {
+        System.out.println("Bắt đầu cập nhật tọa độ cho tất cả địa điểm...");
+        List<DiaDiem> tatCa = diaDiemRepository.findAll();
+        int count = 0;
+        for (DiaDiem dd : tatCa) {
+            try {
+                // Chỉ cập nhật nếu thiếu tọa độ
+                if (dd.getLatitude() == null || dd.getLongitude() == null) {
+                    Double[] toaDo = dichVuThoiTiet.layToaDoTuTenDiaDiem(dd.getTenDiaDiem());
+                    if (toaDo != null) {
+                        dd.setLatitude(toaDo[0]);
+                        dd.setLongitude(toaDo[1]);
+                        diaDiemRepository.save(dd);
+                        count++;
+                    }
+                }
+            } catch (Exception e) {
+                System.err.println("Lỗi cập nhật cho " + dd.getTenDiaDiem() + ": " + e.getMessage());
+            }
+        }
+        return count;
     }
 
     @Transactional

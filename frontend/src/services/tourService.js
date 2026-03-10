@@ -1,42 +1,58 @@
 import api from "@/lib/api";
 import { mockTours } from "@/lib/mock-data";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8081/api";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:8081/api";
 
 async function serverFetchJson(path) {
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    method: "GET",
-    headers: { Accept: "application/json" },
-    cache: "no-store",
-  });
+  const url = `${API_BASE_URL}${path}`;
+  try {
+    const response = await fetch(url, {
+      method: "GET",
+      headers: { Accept: "application/json" },
+      cache: "no-store",
+    });
 
-  if (!response.ok) {
-    throw new Error(`Request failed: ${response.status}`);
+    if (!response.ok) {
+      if (response.status === 204) return null;
+      throw new Error(`Request failed: ${response.status}`);
+    }
+
+    const text = await response.text();
+    if (!text) return null;
+    try {
+      return JSON.parse(text);
+    } catch (e) {
+      console.error(`Malformed JSON from ${url}:`, text);
+      return null;
+    }
+  } catch (error) {
+    console.error(`Server fetch error for ${url}:`, error);
+    throw error;
   }
-
-  return response.json();
 }
 
 export const getPopularTours = async () => {
   try {
     if (typeof window === "undefined") {
-      return await serverFetchJson("/tour/pho-bien");
+      const data = await serverFetchJson("/tour/pho-bien");
+      return data || [];
     }
     const response = await api.get("/tour/pho-bien");
-    return response.data;
+    return response.data || [];
   } catch (error) {
     console.error("Failed to fetch popular tours:", error);
-    return []; // Trả về mảng rỗng nếu có lỗi
+    return [];
   }
 };
 
 export const getAllTours = async () => {
   try {
     if (typeof window === "undefined") {
-      return await serverFetchJson("/tour");
+      const data = await serverFetchJson("/tour");
+      return data || [];
     }
     const response = await api.get("/tour");
-    return response.data;
+    return response.data || [];
   } catch (error) {
     console.error("Failed to fetch all tours:", error);
     return [];

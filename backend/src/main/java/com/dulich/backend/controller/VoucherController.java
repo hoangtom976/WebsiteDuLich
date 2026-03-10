@@ -1,6 +1,7 @@
 package com.dulich.backend.controller;
 
 import com.dulich.backend.dto.VoucherDTO;
+import com.dulich.backend.dto.VoucherCuaToiDTO;
 import com.dulich.backend.entity.Voucher;
 import com.dulich.backend.service.VoucherService;
 import jakarta.validation.Valid;
@@ -52,5 +53,10 @@ public class VoucherController {
     public ResponseEntity<Voucher> kiemTraVoucher(@PathVariable String maVoucher) {
         Voucher voucher = voucherService.kiemTraVoucher(maVoucher);
         return ResponseEntity.ok(voucher);
+    }
+
+    @GetMapping("/cua-toi")
+    public ResponseEntity<List<VoucherCuaToiDTO>> layVoucherCuaToi() {
+        return ResponseEntity.ok(voucherService.layVouchersCuaToi());
     }
 }

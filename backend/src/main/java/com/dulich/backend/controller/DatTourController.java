@@ -1,5 +1,6 @@
 package com.dulich.backend.controller;
 
+import com.dulich.backend.dto.DonDatTourChiTietDTO;
 import com.dulich.backend.dto.DuyetDonDTO;
 import com.dulich.backend.dto.LichSuDatTourDTO;
 import com.dulich.backend.dto.QuanLyDonDatTourDTO;
@@ -47,6 +48,11 @@ public class DatTourController {
     public ResponseEntity<?> layLichSuDatTour() {
         List<LichSuDatTourDTO> lichSu = datTourService.layLichSuDatTour();
         return ResponseEntity.ok(lichSu);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<DonDatTourChiTietDTO> layChiTietDonHang(@PathVariable Long id) {
+        return ResponseEntity.ok(datTourService.layChiTietDonHang(id));
     }
 
     @GetMapping("/quan-ly")

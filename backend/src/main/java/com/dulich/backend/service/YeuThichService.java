@@ -5,6 +5,8 @@ import com.dulich.backend.entity.NguoiDung;
 import com.dulich.backend.entity.Tour;
 import com.dulich.backend.dto.LoiBadRequestException;
 import com.dulich.backend.dto.TaiNguyenKhongTonTaiException;
+import com.dulich.backend.repository.DanhGiaRepository;
+import com.dulich.backend.repository.HinhAnhTourRepository;
 import com.dulich.backend.repository.NguoiDungRepository;
 import com.dulich.backend.repository.TourRepository;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +25,8 @@ public class YeuThichService {
 
     private final NguoiDungRepository nguoiDungRepository;
     private final TourRepository tourRepository;
+    private final HinhAnhTourRepository hinhAnhTourRepository;
+    private final DanhGiaRepository danhGiaRepository;
 
     @Transactional
     public String thayDoiTrangThaiYeuThich(Long tourId) {
@@ -72,6 +76,22 @@ public class YeuThichService {
             dto.setTenDanhMuc(tour.getDanhMuc().getTenDanhMuc());
         if (tour.getDiaDiem() != null)
             dto.setTenDiaDiem(tour.getDiaDiem().getTenDiaDiem());
+
+        // Lấy hình ảnh đầu tiên
+        hinhAnhTourRepository.findByTourId(tour.getId()).stream().findFirst()
+                .ifPresent(h -> dto.setHinhAnh(h.getUrlHinhAnh()));
+
+        // Lấy đánh giá trung bình
+        List<Object[]> ratingData = danhGiaRepository.getAverageRatingAndCountByTourId(tour.getId());
+        if (!ratingData.isEmpty() && ratingData.get(0)[0] != null) {
+            Number avgNum = (Number) ratingData.get(0)[0];
+            Number countNum = (Number) ratingData.get(0)[1];
+            dto.setSoSaoTrungBinh(avgNum != null ? avgNum.doubleValue() : 0.0);
+            dto.setTongDanhGia(countNum != null ? countNum.intValue() : 0);
+        } else {
+            dto.setSoSaoTrungBinh(0.0);
+            dto.setTongDanhGia(0);
+        }
 
         return dto;
     }

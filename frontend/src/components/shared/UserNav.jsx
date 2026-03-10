@@ -14,6 +14,9 @@ import {
   User,
   CircleUserRound,
   MessageCircleMore,
+  Bell,
+  Star,
+  Ticket,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -54,8 +57,11 @@ function menuByRole(auth) {
 
   return [
     { href: "/ho-so", label: "Thông tin cá nhân", icon: User },
-    { href: "/lich-su-dat-tour", label: "Lịch sử đơn hàng", icon: History },
+    { href: "/ho-so/thong-bao", label: "Thông báo", icon: Bell },
+    { href: "/lich-su-dat-tour", label: "Đơn đặt tour", icon: History },
     { href: "/yeu-thich", label: "Danh sách yêu thích", icon: Heart },
+    { href: "/ho-so/danh-gia", label: "Đánh giá của tôi", icon: Star },
+    { href: "/ho-so/voucher", label: "Voucher của tôi", icon: Ticket },
   ];
 }
 

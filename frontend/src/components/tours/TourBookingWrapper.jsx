@@ -13,8 +13,10 @@ import api from "@/lib/api";
 import {
     UserPlus, Trash2, Ticket, Loader2, CheckCircle2,
     AlertCircle, Users, Phone, User, CreditCard, QrCode,
-    ArrowLeft, ShieldCheck, Clock, X, Banknote
+    ArrowLeft, ShieldCheck, Clock, X, Banknote, CloudSun,
+    Sun, Cloud, CloudRain, CloudLightning, Snowflake, Wind
 } from "lucide-react";
+import { getForecast, getCurrentWeather } from "@/services/weatherService";
 
 export default function TourBookingWrapper({
     tour,
@@ -49,6 +51,10 @@ export default function TourBookingWrapper({
     // Flash Sale state
     const [activeFlashSale, setActiveFlashSale] = useState(null);
     const [timeLeft, setTimeLeft] = useState({});
+
+    // Weather state
+    const [weatherForecast, setWeatherForecast] = useState(null);
+    const [weatherCurrent, setWeatherCurrent] = useState(null);
 
     // Refs for scrolling
     const datePickerRef = useRef(null);
@@ -89,6 +95,60 @@ export default function TourBookingWrapper({
             setLoadingProfile(false);
         }
     };
+
+    // ─── Fetch weather forecast ───
+    useEffect(() => {
+        const lat = tour.diaDiem?.latitude;
+        const lon = tour.diaDiem?.longitude;
+        if (!lat || !lon) return;
+
+        const fetchWeather = async () => {
+            try {
+                const [forecastData, currentData] = await Promise.all([
+                    getForecast(lat, lon),
+                    getCurrentWeather(lat, lon).catch(() => null)
+                ]);
+                setWeatherForecast(forecastData);
+                setWeatherCurrent(currentData);
+            } catch (err) {
+                console.error("Failed to fetch weather for sidebar:", err);
+            }
+        };
+        fetchWeather();
+    }, [tour.diaDiem]);
+
+    // Helper to find weather for selected date
+    const getWeatherHint = () => {
+        if (!selectedDate) return null;
+
+        const d = new Date(selectedDate.ngayKhoiHanh);
+        const day = String(d.getDate()).padStart(2, '0');
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const year = d.getFullYear();
+        const targetDate = `${day}/${month}/${year}`;
+
+        const today = new Date();
+        const isToday = d.getDate() === today.getDate() &&
+            d.getMonth() === today.getMonth() &&
+            d.getFullYear() === today.getFullYear();
+
+        if (isToday && weatherCurrent) {
+            return {
+                ...weatherCurrent,
+                // Map current weather fields to match forecast UI if needed
+                nhietDoNgay: weatherCurrent.nhietDo,
+                nhietDoDem: weatherCurrent.nhietDo, // Fallback for today
+            };
+        }
+
+        if (weatherForecast) {
+            return weatherForecast.danhSachDuBao.find(d => d.thoiGian === targetDate);
+        }
+
+        return null;
+    };
+
+    const weatherHint = getWeatherHint();
 
     // ─── Validate & scroll ───
     const validateAndScroll = () => {
@@ -176,7 +236,7 @@ export default function TourBookingWrapper({
             setAppliedVoucher({ maVoucher: result.maVoucher, phanTramGiam: result.phanTramGiam });
             setVoucherError("");
         } catch (error) {
-            const msg = error.response?.data?.message || error.response?.data || "Mã voucher không hợp lệ";
+            const msg = error.response?.data?.thongDiep || error.response?.data?.message || error.response?.data || "Mã voucher không hợp lệ";
             setVoucherError(typeof msg === "string" ? msg : JSON.stringify(msg));
             setAppliedVoucher(null);
         } finally {
@@ -815,7 +875,7 @@ export default function TourBookingWrapper({
                                     <span className="font-bold text-red-600 text-lg">{formattedCurrentPrice}</span>
                                 </>
                             ) : (
-                                <span className="font-bold text-blue-600 text-lg">{formattedPrice}</span>
+                                <span className="font-bold text-[#0a2d4d] text-lg">{formattedPrice}</span>
                             )}
                             /khách
                         </div>
@@ -829,11 +889,31 @@ export default function TourBookingWrapper({
                                     })}
                                 </p>
                                 <p className="text-xs text-emerald-600 mt-1">Còn {selectedDate.soChoConLai} chỗ trống</p>
+
+                                {weatherHint ? (
+                                    <div className="mt-3 pt-3 border-t border-green-200 flex items-center gap-3">
+                                        <div className="bg-white/60 rounded-lg p-2 text-green-600">
+                                            <WeatherIcon iconCode={weatherHint.icon} className="w-6 h-6" />
+                                        </div>
+                                        <div>
+                                            <p className="text-[10px] uppercase font-bold text-green-600 leading-tight">Dự báo thời tiết</p>
+                                            <p className="text-sm font-bold text-green-900 leading-tight">
+                                                {Math.round(weatherHint.nhietDoNgay)}°C • <span className="capitalize">{weatherHint.moTa}</span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="mt-2 pt-2 border-t border-green-200/50">
+                                        <p className="text-[10px] text-green-600 flex items-center gap-1 font-medium">
+                                            <CloudSun className="w-3 h-3 text-green-500" /> Chỉ hiển thị dự báo trong 5 ngày tới
+                                        </p>
+                                    </div>
+                                )}
                             </div>
                         ) : (
-                            <div className="mb-5 bg-amber-50 border border-amber-200 rounded-xl p-4 text-center">
-                                <p className="text-sm text-amber-700 font-medium">⚠️ Chọn ngày khởi hành</p>
-                                <p className="text-xs text-amber-500 mt-1">Cuộn xuống phần lịch khởi hành bên trái</p>
+                            <div className="mb-5 bg-red-50 border border-red-200 rounded-xl p-4 text-center shadow-sm">
+                                <p className="text-sm text-red-600 font-bold">⚠️ Vui lòng chọn ngày khởi hành</p>
+                                <p className="text-xs text-red-500/80 mt-1">Cuộn xuống phần lịch khởi hành bên trái</p>
                             </div>
                         )}
 
@@ -868,7 +948,7 @@ export default function TourBookingWrapper({
                                 size="lg"
                                 onClick={handleSidebarClick}
                                 disabled={isBooking}
-                                className="w-full text-base font-semibold h-12 rounded-xl transition-all duration-300 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg shadow-blue-600/30"
+                                className="w-full text-base font-bold h-12 rounded-xl transition-all duration-300 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-lg shadow-orange-500/30 border-0"
                             >
                                 {isBooking ? (
                                     <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Đang xử lý...</>
@@ -883,7 +963,7 @@ export default function TourBookingWrapper({
                         )}
 
                         <p className="text-xs text-gray-400 text-center mt-3">
-                            Miễn phí hủy trước 7 ngày khởi hành
+                            Hỗ trợ tư vấn 24/7 & Lên lịch trình riêng theo yêu cầu
                         </p>
                     </div>
                 </div>
@@ -893,3 +973,25 @@ export default function TourBookingWrapper({
         </div>
     );
 }
+
+// ─── Weather Icon Helper (OpenWeatherMap to Lucide) ───
+function WeatherIcon({ iconCode, className }) {
+    if (!iconCode) return <CloudSun className={className} />;
+
+    // OpenWeatherMap: https://openweathermap.org/weather-conditions
+    const code = iconCode.substring(0, 2);
+
+    switch (code) {
+        case "01": return <Sun className={className} />;
+        case "02": return <CloudSun className={className} />;
+        case "03":
+        case "04": return <Cloud className={className} />;
+        case "09":
+        case "10": return <CloudRain className={className} />;
+        case "11": return <CloudLightning className={className} />;
+        case "13": return <Snowflake className={className} />;
+        case "50": return <Wind className={className} />;
+        default: return <CloudSun className={className} />;
+    }
+}
+

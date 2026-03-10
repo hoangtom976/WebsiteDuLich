@@ -9,9 +9,16 @@ import java.util.List;
 @Repository
 public interface DonDatTourRepository extends JpaRepository<DonDatTour, Long> {
     List<DonDatTour> findByNguoiDungId(Long nguoiDungId);
+
     List<DonDatTour> findByNguoiDungIdOrderByNgayDatDesc(Long nguoiDungId);
+
     List<DonDatTour> findAllByOrderByNgayDatDesc();
+
     List<DonDatTour> findByLichKhoiHanh_Id(Long lichKhoiHanhId);
+
     boolean existsByLichKhoiHanh_Id(Long lichKhoiHanhId);
+
+    List<DonDatTour> findByNguoiDungIdAndVoucherIsNotNull(Long nguoiDungId);
+
     boolean existsByNguoiDungIdAndLichKhoiHanh_Tour_IdAndTrangThai(Long userId, Long tourId, String trangThai);
 }

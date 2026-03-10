@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { getAllCategories } from "@/services/categoryService";
+import { LayoutGrid } from "lucide-react";
+import SectionHeader from "@/components/shared/SectionHeader";
 
 export default function FeaturedCategories() {
     const [categories, setCategories] = useState([]);
@@ -58,16 +60,16 @@ export default function FeaturedCategories() {
     }, []);
 
     return (
-        <section className="bg-white py-12 sm:py-16">
+        <section className="bg-white py-8 sm:py-12">
             <div className="mx-auto max-w-7xl px-6 lg:px-8">
-                <div className="mb-10 text-center">
-                    <h2 className="text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">
-                        Khám phá theo danh mục
-                    </h2>
-                    <p className="mt-4 text-lg text-gray-600">
-                        Tìm kiếm trải nghiệm hoàn hảo phù hợp với sở thích của bạn
-                    </p>
-                </div>
+                <SectionHeader
+                    title="Khám phá theo danh mục"
+                    subtitle="Tìm kiếm trải nghiệm hoàn hảo phù hợp với sở thích của bạn để bắt đầu hành trình đáng nhớ."
+                    icon={LayoutGrid}
+                    badgeText="Phân loại"
+                    iconBg="bg-blue-50"
+                    iconColor="text-blue-500"
+                />
 
                 <div className="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-5">
                     {categories.map((cat) => (

@@ -11,4 +11,7 @@ public class DiaDiemDTO {
     private String tenDiaDiem;
 
     private String moTa;
+
+    private Double latitude;
+    private Double longitude;
 }

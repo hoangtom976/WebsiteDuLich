@@ -19,6 +19,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.dulich.backend.dto.BaiVietPhanHoiDTO;
 import com.dulich.backend.dto.BaiVietYeuCauDTO;
+import com.dulich.backend.dto.BinhLuanYeuCauDTO;
+import com.dulich.backend.dto.BinhLuanPhanHoiDTO;
 import com.dulich.backend.service.BaiVietService;
 
 import jakarta.validation.Valid;
@@ -37,8 +39,10 @@ public class BaiVietController {
 
     /**
      * Endpoint cho nhân viên tạo bài viết mới.
+     * 
      * @param yeuCau DTO chứa thông tin bài viết.
-     * @return ResponseEntity chứa DTO của bài viết đã tạo và mã trạng thái 201 (Created).
+     * @return ResponseEntity chứa DTO của bài viết đã tạo và mã trạng thái 201
+     *         (Created).
      */
     @PostMapping("/nhan-vien/bai-viet")
     public ResponseEntity<BaiVietPhanHoiDTO> taoBaiViet(@Valid @RequestBody BaiVietYeuCauDTO yeuCau) {
@@ -56,7 +60,8 @@ public class BaiVietController {
 
     /**
      * Endpoint cho nhân viên cập nhật bài viết.
-     * @param id ID của bài viết cần cập nhật.
+     * 
+     * @param id     ID của bài viết cần cập nhật.
      * @param yeuCau DTO chứa thông tin cập nhật.
      * @return ResponseEntity chứa DTO của bài viết đã cập nhật.
      */
@@ -70,6 +75,7 @@ public class BaiVietController {
 
     /**
      * Endpoint cho nhân viên xóa bài viết.
+     * 
      * @param id ID của bài viết cần xóa.
      * @return ResponseEntity chứa thông báo thành công.
      */
@@ -85,6 +91,7 @@ public class BaiVietController {
 
     /**
      * Endpoint công khai để lấy danh sách bài viết đã xuất bản có phân trang.
+     * 
      * @param page Trang hiện tại (mặc định là 0).
      * @param size Số lượng bài viết trên mỗi trang (mặc định là 10).
      * @return ResponseEntity chứa một trang (Page) các bài viết.
@@ -100,6 +107,7 @@ public class BaiVietController {
 
     /**
      * Endpoint công khai để xem chi tiết một bài viết theo slug.
+     * 
      * @param slug Slug của bài viết.
      * @return ResponseEntity chứa DTO chi tiết của bài viết.
      */
@@ -107,5 +115,32 @@ public class BaiVietController {
     public ResponseEntity<BaiVietPhanHoiDTO> layChiTietBaiViet(@PathVariable String slug) {
         BaiVietPhanHoiDTO dto = baiVietService.layChiTietBaiViet(slug);
         return ResponseEntity.ok(dto);
+    }
+
+    // =================================
+    // == API BÌNH LUẬN (COMMENTS) ==
+    // =================================
+
+    /**
+     * Lấy danh sách bình luận của một bài viết.
+     */
+    @GetMapping("/cong-khai/bai-viet/{id}/binh-luan")
+    public ResponseEntity<List<BinhLuanPhanHoiDTO>> layDanhSachBinhLuan(@PathVariable Long id) {
+        List<BinhLuanPhanHoiDTO> danhSach = baiVietService.layDanhSachBinhLuan(id);
+        return ResponseEntity.ok(danhSach);
+    }
+
+    /**
+     * Thêm bình luận mới vào bài viết (Yêu cầu đăng nhập).
+     */
+    @PostMapping("/bai-viet/{id}/binh-luan")
+    public ResponseEntity<BinhLuanPhanHoiDTO> themBinhLuan(
+            @PathVariable Long id,
+            @Valid @RequestBody BinhLuanYeuCauDTO yeuCau) {
+        // Giả lập ID người dùng lấy từ JWT token (trong thực tế lấy từ
+        // SecurityContextHolder)
+        Long nguoiDungId = 1L;
+        BinhLuanPhanHoiDTO dto = baiVietService.themBinhLuan(id, yeuCau, nguoiDungId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(dto);
     }
 }

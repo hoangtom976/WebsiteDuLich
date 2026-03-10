@@ -8,5 +8,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface YeuThichRepository extends JpaRepository<YeuThich, YeuThichId> {
     boolean existsByTour_Id(Long tourId);
+
     void deleteByTour_Id(Long tourId);
+
+    boolean existsByNguoiDungEmailAndTourId(String email, Long tourId);
 }

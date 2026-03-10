@@ -4,21 +4,31 @@ import com.dulich.backend.dto.LoiBadRequestException;
 import com.dulich.backend.dto.TaiNguyenKhongTonTaiException;
 import com.dulich.backend.dto.TaiNguyenTrungLapException;
 import com.dulich.backend.dto.VoucherDTO;
+import com.dulich.backend.dto.VoucherCuaToiDTO;
+import com.dulich.backend.entity.DonDatTour;
+import com.dulich.backend.entity.NguoiDung;
 import com.dulich.backend.entity.Voucher;
+import com.dulich.backend.repository.DonDatTourRepository;
+import com.dulich.backend.repository.NguoiDungRepository;
 import com.dulich.backend.repository.VoucherRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class VoucherService {
 
     private final VoucherRepository voucherRepository;
+    private final DonDatTourRepository donDatTourRepository;
+    private final NguoiDungRepository nguoiDungRepository;
 
     public List<Voucher> layTatCaVoucher() {
         return voucherRepository.findAll();
@@ -108,5 +118,37 @@ public class VoucherService {
         }
 
         return voucher;
+    }
+
+    public List<VoucherCuaToiDTO> layVouchersCuaToi() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        NguoiDung nguoiDung = nguoiDungRepository.findByEmail(email)
+                .orElseThrow(() -> new TaiNguyenKhongTonTaiException("Không tìm thấy người dùng: " + email));
+
+        List<Voucher> allVouchers = voucherRepository.findAll();
+        Set<Long> usedVoucherIds = donDatTourRepository.findByNguoiDungIdAndVoucherIsNotNull(nguoiDung.getId())
+                .stream()
+                .filter(don -> don.getVoucher() != null)
+                .map(don -> don.getVoucher().getId())
+                .collect(Collectors.toSet());
+
+        return allVouchers.stream()
+                .map(v -> {
+                    String status = "CON_HAN";
+                    if (usedVoucherIds.contains(v.getId())) {
+                        status = "DA_DUNG";
+                    } else if (LocalDate.now().isAfter(v.getNgayHetHan()) || !Boolean.TRUE.equals(v.getTrangThai())) {
+                        status = "HET_HAN";
+                    }
+
+                    return VoucherCuaToiDTO.builder()
+                            .id(v.getId())
+                            .maVoucher(v.getMaVoucher())
+                            .phanTramGiam(v.getPhanTramGiam())
+                            .ngayHetHan(v.getNgayHetHan())
+                            .trangThai(status)
+                            .build();
+                })
+                .collect(Collectors.toList());
     }
 }
