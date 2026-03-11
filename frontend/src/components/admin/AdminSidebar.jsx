@@ -18,7 +18,6 @@ import {
   Map,
   TicketPercent,
   MessageCircleMore,
-  CloudSun,
   ChevronDown,
   ChevronRight,
 } from "lucide-react";
@@ -27,49 +26,48 @@ import { clearAuthToken, getAuthState } from "@/lib/auth-client";
 const navSections = [
   {
     key: "overview",
-    label: "Tong quan",
+    label: "Tổng quan",
     icon: LayoutDashboard,
-    items: [{ href: "/dashboard", label: "Dashboard" }],
+    items: [{ href: "/dashboard", label: "Bảng điều khiển" }],
   },
   {
     key: "product",
-    label: "San pham",
+    label: "Sản phẩm",
     icon: Plane,
     items: [
-      { href: "/dashboard/categories", label: "Danh muc", icon: Grid3x3 },
-      { href: "/dashboard/locations", label: "Dia diem", icon: MapPinned },
+      { href: "/dashboard/categories", label: "Danh mục", icon: Grid3x3 },
+      { href: "/dashboard/locations", label: "Địa điểm", icon: MapPinned },
       { href: "/dashboard/tours", label: "Tours", icon: Plane },
-      { href: "/dashboard/schedules", label: "Lich khoi hanh", icon: CalendarDays },
-      { href: "/dashboard/itineraries", label: "Lich trinh tour", icon: Map },
+      { href: "/dashboard/schedules", label: "Lịch khởi hành", icon: CalendarDays },
+      { href: "/dashboard/itineraries", label: "Lịch trình tour", icon: Map },
     ],
   },
   {
     key: "operation",
-    label: "Van hanh",
+    label: "Vận hành",
     icon: Ticket,
     items: [
-      { href: "/dashboard/users", label: "Nguoi dung", icon: Users, adminOnly: true },
-      { href: "/dashboard/bookings", label: "Don hang", icon: Ticket },
-      { href: "/dashboard/reviews", label: "Danh gia", icon: MessageCircleMore },
+      { href: "/dashboard/users", label: "Người dùng", icon: Users, adminOnly: true },
+      { href: "/dashboard/bookings", label: "Đơn hàng", icon: Ticket },
+      { href: "/dashboard/reviews", label: "Đánh giá", icon: MessageCircleMore },
       { href: "/dashboard/vouchers", label: "Vouchers", icon: TicketPercent },
       { href: "/dashboard/flash-sales", label: "Flash Sale", icon: TicketPercent },
     ],
   },
   {
     key: "content",
-    label: "Noi dung",
+    label: "Nội dung",
     icon: BookOpen,
     items: [
       { href: "/dashboard/blog", label: "Blog", icon: BookOpen },
-      { href: "/dashboard/weather", label: "Thoi tiet", icon: CloudSun },
       { href: "/dashboard/chatbot", label: "Chatbot AI", icon: MessageCircleMore },
     ],
   },
   {
     key: "system",
-    label: "He thong",
+    label: "Hệ thống",
     icon: Settings,
-    items: [{ href: "/dashboard/settings", label: "Cai dat", icon: Settings, adminOnly: true }],
+    items: [{ href: "/dashboard/settings", label: "Cài đặt", icon: Settings, adminOnly: true }],
   },
 ];
 
@@ -181,7 +179,7 @@ export default function AdminSidebar() {
                       return (
                         <div
                           key={item.href}
-                          title="Chuc nang chi danh cho Admin"
+                          title="Chức năng chỉ dành cho Admin"
                           className="flex cursor-not-allowed items-center gap-2 rounded-md px-3 py-2 text-sm text-gray-400 opacity-45"
                         >
                           {ItemIcon ? <ItemIcon className="h-4 w-4" /> : null}
@@ -216,7 +214,7 @@ export default function AdminSidebar() {
           className="flex w-full items-center gap-3 rounded-lg px-4 py-2.5 text-gray-300 transition-colors hover:bg-red-500/15 hover:text-white"
         >
           <LogOut className="h-5 w-5" />
-          <span className="font-medium">Dang xuat</span>
+          <span className="font-medium">Đăng xuất</span>
         </button>
       </nav>
 

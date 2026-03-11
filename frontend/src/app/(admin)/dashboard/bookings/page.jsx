@@ -190,9 +190,6 @@ export default function AdminBookingsPage() {
             {loading ? "Đang tải..." : "Làm mới dữ liệu"}
           </Button>
         </div>
-        <p className="text-xs text-slate-500">
-          Luồng xử lý chuẩn: Chờ thanh toán -&gt; Đã thanh toán -&gt; Đã xác nhận (hoặc hủy đơn trước khi xác nhận).
-        </p>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid gap-3 md:grid-cols-[1fr,220px,auto,auto]">

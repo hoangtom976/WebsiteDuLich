@@ -18,10 +18,9 @@ import { Label } from "@/components/ui/label";
 
 export default function ForgotPasswordPage() {
   const router = useRouter();
-  const [step, setStep] = useState(1); // 1: Nhập email, 2: Nhập mật khẩu mới
+  const [step, setStep] = useState(1); // 1: Nhập email, 2: Nhập mã OTP & mật khẩu mới
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const [resetToken, setResetToken] = useState("");
 
   const {
     register,
@@ -31,19 +30,19 @@ export default function ForgotPasswordPage() {
   } = useForm();
 
   const newPassword = watch("matKhauMoi", "");
+  const [userEmail, setUserEmail] = useState("");
 
   const handleRequestToken = async (data) => {
     setError("");
     setSuccess("");
     try {
-      const message = await forgotPassword(data.email);
-      // Trích xuất token từ message trả về để test
-      const token = message.split(": ")[1];
-      setResetToken(token);
-      setSuccess("Yêu cầu thành công! Vui lòng kiểm tra email để lấy token.");
-      setStep(2); // Chuyển sang bước 2
+      const email = (data.email || "").trim().toLowerCase();
+      const message = await forgotPassword(email);
+      setUserEmail(email);
+      setSuccess("Yêu cầu thành công! Vui lòng kiểm tra email để lấy mã OTP.");
+      setStep(2);
     } catch (err) {
-      setError(err.message || "Email không tồn tại trong hệ thống.");
+      setError(err.thongDiep || err.message || "Email không tồn tại trong hệ thống.");
     }
   };
 
@@ -51,7 +50,7 @@ export default function ForgotPasswordPage() {
     setError("");
     setSuccess("");
     try {
-      const message = await resetPassword(data.token, data.matKhauMoi);
+      const message = await resetPassword(data.verification_code, data.matKhauMoi);
       setSuccess(
         message + " Bạn sẽ được chuyển đến trang đăng nhập sau 3 giây.",
       );
@@ -59,7 +58,7 @@ export default function ForgotPasswordPage() {
         router.push("/dang-nhap");
       }, 3000);
     } catch (err) {
-      setError(err.message || "Token không hợp lệ hoặc đã hết hạn.");
+      setError(err.thongDiep || err.message || "Mã OTP không hợp lệ hoặc đã hết hạn.");
     }
   };
 
@@ -97,6 +96,11 @@ export default function ForgotPasswordPage() {
                     {error}
                   </p>
                 )}
+                {success && (
+                  <p className="text-sm font-medium text-green-600">
+                    {success}
+                  </p>
+                )}
                 <Button
                   type="submit"
                   className="w-full"
@@ -104,15 +108,24 @@ export default function ForgotPasswordPage() {
                 >
                   {isSubmitting ? "Đang gửi..." : "Gửi yêu cầu"}
                 </Button>
+                <div className="mt-4 text-center text-sm">
+                  <button
+                    type="button"
+                    onClick={() => router.push("/dang-nhap")}
+                    className="underline text-slate-600"
+                  >
+                    Quay lại đăng nhập
+                  </button>
+                </div>
               </form>
             </CardContent>
           </>
         ) : (
           <>
             <CardHeader>
-              <CardTitle className="text-2xl">Đặt lại mật khẩu</CardTitle>
-              <CardDescription>
-                Nhập token bạn nhận được và mật khẩu mới.
+              <CardTitle className="text-2xl text-center">Đặt lại mật khẩu</CardTitle>
+              <CardDescription className="text-center">
+                Nhập mã OTP được gửi đến <span className="font-medium text-black block mt-1">{userEmail}</span>
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -121,15 +134,39 @@ export default function ForgotPasswordPage() {
                 className="grid gap-4"
               >
                 <div className="grid gap-2">
-                  <Label htmlFor="token">Token</Label>
-                  <Input
-                    id="token"
-                    defaultValue={resetToken} // Tự điền token giả
-                    {...register("token", { required: "Token là bắt buộc" })}
+                  {/* Dummy hidden field to intercept browser autofill */}
+                  <input
+                    type="text"
+                    name="dummy_email"
+                    style={{ display: "none" }}
+                    tabIndex="-1"
+                    autoComplete="username"
                   />
-                  {errors.token && (
-                    <p className="text-sm font-medium text-destructive">
-                      {errors.token.message}
+                  <input
+                    type="password"
+                    name="dummy_password"
+                    style={{ display: "none" }}
+                    tabIndex="-1"
+                    autoComplete="new-password"
+                  />
+                  <Label htmlFor="otp-input" className="text-center">Mã OTP 6 số</Label>
+                  <Input
+                    id="otp-input"
+                    {...register("verification_code", {
+                      required: "Mã OTP là bắt buộc",
+                      minLength: { value: 6, message: "Mã OTP phải có 6 chữ số" },
+                      maxLength: { value: 6, message: "Mã OTP phải có 6 chữ số" }
+                    })}
+                    placeholder="------"
+                    className="text-center text-2xl tracking-[0.5em] font-mono h-14"
+                    maxLength={6}
+                    autoComplete="off"
+                    inputMode="numeric"
+                    autoFocus
+                  />
+                  {errors.verification_code && (
+                    <p className="text-sm font-medium text-destructive text-center">
+                      {errors.verification_code.message}
                     </p>
                   )}
                 </div>
@@ -138,6 +175,7 @@ export default function ForgotPasswordPage() {
                   <Input
                     id="matKhauMoi"
                     type="password"
+                    autoComplete="new-password"
                     {...register("matKhauMoi", {
                       required: "Mật khẩu mới là bắt buộc",
                       minLength: {
@@ -159,6 +197,7 @@ export default function ForgotPasswordPage() {
                   <Input
                     id="confirmNewPassword"
                     type="password"
+                    autoComplete="new-password"
                     {...register("confirmNewPassword", {
                       validate: (value) =>
                         value === newPassword || "Mật khẩu không khớp",
@@ -171,22 +210,31 @@ export default function ForgotPasswordPage() {
                   )}
                 </div>
                 {error && (
-                  <p className="text-sm font-medium text-destructive">
+                  <p className="text-sm font-medium text-destructive text-center">
                     {error}
                   </p>
                 )}
                 {success && (
-                  <p className="text-sm font-medium text-green-600">
+                  <p className="text-sm font-medium text-green-600 text-center">
                     {success}
                   </p>
                 )}
                 <Button
                   type="submit"
-                  className="w-full"
+                  className="w-full h-11"
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? "Đang xử lý..." : "Đặt lại mật khẩu"}
                 </Button>
+                <div className="mt-4 text-center text-sm">
+                  <button
+                    type="button"
+                    onClick={() => { setStep(1); setError(""); setSuccess(""); }}
+                    className="underline text-blue-600 font-medium"
+                  >
+                    Không nhận được email? Gửi lại
+                  </button>
+                </div>
               </form>
             </CardContent>
           </>

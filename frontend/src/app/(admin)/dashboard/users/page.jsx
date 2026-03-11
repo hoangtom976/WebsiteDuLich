@@ -8,7 +8,6 @@ import {
   assignUserRole,
   changeUserStatus,
   createAdminUser,
-  deleteAdminUser,
   getAdminUsers,
   updateAdminUser,
 } from "@/services/adminUserService";
@@ -146,23 +145,7 @@ export default function AdminUsersPage() {
     }
   };
 
-  const handleDelete = async (u) => {
-    const ok = window.confirm(`Xóa tài khoản ${u.email}? Hành động này không thể hoàn tác.`);
-    if (!ok) return;
 
-    setMessage("");
-    setError("");
-    setActionKey(`delete-${u.id}`);
-    try {
-      const msg = await deleteAdminUser(u.id);
-      setUsers((prev) => prev.filter((item) => item.id !== u.id));
-      setMessage(typeof msg === "string" ? msg : "Xóa tài khoản thành công.");
-    } catch (err) {
-      setError(extractApiError(err, "Xóa tài khoản thất bại."));
-    } finally {
-      setActionKey("");
-    }
-  };
 
   const handleRoleChange = async (user, tenVaiTro) => {
     setMessage("");
@@ -379,11 +362,10 @@ export default function AdminUsersPage() {
                           </label>
                         ) : (
                           <span
-                            className={`rounded-full px-2 py-1 text-xs font-semibold ${
-                              u.trangThai
+                            className={`rounded-full px-2 py-1 text-xs font-semibold ${u.trangThai
                                 ? "bg-emerald-100 text-emerald-700"
                                 : "bg-red-100 text-red-700"
-                            }`}
+                              }`}
                           >
                             {u.trangThai ? "Hoạt động" : "Bị khóa"}
                           </span>
@@ -425,14 +407,7 @@ export default function AdminUsersPage() {
                             >
                               {u.trangThai ? "Khóa" : "Mở khóa"}
                             </Button>
-                            <Button
-                              size="sm"
-                              variant="destructive"
-                              onClick={() => handleDelete(u)}
-                              disabled={actionKey === `delete-${u.id}`}
-                            >
-                              {actionKey === `delete-${u.id}` ? "Đang xóa..." : "Xóa"}
-                            </Button>
+
                           </div>
                         )}
                       </td>

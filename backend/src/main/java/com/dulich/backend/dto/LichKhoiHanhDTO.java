@@ -25,4 +25,5 @@ public class LichKhoiHanhDTO {
 
     // Trường hiển thị
     private String tenTour;
+    private Integer soNgay;
 }

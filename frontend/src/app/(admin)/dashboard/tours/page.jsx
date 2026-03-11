@@ -333,9 +333,6 @@ export default function AdminToursPage() {
           className="max-w-md"
         />
 
-        <p className="text-xs text-slate-500">
-          Luồng xóa chuẩn: xóa đơn đặt tour -&gt; xóa lịch khởi hành -&gt; xóa lịch trình/hình ảnh/đánh giá -&gt; xóa tour.
-        </p>
         {message && <p className="text-sm text-emerald-600">{message}</p>}
         {error && <p className="text-sm text-red-600">{error}</p>}
 

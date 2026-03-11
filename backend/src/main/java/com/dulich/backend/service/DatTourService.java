@@ -50,6 +50,7 @@ public class DatTourService {
     private final GuiEmailService guiEmailService;
     private final VoucherService voucherService;
     private final ThongBaoService thongBaoService;
+    private final com.dulich.backend.repository.FlashSaleRepository flashSaleRepository;
 
     @Transactional
     public DonDatTour datTour(YeuCauDatTourDTO req) {
@@ -71,6 +72,42 @@ public class DatTourService {
         }
 
         BigDecimal giaTour = lich.getTour().getGia();
+        com.dulich.backend.entity.FlashSale flashSale = null;
+
+        if (req.getMaFlashSale() != null) {
+            flashSale = flashSaleRepository.findById(req.getMaFlashSale())
+                    .orElseThrow(() -> new TaiNguyenKhongTonTaiException("Không tìm thấy Flash Sale"));
+
+            if (!flashSale.getTrangThai() || java.time.LocalDateTime.now().isAfter(flashSale.getTgKetThuc())
+                    || java.time.LocalDateTime.now().isBefore(flashSale.getTgBatDau())) {
+                throw new LoiBadRequestException("Flash Sale không còn hiệu lực.");
+            }
+            if (flashSale.getSoLuong() <= 0) {
+                throw new LoiBadRequestException("Flash Sale đã hết lượt sử dụng.");
+            }
+
+            // Check if user already used this exact flash sale
+            java.util.List<DonDatTour> usedOrders = donDatTourRepository
+                    .findByNguoiDungIdAndFlashSaleIsNotNull(nguoiDung.getId());
+            System.out.println("Checking flash sale usage for user " + nguoiDung.getEmail() + ": req.maFlashSale="
+                    + req.getMaFlashSale() + ", previously used flash sales count=" + usedOrders.size());
+            for (DonDatTour od : usedOrders) {
+                System.out.println(" - Order ID: " + od.getId() + " has flash sale ID: "
+                        + (od.getFlashSale() != null ? od.getFlashSale().getId() : "null"));
+            }
+
+            boolean alreadyUsedFlashSale = usedOrders.stream()
+                    .anyMatch(don -> don.getFlashSale() != null
+                            && don.getFlashSale().getId().equals(req.getMaFlashSale())
+                            && !don.getTrangThai().equals("DA_HUY"));
+            if (alreadyUsedFlashSale) {
+                throw new LoiBadRequestException("Mỗi tài khoản chỉ được áp dụng Flash Sale này 1 lần.");
+            }
+
+            BigDecimal phanTram = BigDecimal.valueOf(100 - flashSale.getPhanTramGiam());
+            giaTour = lich.getTour().getGia().multiply(phanTram).divide(BigDecimal.valueOf(100));
+        }
+
         BigDecimal tongTien = giaTour.multiply(BigDecimal.valueOf(soLuongKhach));
 
         if (req.getMaVoucher() != null && !req.getMaVoucher().isEmpty()) {
@@ -85,6 +122,13 @@ public class DatTourService {
         donDatTour.setLichKhoiHanh(lich);
         donDatTour.setTongTien(tongTien);
         donDatTour.setTrangThai(CHO_THANH_TOAN);
+
+        if (flashSale != null) {
+            donDatTour.setFlashSale(flashSale);
+            // Decrease flash sale stock
+            flashSale.setSoLuong(flashSale.getSoLuong() - 1);
+            flashSaleRepository.save(flashSale);
+        }
 
         if (req.getMaVoucher() != null && !req.getMaVoucher().isEmpty()) {
             Voucher voucher = voucherService.kiemTraVoucher(req.getMaVoucher());
@@ -192,6 +236,7 @@ public class DatTourService {
                         .soLuongKhach(donHang.getChiTiets().size())
                         .tongTien(donHang.getTongTien())
                         .trangThai(donHang.getTrangThai())
+                        .soNgay(donHang.getLichKhoiHanh().getTour().getSoNgay())
                         .build())
                 .collect(Collectors.toList());
     }

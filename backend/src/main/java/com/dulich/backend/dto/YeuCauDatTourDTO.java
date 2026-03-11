@@ -15,4 +15,6 @@ public class YeuCauDatTourDTO {
     private List<KhachDiCungDTO> danhSachKhach;
 
     private String maVoucher;
+
+    private Long maFlashSale;
 }

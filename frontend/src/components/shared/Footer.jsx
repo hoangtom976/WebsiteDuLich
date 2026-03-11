@@ -1,8 +1,27 @@
+"use client";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { Mountain, MapPin, Phone, Mail, Send, Facebook, Instagram, Twitter, Youtube } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { getAllCategories } from "@/services/categoryService";
 
 export default function PremiumFooter() {
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const data = await getAllCategories();
+        if (data && data.length > 0) {
+          setCategories(data.slice(0, 5)); // Lấy tối đa 5 danh mục
+        }
+      } catch (error) {
+        console.error("Lỗi khi tải danh mục ở footer:", error);
+      }
+    };
+    fetchCategories();
+  }, []);
+
   return (
     <footer className="bg-[#0a2d4d] pb-8 pt-16 text-white/80">
       <div className="mx-auto w-full max-w-[1400px] px-4 lg:px-6">
@@ -42,7 +61,14 @@ export default function PremiumFooter() {
           <div>
             <h4 className="mb-6 text-lg font-black text-white uppercase tracking-wider">Khám phá</h4>
             <ul className="space-y-4">
-              {[
+              {categories.length > 0 ? categories.map((cat) => (
+                <li key={cat.id}>
+                  <Link href={`/tours?category=${cat.id}`} className="text-sm hover:text-amber-500 transition-colors flex items-center gap-2 group">
+                    <span className="h-1.5 w-1.5 rounded-full bg-amber-500/50 group-hover:bg-amber-500 transition-all" />
+                    {cat.tenDanhMuc}
+                  </Link>
+                </li>
+              )) : [
                 { name: "Tour nổi bật", href: "/tours?q=nổi bật" },
                 { name: "Tour mới nhất", href: "/tours?q=mới" },
                 { name: "Du lịch biển đảo", href: "/tours?category=1" },
@@ -64,11 +90,11 @@ export default function PremiumFooter() {
             <h4 className="mb-6 text-lg font-black text-white uppercase tracking-wider">Hỗ trợ khách hàng</h4>
             <ul className="space-y-4">
               {[
-                { name: "Cách đặt tour", href: "/huong-dan" },
-                { name: "Chính sách thanh toán", href: "/chinh-sach-thanh-toan" },
-                { name: "Chính sách hủy tour", href: "/chinh-sach-huy-tour" },
-                { name: "Điều khoản sử dụng", href: "/dieu-khoan" },
-                { name: "Chính sách bảo mật", href: "/bao-mat" }
+                { name: "Cách đặt tour", href: "/chinh-sach/huong-dan" },
+                { name: "Chính sách thanh toán", href: "/chinh-sach/thanh-toan" },
+                { name: "Chính sách hủy tour", href: "/chinh-sach/huy-tour" },
+                { name: "Điều khoản sử dụng", href: "/chinh-sach/dieu-khoan" },
+                { name: "Chính sách bảo mật", href: "/chinh-sach/bao-mat" }
               ].map((item) => (
                 <li key={item.name}>
                   <Link href={item.href} className="text-sm hover:text-amber-500 transition-colors flex items-center gap-2 group">
@@ -98,8 +124,13 @@ export default function PremiumFooter() {
               </button>
             </div>
             <div className="flex items-center gap-4 pt-4 border-t border-white/10">
-              {[Facebook, Instagram, Twitter, Youtube].map((Icon, i) => (
-                <Link key={i} href="#" className="h-10 w-10 flex items-center justify-center rounded-full bg-white/5 hover:bg-amber-500 hover:text-slate-900 transition-all duration-300">
+              {Object.entries({
+                facebook: { Icon: Facebook, href: "https://facebook.com/viettour" },
+                instagram: { Icon: Instagram, href: "https://instagram.com/viettour" },
+                twitter: { Icon: Twitter, href: "https://twitter.com/viettour" },
+                youtube: { Icon: Youtube, href: "https://youtube.com/viettour" }
+              }).map(([key, { Icon, href }]) => (
+                <Link key={key} href={href} target="_blank" rel="noopener noreferrer" className="h-10 w-10 flex items-center justify-center rounded-full bg-white/5 hover:bg-amber-500 hover:text-slate-900 transition-all duration-300">
                   <Icon className="h-5 w-5" />
                 </Link>
               ))}
@@ -110,8 +141,8 @@ export default function PremiumFooter() {
         <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-slate-400">
           <p>&copy; {new Date().getFullYear()} <span className="text-white font-bold">VietTour</span>. All Rights Reserved.</p>
           <div className="flex items-center gap-6">
-            <Link href="#" className="hover:text-white transition-colors">Sitemap</Link>
-            <Link href="#" className="hover:text-white transition-colors">FAQs</Link>
+            <Link href="/sitemap" className="hover:text-white transition-colors">Sitemap</Link>
+            <Link href="/faq" className="hover:text-white transition-colors">FAQs</Link>
           </div>
         </div>
       </div>

@@ -1,20 +1,17 @@
 package com.dulich.backend.controller;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.dulich.backend.dto.YeuCauChatDTO;
 import com.dulich.backend.service.DichVuChatbot;
+import com.dulich.backend.service.DongBoDuLieuService;
+import com.dulich.backend.service.TaiLieuRagService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -24,6 +21,8 @@ import lombok.RequiredArgsConstructor;
 public class ChatbotController {
 
     private final DichVuChatbot dichVuChatbot;
+    private final DongBoDuLieuService dongBoDuLieuService;
+    private final TaiLieuRagService taiLieuRagService;
 
     @PostMapping("/hoi")
     public ResponseEntity<?> hoiChatbot(@RequestBody YeuCauChatDTO req) {
@@ -45,5 +44,46 @@ public class ChatbotController {
     public ResponseEntity<Void> xoaLichSuChat(@PathVariable Long phienChatId) {
         dichVuChatbot.xoaPhienChat(phienChatId);
         return ResponseEntity.noContent().build();
+    }
+
+    // ============ ADMIN - RAG ENDPOINTS ============
+
+    /**
+     * Đồng bộ dữ liệu tour từ MySQL → Qdrant (chỉ ADMIN)
+     */
+    @PostMapping("/dong-bo")
+    public ResponseEntity<?> dongBoDuLieu() {
+        int soLuong = dongBoDuLieuService.dongBo();
+        Map<String, Object> result = new HashMap<>();
+        result.put("message", "Đồng bộ thành công");
+        result.put("soLuongTour", soLuong);
+        result.put("tongSoVector", dongBoDuLieuService.laySoLuongVector());
+        return ResponseEntity.ok(result);
+    }
+
+    /**
+     * Upload file .txt chính sách/thông tin → Qdrant (chỉ ADMIN)
+     */
+    @PostMapping("/upload-tai-lieu")
+    public ResponseEntity<?> uploadTaiLieu(@RequestParam("file") MultipartFile file) {
+        int soChunks = taiLieuRagService.uploadVaEmbedFile(file);
+        Map<String, Object> result = new HashMap<>();
+        result.put("message", "Upload thành công");
+        result.put("tenFile", file.getOriginalFilename());
+        result.put("soChunks", soChunks);
+        result.put("tongSoVector", dongBoDuLieuService.laySoLuongVector());
+        return ResponseEntity.ok(result);
+    }
+
+    /**
+     * Xóa tài liệu đã upload khỏi Qdrant (chỉ ADMIN)
+     */
+    @DeleteMapping("/tai-lieu/{tenFile}")
+    public ResponseEntity<?> xoaTaiLieu(@PathVariable String tenFile) {
+        taiLieuRagService.xoaTaiLieu(tenFile);
+        Map<String, Object> result = new HashMap<>();
+        result.put("message", "Đã xóa tài liệu: " + tenFile);
+        result.put("tongSoVector", dongBoDuLieuService.laySoLuongVector());
+        return ResponseEntity.ok(result);
     }
 }

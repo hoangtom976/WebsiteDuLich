@@ -1,6 +1,7 @@
 package com.dulich.backend.controller;
 
-import com.dulich.backend.dto.DangKyDTO;
+import com.dulich.backend.dto.GuiOtpDangKyDTO;
+import com.dulich.backend.dto.XacNhanOtpDangKyDTO;
 import com.dulich.backend.dto.DangNhapDTO;
 import com.dulich.backend.dto.DatLaiMatKhauDTO;
 import com.dulich.backend.dto.PhanHoiTokenDTO;
@@ -25,9 +26,14 @@ public class XacThucController {
     private final XacThucService xacThucService;
     private final NguoiDungRepository nguoiDungRepository;
 
-    @PostMapping("/dang-ky")
-    public ResponseEntity<String> dangKy(@Valid @RequestBody DangKyDTO request) {
-        return ResponseEntity.ok(xacThucService.dangKy(request));
+    @PostMapping("/gui-otp-dang-ky")
+    public ResponseEntity<String> guiOtpDangKy(@Valid @RequestBody GuiOtpDangKyDTO request) {
+        return ResponseEntity.ok(xacThucService.guiOtpDangKy(request.getEmail()));
+    }
+
+    @PostMapping("/xac-nhan-dang-ky")
+    public ResponseEntity<String> xacNhanDangKy(@Valid @RequestBody XacNhanOtpDangKyDTO request) {
+        return ResponseEntity.ok(xacThucService.xacNhanDangKy(request.getThongTinDangKy(), request.getOtp()));
     }
 
     @PostMapping("/dang-nhap")
@@ -36,7 +42,7 @@ public class XacThucController {
             String token = xacThucService.dangNhap(request);
             PhanHoiTokenDTO phanHoi = new PhanHoiTokenDTO();
             phanHoi.setAccessToken(token);
-            String hoTen = nguoiDungRepository.findByEmail(request.getEmail())
+            String hoTen = nguoiDungRepository.findByEmailIgnoreCase(request.getEmail())
                     .map(nguoiDung -> nguoiDung.getHoTen())
                     .orElse("");
             phanHoi.setHoTen(hoTen);
@@ -51,7 +57,7 @@ public class XacThucController {
     @PostMapping("/quen-mat-khau")
     public ResponseEntity<String> quenMatKhau(@Valid @RequestBody QuenMatKhauDTO request) {
         String result = xacThucService.quenMatKhau(request.getEmail());
-        return ResponseEntity.ok("Yêu cầu reset mật khẩu thành công. Token (để test): " + result);
+        return ResponseEntity.ok(result);
     }
 
     @PostMapping("/dat-lai-mat-khau")

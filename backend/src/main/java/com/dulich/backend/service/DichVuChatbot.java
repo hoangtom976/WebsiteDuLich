@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import io.qdrant.client.grpc.Points.ScoredPoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -32,30 +33,35 @@ public class DichVuChatbot {
         private final PhienChatRepository phienChatRepository;
         private final TinNhanChatRepository tinNhanChatRepository;
         private final TourRepository tourRepository;
+        private final HuggingFaceEmbeddingService embeddingService;
+        private final QdrantService qdrantService;
 
-        // Constructor injection thủ công để sửa lỗi Lombok không nhận diện
         public DichVuChatbot(GroqApiService groqApiService,
                         PhienChatRepository phienChatRepository,
                         TinNhanChatRepository tinNhanChatRepository,
-                        TourRepository tourRepository) {
+                        TourRepository tourRepository,
+                        HuggingFaceEmbeddingService embeddingService,
+                        QdrantService qdrantService) {
                 this.groqApiService = groqApiService;
                 this.phienChatRepository = phienChatRepository;
                 this.tinNhanChatRepository = tinNhanChatRepository;
                 this.tourRepository = tourRepository;
+                this.embeddingService = embeddingService;
+                this.qdrantService = qdrantService;
         }
 
         private static final String SYSTEM_INSTRUCTION = """
                         Bạn là trợ lý ảo AI của Việt Tour.
-                        Nhiệm vụ: Tư vấn tour du lịch dựa trên dữ liệu được cung cấp.
+                        Nhiệm vụ: Tư vấn tour du lịch và trả lời câu hỏi dựa trên dữ liệu được cung cấp.
 
                         QUY TẮC:
                         1. Luôn vui vẻ, gọi khách là 'anh/chị', xưng 'em'.
                         2. Trả lời bằng Tiếng Việt.
                         3. Dữ liệu: Chỉ dùng thông tin trong phần cung cấp để trả lời.
-                        4. Nếu không tìm thấy: Xin lỗi và gợi ý liên hệ hotline 1900-1234.
+                        4. Nếu dữ liệu chứa thông tin chính sách, hãy trả lời chính xác theo nội dung.
+                        5. Nếu không tìm thấy: Xin lỗi và gợi ý liên hệ hotline 1900-1234.
                         """;
 
-        // Xóa @Transactional để tránh giữ kết nối DB khi đang gọi API AI (thường mất nhiều thời gian)
         public Map<String, Object> xuLyChat(YeuCauChatDTO req) {
                 // 1. Lấy/Tạo phiên chat
                 PhienChat phienChat = layHoacTaoPhienChat(req);
@@ -64,7 +70,7 @@ public class DichVuChatbot {
                 String noiDungUser = req.getCauHoi() != null ? req.getCauHoi() : "...";
                 luuTinNhan(phienChat, "USER", noiDungUser);
 
-                // 3. Tìm thông tin liên quan (RAG)
+                // 3. Tìm thông tin liên quan (RAG với vector search, fallback keyword)
                 String contextDuLieu = timKiemDuLieuLienQuan(noiDungUser);
 
                 // 4. Gọi Groq AI
@@ -82,19 +88,18 @@ public class DichVuChatbot {
 
         @Transactional(readOnly = true)
         public List<Map<String, Object>> layLichSuChat(Long phienChatId) {
-                // Sử dụng findAll và lọc trong Java để đảm bảo hoạt động ổn định
                 List<TinNhanChat> all = tinNhanChatRepository.findAll();
                 return all.stream()
-                        .filter(t -> t.getPhienChat().getId().equals(phienChatId))
-                        .sorted(Comparator.comparing(TinNhanChat::getThoiGianGui))
-                        .map(t -> {
-                                Map<String, Object> map = new HashMap<>();
-                                map.put("nguoiGui", t.getNguoiGui());
-                                map.put("noiDung", t.getNoiDung());
-                                map.put("thoiGian", t.getThoiGianGui());
-                                return map;
-                        })
-                        .collect(Collectors.toList());
+                                .filter(t -> t.getPhienChat().getId().equals(phienChatId))
+                                .sorted(Comparator.comparing(TinNhanChat::getThoiGianGui))
+                                .map(t -> {
+                                        Map<String, Object> map = new HashMap<>();
+                                        map.put("nguoiGui", t.getNguoiGui());
+                                        map.put("noiDung", t.getNoiDung());
+                                        map.put("thoiGian", t.getThoiGianGui());
+                                        return map;
+                                })
+                                .collect(Collectors.toList());
         }
 
         @Transactional
@@ -103,7 +108,6 @@ public class DichVuChatbot {
                         throw new TaiNguyenKhongTonTaiException("Không tìm thấy phiên chat với ID: " + phienChatId);
                 }
 
-                // Tìm và xóa các tin nhắn thuộc phiên chat này trước
                 List<TinNhanChat> tinNhans = tinNhanChatRepository.findAll().stream()
                                 .filter(t -> t.getPhienChat().getId().equals(phienChatId))
                                 .collect(Collectors.toList());
@@ -113,7 +117,6 @@ public class DichVuChatbot {
 
         @Transactional(readOnly = true)
         public List<PhienChatQuanTriDTO> layTatCaPhienChat() {
-                // Lấy tất cả và sắp xếp giảm dần theo thời gian bắt đầu
                 return phienChatRepository.findAll().stream()
                                 .sorted(Comparator.comparing(PhienChat::getThoiGianBatDau).reversed())
                                 .map(p -> PhienChatQuanTriDTO.builder()
@@ -135,7 +138,133 @@ public class DichVuChatbot {
                                 "Liên hệ hỗ trợ khẩn cấp ở đâu?");
         }
 
+        // =============== PRIVATE METHODS ===============
 
+        /**
+         * Tìm kiếm dữ liệu liên quan bằng RAG (vector search).
+         * Fallback sang keyword matching nếu Qdrant không khả dụng.
+         */
+        private String timKiemDuLieuLienQuan(String cauHoi) {
+                // Thử RAG vector search trước
+                try {
+                        if (qdrantService.isAvailable()) {
+                                String ragResult = timKiemBangVector(cauHoi);
+                                if (ragResult != null && !ragResult.isBlank()) {
+                                        logger.info("RAG vector search thành công cho câu hỏi: {}", cauHoi);
+                                        return ragResult;
+                                }
+                        }
+                } catch (Exception e) {
+                        logger.warn("RAG vector search thất bại, dùng fallback: {}", e.getMessage());
+                }
+
+                // Fallback: keyword matching (logic cũ)
+                logger.info("Dùng fallback keyword search cho câu hỏi: {}", cauHoi);
+                return timKiemBangKeyword(cauHoi);
+        }
+
+        /**
+         * Tìm kiếm bằng vector similarity (RAG)
+         */
+        private String timKiemBangVector(String cauHoi) {
+                // 1. Embed câu hỏi
+                List<Float> queryVector = embeddingService.embed(cauHoi);
+
+                // 2. Tìm top 5 kết quả tương tự trong Qdrant
+                List<ScoredPoint> results = qdrantService.timKiem(queryVector, 5);
+
+                if (results.isEmpty()) {
+                        return null; // Fallback sang keyword search
+                }
+
+                // 3. Tổng hợp context từ kết quả
+                StringBuilder context = new StringBuilder();
+
+                // Tách kết quả tour và tài liệu
+                List<ScoredPoint> tourResults = new ArrayList<>();
+                List<ScoredPoint> docResults = new ArrayList<>();
+
+                for (ScoredPoint point : results) {
+                        String loai = getPayloadString(point, "loai");
+                        if ("tai_lieu".equals(loai)) {
+                                docResults.add(point);
+                        } else {
+                                tourResults.add(point);
+                        }
+                }
+
+                // Format kết quả tour
+                if (!tourResults.isEmpty()) {
+                        context.append("=== THÔNG TIN TOUR ===\n");
+                        for (ScoredPoint point : tourResults) {
+                                context.append(String.format(
+                                                "- Tour: %s\n  Giá: %s VNĐ\n  Nơi đến: %s\n  Số ngày: %s\n  Mô tả: %s\n  (Độ liên quan: %.2f)\n\n",
+                                                getPayloadString(point, "tenTour"),
+                                                getPayloadString(point, "gia"),
+                                                getPayloadString(point, "diaDiem"),
+                                                getPayloadString(point, "soNgay"),
+                                                catNgan(getPayloadString(point, "moTa")),
+                                                point.getScore()));
+                        }
+                }
+
+                // Format kết quả tài liệu chính sách
+                if (!docResults.isEmpty()) {
+                        context.append("=== THÔNG TIN CHÍNH SÁCH / TÀI LIỆU ===\n");
+                        for (ScoredPoint point : docResults) {
+                                String tenFile = getPayloadString(point, "tenFile");
+                                String noiDung = getPayloadString(point, "noiDung");
+                                context.append(String.format(
+                                                "[Nguồn: %s]\n%s\n(Độ liên quan: %.2f)\n\n",
+                                                tenFile, noiDung, point.getScore()));
+                        }
+                }
+
+                return context.toString();
+        }
+
+        /**
+         * Tìm kiếm bằng keyword (logic cũ, dùng làm fallback)
+         */
+        private String timKiemBangKeyword(String cauHoi) {
+                String tuKhoa = cauHoi.toLowerCase().trim();
+                List<Tour> all = tourRepository.findAll();
+                List<Tour> matches = new ArrayList<>();
+
+                for (Tour t : all) {
+                        if (!Boolean.TRUE.equals(t.getTrangThai()))
+                                continue;
+
+                        String tenTour = t.getTenTour() != null ? t.getTenTour().toLowerCase().trim() : "";
+                        String tenDiaDiem = (t.getDiaDiem() != null && t.getDiaDiem().getTenDiaDiem() != null)
+                                        ? t.getDiaDiem().getTenDiaDiem().toLowerCase().trim()
+                                        : "";
+
+                        boolean matchTenTour = !tenTour.isEmpty()
+                                        && (tenTour.contains(tuKhoa) || tuKhoa.contains(tenTour));
+                        boolean matchDiaDiem = !tenDiaDiem.isEmpty()
+                                        && (tenDiaDiem.contains(tuKhoa) || tuKhoa.contains(tenDiaDiem));
+
+                        if (matchTenTour || matchDiaDiem) {
+                                matches.add(t);
+                        }
+                }
+
+                if (matches.isEmpty()) {
+                        return "Không tìm thấy dữ liệu chính xác. Dưới đây là 3 tour phổ biến nhất:\n"
+                                        + formatList(tourRepository.timTourPhoBien());
+                }
+
+                return formatList(matches.stream().limit(3).collect(Collectors.toList()));
+        }
+
+        private String getPayloadString(ScoredPoint point, String key) {
+                io.qdrant.client.grpc.JsonWithInt.Value val = point.getPayloadMap().get(key);
+                if (val != null && val.hasStringValue()) {
+                        return val.getStringValue();
+                }
+                return "";
+        }
 
         private PhienChat layHoacTaoPhienChat(YeuCauChatDTO req) {
                 Long phienChatId = req.getPhienChatId();
@@ -164,35 +293,6 @@ public class DichVuChatbot {
                                 .thoiGianGui(LocalDateTime.now())
                                 .build();
                 java.util.Objects.requireNonNull(tinNhanChatRepository.save(t));
-        }
-
-        private String timKiemDuLieuLienQuan(String cauHoi) {
-                String tuKhoa = cauHoi.toLowerCase().trim();
-                List<Tour> all = tourRepository.findAll();
-                List<Tour> matches = new ArrayList<>();
-
-                for (Tour t : all) {
-                        if (!Boolean.TRUE.equals(t.getTrangThai())) continue;
-
-                        String tenTour = t.getTenTour() != null ? t.getTenTour().toLowerCase().trim() : "";
-                        String tenDiaDiem = (t.getDiaDiem() != null && t.getDiaDiem().getTenDiaDiem() != null)
-                                        ? t.getDiaDiem().getTenDiaDiem().toLowerCase().trim() : "";
-
-                        // Sửa lỗi logic: Kiểm tra chuỗi không rỗng trước khi contains để tránh match sai
-                        boolean matchTenTour = !tenTour.isEmpty() && (tenTour.contains(tuKhoa) || tuKhoa.contains(tenTour));
-                        boolean matchDiaDiem = !tenDiaDiem.isEmpty() && (tenDiaDiem.contains(tuKhoa) || tuKhoa.contains(tenDiaDiem));
-
-                        if (matchTenTour || matchDiaDiem) {
-                                matches.add(t);
-                        }
-                }
-
-                if (matches.isEmpty()) {
-                        return "Không tìm thấy dữ liệu chính xác. Dưới đây là 3 tour phổ biến nhất:\n"
-                                        + formatList(tourRepository.timTourPhoBien());
-                }
-
-                return formatList(matches.stream().limit(3).collect(Collectors.toList()));
         }
 
         private String formatList(List<Tour> list) {

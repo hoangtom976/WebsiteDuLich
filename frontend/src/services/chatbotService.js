@@ -14,3 +14,8 @@ export const getChatHistory = async (phienChatId) => {
     const response = await api.get(`/chatbot/lich-su/${phienChatId}`);
     return response.data;
 };
+
+export const deleteChatHistory = async (phienChatId) => {
+    const response = await api.delete(`/chatbot/lich-su/${phienChatId}`);
+    return response.data;
+};

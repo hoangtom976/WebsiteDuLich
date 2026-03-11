@@ -38,8 +38,9 @@ export default function LoginForm() {
   const onSubmit = async (data) => {
     setError("");
     try {
+      const email = (data.email || "").trim().toLowerCase();
       const response = await login({
-        email: data.email,
+        email,
         matKhau: data.password,
       });
 
@@ -74,7 +75,7 @@ export default function LoginForm() {
         router.push(getDefaultPathByRoles(roles));
       }
     } catch (err) {
-      setError(err.message || "Tai khoan hoac mat khau khong chinh xac.");
+      setError(err.thongDiep || err.message || "Tài khoản hoặc mật khẩu không chính xác.");
     }
   };
 
@@ -82,8 +83,8 @@ export default function LoginForm() {
     <div className="flex min-h-[calc(100vh-150px)] items-center justify-center bg-gray-50">
       <Card className="mx-auto w-full max-w-sm">
         <CardHeader>
-          <CardTitle className="text-2xl">Dang nhap</CardTitle>
-          <CardDescription>Nhap email va mat khau de tiep tuc</CardDescription>
+          <CardTitle className="text-2xl">Đăng nhập</CardTitle>
+          <CardDescription>Nhập email và mật khẩu để tiếp tục</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
@@ -94,10 +95,10 @@ export default function LoginForm() {
                 type="email"
                 placeholder="m@example.com"
                 {...register("email", {
-                  required: "Email la bat buoc",
+                  required: "Email là bắt buộc",
                   pattern: {
                     value: /^\S+@\S+$/i,
-                    message: "Email khong hop le",
+                    message: "Email không hợp lệ",
                   },
                 })}
               />
@@ -107,15 +108,15 @@ export default function LoginForm() {
             </div>
             <div className="grid gap-2">
               <div className="flex items-center">
-                <Label htmlFor="password">Mat khau</Label>
+                <Label htmlFor="password">Mật khẩu</Label>
                 <Link href="/quen-mat-khau" className="ml-auto inline-block text-sm underline">
-                  Quen mat khau?
+                  Quên mật khẩu?
                 </Link>
               </div>
               <Input
                 id="password"
                 type="password"
-                {...register("password", { required: "Mat khau la bat buoc" })}
+                {...register("password", { required: "Mật khẩu là bắt buộc" })}
               />
               {errors.password && (
                 <p className="text-sm font-medium text-destructive">{errors.password.message}</p>
@@ -123,7 +124,7 @@ export default function LoginForm() {
             </div>
             {error && <p className="text-sm font-medium text-destructive">{error}</p>}
             <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? "Dang xu ly..." : "Dang nhap"}
+              {isSubmitting ? "Đang xử lý..." : "Đăng nhập"}
             </Button>
           </form>
         </CardContent>

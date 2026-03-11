@@ -30,6 +30,20 @@ function fmtDate(value) {
   return d.toLocaleDateString("vi-VN");
 }
 
+function getTripStatus(ngayKhoiHanh, soNgay) {
+  if (!ngayKhoiHanh) return null;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const start = new Date(ngayKhoiHanh);
+  start.setHours(0, 0, 0, 0);
+  const end = new Date(start);
+  end.setDate(end.getDate() + (soNgay || 1) - 1);
+
+  if (today < start) return { label: "Chưa đến ngày đi", color: "bg-blue-100 text-blue-700" };
+  if (today > end) return { label: "Đã hoàn thành", color: "bg-slate-100 text-slate-700" };
+  return { label: "Đang đi", color: "bg-emerald-100 text-emerald-700" };
+}
+
 export default function AdminSchedulesPage() {
   const [tours, setTours] = useState([]);
   const [selectedTourId, setSelectedTourId] = useState("");
@@ -243,9 +257,6 @@ export default function AdminSchedulesPage() {
           </p>
         )}
 
-        <p className="text-xs text-slate-500">
-          Luồng xóa chuẩn: xóa đơn đặt tour trước rồi mới xóa lịch khởi hành.
-        </p>
         {message && <p className="text-sm text-emerald-600">{message}</p>}
         {error && <p className="text-sm text-red-600">{error}</p>}
 
@@ -258,13 +269,14 @@ export default function AdminSchedulesPage() {
                 <th className="px-4 py-3">Ngày khởi hành</th>
                 <th className="px-4 py-3">Tổng số chỗ</th>
                 <th className="px-4 py-3">Số chỗ còn lại</th>
+                <th className="px-4 py-3">Trạng thái</th>
                 <th className="px-4 py-3">Tác vụ</th>
               </tr>
             </thead>
             <tbody>
               {schedulesLoading ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-6 text-center text-slate-500">
+                  <td colSpan={7} className="px-4 py-6 text-center text-slate-500">
                     Đang tải lịch khởi hành...
                   </td>
                 </tr>
@@ -309,6 +321,16 @@ export default function AdminSchedulesPage() {
                       )}
                     </td>
                     <td className="px-4 py-3">{item.soChoConLai}</td>
+                    <td className="px-4 py-3">
+                      {(() => {
+                        const status = getTripStatus(item.ngayKhoiHanh, item.soNgay);
+                        return status ? (
+                          <span className={`inline-block rounded-full px-3 py-1 text-xs font-bold ${status.color}`}>
+                            {status.label}
+                          </span>
+                        ) : "-";
+                      })()}
+                    </td>
                     <td className="px-4 py-3">
                       <div className="flex gap-2">
                         {editingId === item.id ? (

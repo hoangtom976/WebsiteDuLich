@@ -361,6 +361,7 @@ export default function TourBookingWrapper({
                 })),
             };
             if (appliedVoucher) payload.maVoucher = appliedVoucher.maVoucher;
+            if (activeFlashSale) payload.maFlashSale = activeFlashSale.id;
 
             // Step 1: Create booking
             const result = await datTour(payload);
@@ -384,13 +385,16 @@ export default function TourBookingWrapper({
                 throw new Error("Không thể khởi tạo cổng thanh toán. Vui lòng thử lại.");
             }
         } catch (error) {
+            const data = error.response?.data || {};
             const msg =
-                error.response?.data?.message ||
-                error.response?.data ||
+                data.thongDiep ||
+                data.message ||
+                (typeof data === "string" ? data : null) ||
                 "Đã xảy ra lỗi khi đặt tour. Vui lòng thử lại.";
+
             setBookingResult({
                 success: false,
-                message: typeof msg === "string" ? msg : JSON.stringify(msg),
+                message: msg,
             });
             setShowPayment(false);
         } finally {
@@ -702,7 +706,7 @@ export default function TourBookingWrapper({
                                         disabled={isBooking}
                                         className="w-full text-base font-semibold h-12 rounded-xl mt-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg shadow-blue-600/30 transition-all duration-300"
                                     >
-                                        <CreditCard className="w-5 h-5 mr-2" /> Tiến hành thanh toán
+                                        <CreditCard className="w-5 h-5 mr-2" /> Thanh toán
                                     </Button>
                                 </>
                             )}
@@ -821,7 +825,7 @@ export default function TourBookingWrapper({
                                     {isBooking ? (
                                         <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Đang xử lý...</>
                                     ) : (
-                                        <><CheckCircle2 className="w-4 h-4 mr-2" /> Tôi đã thanh toán</>
+                                        <><CheckCircle2 className="w-4 h-4 mr-2" /> Thanh toán</>
                                     )}
                                 </Button>
                             </div>
@@ -970,7 +974,7 @@ export default function TourBookingWrapper({
 
                 {rightContent}
             </aside>
-        </div>
+        </div >
     );
 }
 

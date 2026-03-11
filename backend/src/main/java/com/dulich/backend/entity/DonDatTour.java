@@ -43,6 +43,10 @@ public class DonDatTour {
     @JoinColumn(name = "voucher_id")
     private Voucher voucher;
 
+    @ManyToOne
+    @JoinColumn(name = "flash_sale_id")
+    private FlashSale flashSale;
+
     @OneToMany(mappedBy = "donDatTour", cascade = CascadeType.ALL)
     @ToString.Exclude
     private List<ChiTietDatTour> chiTiets;

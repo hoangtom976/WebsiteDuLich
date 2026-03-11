@@ -152,9 +152,6 @@ export default function AdminCategoriesPage() {
 
       {message && <p className="text-sm text-emerald-600">{message}</p>}
       {error && <p className="text-sm text-red-600">{error}</p>}
-      <p className="text-xs text-slate-500">
-        Luồng xóa chuẩn: xóa đơn đặt tour -&gt; lịch khởi hành -&gt; lịch trình/hình ảnh/đánh giá -&gt; tour -&gt; danh mục.
-      </p>
 
       <Card>
         <CardContent className="p-0">

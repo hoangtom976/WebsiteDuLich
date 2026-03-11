@@ -15,7 +15,6 @@ import {
   CalendarDays,
   Wallet,
   Bot,
-  CloudSun,
   ShieldCheck,
   ArrowRight,
   RefreshCcw,
@@ -149,12 +148,7 @@ export default function DashboardPage() {
       href: "/dashboard/users",
       icon: Users,
     },
-    {
-      title: "Thời tiết và điểm đến",
-      desc: "Theo dõi dự báo thời tiết và thông tin địa điểm du lịch.",
-      href: "/dashboard/weather",
-      icon: CloudSun,
-    },
+
     {
       title: "Chatbot AI",
       desc: "Theo dõi phiên chat, tối ưu prompt và dữ liệu RAG.",

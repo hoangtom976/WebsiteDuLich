@@ -63,7 +63,8 @@ public class LichKhoiHanhService {
             throw new LoiBadRequestException("ID lịch khởi hành không được để trống");
         }
         LichKhoiHanh lich = lichKhoiHanhRepository.findById(lichId)
-                .orElseThrow(() -> new TaiNguyenKhongTonTaiException("Không tìm thấy lịch khởi hành với ID: " + lichId));
+                .orElseThrow(
+                        () -> new TaiNguyenKhongTonTaiException("Không tìm thấy lịch khởi hành với ID: " + lichId));
 
         int soKhachDaDat = lich.getTongSoCho() - lich.getSoChoConLai();
         if (req.getTongSoCho() < soKhachDaDat) {
@@ -84,7 +85,8 @@ public class LichKhoiHanhService {
             throw new LoiBadRequestException("ID lịch khởi hành không được để trống");
         }
         LichKhoiHanh lich = lichKhoiHanhRepository.findById(lichId)
-                .orElseThrow(() -> new TaiNguyenKhongTonTaiException("Không tìm thấy lịch khởi hành với ID: " + lichId));
+                .orElseThrow(
+                        () -> new TaiNguyenKhongTonTaiException("Không tìm thấy lịch khởi hành với ID: " + lichId));
 
         lich.setNgayKhoiHanh(req.getNgayKhoiHanh());
 
@@ -129,6 +131,7 @@ public class LichKhoiHanhService {
         if (lich.getTour() != null) {
             dto.setTourId(lich.getTour().getId());
             dto.setTenTour(lich.getTour().getTenTour());
+            dto.setSoNgay(lich.getTour().getSoNgay());
         }
 
         return dto;

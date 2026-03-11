@@ -21,4 +21,6 @@ public interface DonDatTourRepository extends JpaRepository<DonDatTour, Long> {
     List<DonDatTour> findByNguoiDungIdAndVoucherIsNotNull(Long nguoiDungId);
 
     boolean existsByNguoiDungIdAndLichKhoiHanh_Tour_IdAndTrangThai(Long userId, Long tourId, String trangThai);
+
+    List<DonDatTour> findByNguoiDungIdAndFlashSaleIsNotNull(Long nguoiDungId);
 }

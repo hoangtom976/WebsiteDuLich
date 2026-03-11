@@ -34,3 +34,8 @@ export const updateAdminSystemSettings = async (payload) => {
   const response = await api.put("/quan-tri/he-thong/cai-dat", payload);
   return normalizeSettings(response.data);
 };
+
+export const submitContactForm = async (payload) => {
+  const response = await api.post("/cong-khai/he-thong/lien-he", payload);
+  return response.data;
+};

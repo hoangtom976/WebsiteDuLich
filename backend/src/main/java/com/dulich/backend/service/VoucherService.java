@@ -117,6 +117,20 @@ public class VoucherService {
             throw new LoiBadRequestException("Mã ngưng hoạt động");
         }
 
+        // Check if user already used this voucher
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        if (email != null && !email.equals("anonymousUser")) {
+            nguoiDungRepository.findByEmail(email).ifPresent(nguoiDung -> {
+                boolean alreadyUsed = donDatTourRepository.findByNguoiDungIdAndVoucherIsNotNull(nguoiDung.getId())
+                        .stream()
+                        .anyMatch(don -> don.getVoucher() != null && don.getVoucher().getId().equals(voucher.getId())
+                                && !don.getTrangThai().equals("DA_HUY"));
+                if (alreadyUsed) {
+                    throw new LoiBadRequestException("Bạn đã sử dụng mã giảm giá này rồi.");
+                }
+            });
+        }
+
         return voucher;
     }
 

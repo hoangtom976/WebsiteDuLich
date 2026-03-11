@@ -13,6 +13,7 @@ import { formatDuration, formatPrice } from "@/lib/utils";
 import Link from "next/link";
 import TourWeather from "@/components/tours/TourWeather";
 import WishlistButton from "@/components/tours/WishlistButton";
+import DeparturePointSection from "@/components/tours/DeparturePointSection";
 
 export default async function TourDetailPage({ params }) {
   const awaitedParams = await params;
@@ -177,6 +178,9 @@ export default async function TourDetailPage({ params }) {
           </div>
         </div>
       </div>
+
+      {/* Điểm xuất phát */}
+      <DeparturePointSection />
 
       {/* Reviews */}
       <div className="bg-white rounded-2xl shadow-lg shadow-black/5 border border-gray-100 overflow-hidden p-6">

@@ -111,11 +111,12 @@ public class QuanLyNguoiDungService {
     public List<NguoiDungDTO> layTatCaNguoiDung(String tuKhoa) {
         return nguoiDungRepository.findAll().stream()
                 .filter(u -> {
-                    if (!StringUtils.hasText(tuKhoa)) return true;
+                    if (!StringUtils.hasText(tuKhoa))
+                        return true;
                     String lowerKey = tuKhoa.toLowerCase();
                     return (u.getHoTen() != null && u.getHoTen().toLowerCase().contains(lowerKey)) ||
-                           (u.getEmail() != null && u.getEmail().toLowerCase().contains(lowerKey)) ||
-                           (u.getSoDienThoai() != null && u.getSoDienThoai().contains(lowerKey));
+                            (u.getEmail() != null && u.getEmail().toLowerCase().contains(lowerKey)) ||
+                            (u.getSoDienThoai() != null && u.getSoDienThoai().contains(lowerKey));
                 })
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
@@ -138,11 +139,12 @@ public class QuanLyNguoiDungService {
         return nguoiDungRepository.findAll().stream()
                 .filter(u -> "ROLE_USER".equals(u.getVaiTro()))
                 .filter(u -> {
-                    if (!StringUtils.hasText(tuKhoa)) return true;
+                    if (!StringUtils.hasText(tuKhoa))
+                        return true;
                     String lowerKey = tuKhoa.toLowerCase();
                     return (u.getHoTen() != null && u.getHoTen().toLowerCase().contains(lowerKey)) ||
-                           (u.getEmail() != null && u.getEmail().toLowerCase().contains(lowerKey)) ||
-                           (u.getSoDienThoai() != null && u.getSoDienThoai().contains(lowerKey));
+                            (u.getEmail() != null && u.getEmail().toLowerCase().contains(lowerKey)) ||
+                            (u.getSoDienThoai() != null && u.getSoDienThoai().contains(lowerKey));
                 })
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());

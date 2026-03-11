@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import {
     Calendar, Users, CreditCard, MapPin,
     ArrowLeft, Clock, ShieldCheck, CheckCircle2,
-    XCircle, History, Package, Loader2
+    XCircle, History, Package, Loader2, AlertCircle, MessageCircle
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ import { Separator } from "@/components/ui/separator";
 import { layChiTietDonHang } from "@/services/datTourService";
 import { formatPrice } from "@/lib/utils";
 import Link from "next/link";
+import DeparturePointSection from "@/components/tours/DeparturePointSection";
 
 const STATUS_MAP = {
     "CHO_THANH_TOAN": { label: "Chờ thanh toán", color: "bg-amber-100 text-amber-700 border-amber-200", icon: Clock },
@@ -149,6 +150,40 @@ export default function ChiTietDonHangPage() {
                                 </div>
                             </CardContent>
                         </Card>
+
+                        {/* Điểm xuất phát */}
+                        <DeparturePointSection />
+
+                        {/* Yêu cầu hủy đơn */}
+                        {booking.trangThai === "CHO_THANH_TOAN" && (
+                            <div className="bg-rose-50 border border-rose-200 rounded-3xl p-6 mt-6">
+                                <h4 className="text-rose-800 font-bold text-lg mb-3 flex items-center gap-2">
+                                    <AlertCircle className="w-5 h-5 text-rose-600" />
+                                    Yêu cầu hủy đơn hàng
+                                </h4>
+                                <p className="text-sm text-rose-700 font-medium mb-4">
+                                    Lưu ý: Chỉ được hủy các đơn chưa thanh toán.
+                                </p>
+                                <div className="text-sm text-slate-700 bg-white p-4 rounded-2xl border border-rose-100 shadow-sm space-y-3">
+                                    <p>Nếu Quý khách muốn hủy đơn, vui lòng liên hệ trực tiếp với chúng tôi qua thông tin dưới đây:</p>
+                                    <ul className="list-disc list-inside space-y-1 ml-1">
+                                        <li><strong>Zalo:</strong> 0333303056</li>
+                                        <li><strong>Email:</strong> hoangtom976@gmail.com</li>
+                                    </ul>
+                                    <p className="mt-2 font-medium">Nội dung tin nhắn/email cần bao gồm:</p>
+                                    <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 font-mono text-xs space-y-1 text-slate-600">
+                                        <p>- Họ và tên người đặt: .................</p>
+                                        <p>- Email đặt tour: ......................</p>
+                                        <p>- Số điện thoại liên hệ: ...............</p>
+                                        <p>- Mã đơn hàng: #{booking.id}</p>
+                                        <p>- Lý do hủy: ...........................</p>
+                                    </div>
+                                    <p className="text-xs text-slate-500 italic mt-2">
+                                        * Nhân viên sẽ kiểm tra, xác nhận lưu vết và tiến hành hủy đơn trên hệ thống cho Quý khách.
+                                    </p>
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     {/* Cột phải: Thanh toán */}

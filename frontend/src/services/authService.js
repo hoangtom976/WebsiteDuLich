@@ -12,36 +12,38 @@ export const login = async (credentials) => {
   }
 };
 
-export const register = async (userData) => {
-  // try {
-  //   const response = await api.post("/auth/dang-ky", userData);
-  //   return response.data; // Should be "Đăng ký tài khoản thành công!"
-  // } catch (error) {
-  //   throw error.response.data || new Error("Đã có lỗi xảy ra khi đăng ký.");
-  // }
-  console.log("Mock register with:", userData);
-  return "Đăng ký tài khoản thành công!";
+export const sendRegistrationOtp = async (email) => {
+  try {
+    const response = await api.post("/auth/gui-otp-dang-ky", { email });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || new Error("Đã có lỗi xảy ra khi gửi OTP.");
+  }
+};
+
+export const verifyRegistrationOtp = async (otp, thongTinDangKy) => {
+  try {
+    const response = await api.post("/auth/xac-nhan-dang-ky", { otp, thongTinDangKy });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || new Error("Đã có lỗi xảy ra khi xác thực đăng ký.");
+  }
 };
 
 export const forgotPassword = async (email) => {
-  // try {
-  //   const response = await api.post("/auth/quen-mat-khau", { email });
-  //   return response.data; // Should be "Yêu cầu... Token (để test): <token>"
-  // } catch (error) {
-  //   throw error.response.data || new Error("Đã có lỗi xảy ra.");
-  // }
-  console.log("Mock forgot password for:", email);
-  // Giả lập token trả về
-  return "Yêu cầu reset mật khẩu thành công. Token (để test): mock-reset-token-12345";
+  try {
+    const response = await api.post("/auth/quen-mat-khau", { email });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || new Error("Đã có lỗi xảy ra.");
+  }
 };
 
 export const resetPassword = async (token, matKhauMoi) => {
-  // try {
-  //   const response = await api.post("/auth/dat-lai-mat-khau", { token, matKhauMoi });
-  //   return response.data; // Should be "Mật khẩu đã được đặt lại thành công!"
-  // } catch (error) {
-  //   throw error.response.data || new Error("Đã có lỗi xảy ra.");
-  // }
-  console.log("Mock reset password with token:", token);
-  return "Mật khẩu đã được đặt lại thành công!";
+  try {
+    const response = await api.post("/auth/dat-lai-mat-khau", { token, matKhauMoi });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || new Error("Đã có lỗi xảy ra.");
+  }
 };

@@ -15,6 +15,10 @@ public interface NguoiDungRepository extends JpaRepository<NguoiDung, Long> {
 
     Boolean existsByEmail(String email);
 
+    Optional<NguoiDung> findByEmailIgnoreCase(String email);
+
+    Boolean existsByEmailIgnoreCase(String email);
+
     List<NguoiDung> findByVaiTros_TenVaiTro(String tenVaiTro);
 
     @Query("SELECT u FROM NguoiDung u JOIN u.vaiTros v WHERE v.tenVaiTro = :tenVaiTro AND " +

@@ -18,6 +18,20 @@ const STATUS_MAP = {
     "DA_HUY": { label: "Đã hủy", color: "bg-rose-100 text-rose-700 border-rose-200" },
 };
 
+function getTripStatus(ngayKhoiHanh, soNgay) {
+    if (!ngayKhoiHanh) return null;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const start = new Date(ngayKhoiHanh);
+    start.setHours(0, 0, 0, 0);
+    const end = new Date(start);
+    end.setDate(end.getDate() + (soNgay || 1) - 1);
+
+    if (today < start) return { label: "Chưa đến ngày đi", color: "bg-blue-100 text-blue-700 border-blue-200" };
+    if (today > end) return { label: "Đã hoàn thành", color: "bg-slate-100 text-slate-700 border-slate-200" };
+    return { label: "Đang đi", color: "bg-emerald-100 text-emerald-700 border-emerald-200" };
+}
+
 export default function LichSuDatTourPage() {
     const [bookings, setBookings] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -132,6 +146,14 @@ function BookingList({ bookings, loading }) {
                                     <Badge variant="outline" className={`rounded-full px-3 py-0.5 text-[10px] font-bold ${STATUS_MAP[booking.trangThai]?.color || ""}`}>
                                         {STATUS_MAP[booking.trangThai]?.label || booking.trangThai}
                                     </Badge>
+                                    {(() => {
+                                        const tripStatus = getTripStatus(booking.ngayKhoiHanh, booking.soNgay);
+                                        return tripStatus ? (
+                                            <Badge variant="outline" className={`rounded-full px-3 py-0.5 text-[10px] font-bold ${tripStatus.color}`}>
+                                                {tripStatus.label}
+                                            </Badge>
+                                        ) : null;
+                                    })()}
                                 </div>
 
                                 <h3 className="mb-4 text-lg font-bold text-slate-900 transition-colors hover:text-blue-600">
