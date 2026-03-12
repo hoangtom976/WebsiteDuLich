@@ -46,9 +46,7 @@ public class BaiVietController {
      */
     @PostMapping("/nhan-vien/bai-viet")
     public ResponseEntity<BaiVietPhanHoiDTO> taoBaiViet(@Valid @RequestBody BaiVietYeuCauDTO yeuCau) {
-        // Giả lập ID nhân viên lấy từ JWT token sau khi đăng nhập
-        Long nhanVienId = 1L;
-        BaiVietPhanHoiDTO dto = baiVietService.taoBaiViet(yeuCau, nhanVienId);
+        BaiVietPhanHoiDTO dto = baiVietService.taoBaiViet(yeuCau);
         return ResponseEntity.status(HttpStatus.CREATED).body(dto);
     }
 
@@ -137,10 +135,7 @@ public class BaiVietController {
     public ResponseEntity<BinhLuanPhanHoiDTO> themBinhLuan(
             @PathVariable Long id,
             @Valid @RequestBody BinhLuanYeuCauDTO yeuCau) {
-        // Giả lập ID người dùng lấy từ JWT token (trong thực tế lấy từ
-        // SecurityContextHolder)
-        Long nguoiDungId = 1L;
-        BinhLuanPhanHoiDTO dto = baiVietService.themBinhLuan(id, yeuCau, nguoiDungId);
+        BinhLuanPhanHoiDTO dto = baiVietService.themBinhLuan(id, yeuCau);
         return ResponseEntity.status(HttpStatus.CREATED).body(dto);
     }
 }

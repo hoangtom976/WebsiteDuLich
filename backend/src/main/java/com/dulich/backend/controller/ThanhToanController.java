@@ -30,6 +30,9 @@ public class ThanhToanController {
 
         if ("Thanh toán thành công".equals(ketQua)) {
             response.sendRedirect("http://localhost:3000/thanh-toan/ket-qua?status=success&orderId=" + orderId);
+        } else if (ketQua != null && ketQua.startsWith("CANCELED:")) {
+            String tourId = ketQua.split(":")[1];
+            response.sendRedirect("http://localhost:3000/tours/" + tourId);
         } else {
             response.sendRedirect("http://localhost:3000/thanh-toan/ket-qua?status=failed&orderId=" + orderId);
         }

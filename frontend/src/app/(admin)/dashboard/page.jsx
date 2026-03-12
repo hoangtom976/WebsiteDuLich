@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { getDashboardStatistics } from "@/services/statisticService";
+import { getDashboardStatistics, getRevenueStatistics } from "@/services/statisticService";
 import {
   Users,
   MapPinned,
@@ -19,6 +19,8 @@ import {
   ArrowRight,
   RefreshCcw,
 } from "lucide-react";
+import { formatPrice } from "@/lib/utils";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 const EMPTY_STATS = {
   tongTour: 0,
@@ -85,6 +87,9 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+  const [revenueStats, setRevenueStats] = useState([]);
+  const [revenueType, setRevenueType] = useState("ngay");
+  const [revenueLoading, setRevenueLoading] = useState(false);
 
   const loadDashboardStats = useCallback(async (showSuccess = false) => {
     setLoading(true);
@@ -101,9 +106,22 @@ export default function DashboardPage() {
     }
   }, []);
 
+  const loadRevenueStats = useCallback(async (type) => {
+    setRevenueLoading(true);
+    try {
+      const data = await getRevenueStatistics(type);
+      setRevenueStats(data);
+    } catch (err) {
+      console.error("Lỗi lấy dữ liệu doanh thu:", err);
+    } finally {
+      setRevenueLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     loadDashboardStats();
-  }, [loadDashboardStats]);
+    loadRevenueStats(revenueType);
+  }, [loadDashboardStats, loadRevenueStats, revenueType]);
 
   const moduleCards = [
     {
@@ -211,6 +229,77 @@ export default function DashboardPage() {
           icon={CalendarDays}
           loading={loading}
         />
+      </section>
+
+      <section>
+        <Card className="border-slate-200 shadow-sm">
+          <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-2 gap-4">
+            <CardTitle className="text-lg">Thống kê doanh thu</CardTitle>
+            <div className="flex rounded-md border text-sm">
+              <button
+                className={`px-4 py-2 hover:bg-slate-50 ${revenueType === "ngay" ? "bg-slate-100 font-medium text-blue-600" : "text-slate-600"}`}
+                onClick={() => setRevenueType("ngay")}
+              >
+                Theo Ngày
+              </button>
+              <button
+                className={`border-l px-4 py-2 hover:bg-slate-50 ${revenueType === "tuan" ? "bg-slate-100 font-medium text-blue-600" : "text-slate-600"}`}
+                onClick={() => setRevenueType("tuan")}
+              >
+                Theo Tuần
+              </button>
+              <button
+                className={`border-l px-4 py-2 hover:bg-slate-50 ${revenueType === "thang" ? "bg-slate-100 font-medium text-blue-600" : "text-slate-600"}`}
+                onClick={() => setRevenueType("thang")}
+              >
+                Theo Tháng
+              </button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {revenueLoading ? (
+               <div className="flex h-72 items-center justify-center text-slate-500">Đang tải dữ liệu biểu đồ...</div>
+            ) : revenueStats.length === 0 ? (
+               <div className="flex h-72 items-center justify-center text-slate-500">Chưa có dữ liệu doanh thu.</div>
+            ) : (
+              <div className="mt-4 h-72 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={revenueStats} margin={{ top: 10, right: 10, left: 30, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                    <XAxis dataKey="nhan" tickLine={false} axisLine={false} tick={{ fontSize: 12, fill: '#64748b' }} dy={10} />
+                    <YAxis 
+                      tickLine={false} 
+                      axisLine={false} 
+                      tick={{ fontSize: 12, fill: '#64748b' }} 
+                      tickFormatter={(value) => `${(value / 1000000).toLocaleString('vi-VN')}M`} 
+                    />
+                    <Tooltip 
+                      cursor={{ fill: '#f1f5f9' }}
+                      contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                      formatter={(value, name) => {
+                        if (name === "tongDoanhThu") return [formatPrice(value), "Doanh thu"];
+                        if (name === "soDonHang") return [value, "Số đơn hàng"];
+                        return [value, name];
+                      }}
+                      labelStyle={{ fontWeight: 'bold', color: '#0f172a', marginBottom: '8px' }}
+                    />
+                    <Bar dataKey="tongDoanhThu" fill="#2563eb" radius={[4, 4, 0, 0]} maxBarSize={50} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            )}
+            {!revenueLoading && revenueStats.length > 0 && (
+              <div className="mt-4 flex justify-between border-t pt-4 text-sm text-slate-600">
+                <p>
+                  Tổng: <span className="font-semibold text-slate-900">{formatPrice(revenueStats.reduce((acc, curr) => acc + (curr.tongDoanhThu || 0), 0))}</span>
+                </p>
+                <p>
+                  Tổng số đơn: <span className="font-semibold text-slate-900">{revenueStats.reduce((acc, curr) => acc + (curr.soDonHang || 0), 0)}</span>
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </section>
 
       <section>

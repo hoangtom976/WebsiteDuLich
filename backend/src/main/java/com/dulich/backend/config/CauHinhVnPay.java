@@ -22,7 +22,7 @@ public class CauHinhVnPay {
                 throw new NullPointerException();
             }
             final Mac hmac512 = Mac.getInstance("HmacSHA512");
-            byte[] hmacKeyBytes = key.getBytes();
+            byte[] hmacKeyBytes = key.getBytes(StandardCharsets.UTF_8);
             final SecretKeySpec secretKey = new SecretKeySpec(hmacKeyBytes, "HmacSHA512");
             hmac512.init(secretKey);
             byte[] dataBytes = data.getBytes(StandardCharsets.UTF_8);
@@ -31,7 +31,7 @@ public class CauHinhVnPay {
             for (byte b : result) {
                 sb.append(String.format("%02x", b & 0xff));
             }
-            return sb.toString();
+            return sb.toString().toUpperCase();
 
         } catch (Exception ex) {
             return "";

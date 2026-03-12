@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ import {
   getBookingStatusLabel,
 } from "@/services/adminBookingService";
 import { taoThanhToanVnPay } from "@/services/datTourService";
+import { formatPrice } from "@/lib/utils";
 
 const STATUS_OPTIONS = [
   { value: "", label: "Tất cả trạng thái" },
@@ -32,9 +33,7 @@ function extractApiError(error, fallback) {
   return fallback;
 }
 
-function formatCurrency(value) {
-  return `${new Intl.NumberFormat("vi-VN").format(Number(value || 0))} đ`;
-}
+
 
 function formatDate(value) {
   if (!value) return "-";
@@ -61,6 +60,9 @@ export default function AdminBookingsPage() {
   const [keywordInput, setKeywordInput] = useState("");
   const [keyword, setKeyword] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [dateFilter, setDateFilter] = useState("");
+  const [weekFilter, setWeekFilter] = useState("");
+  const [monthFilter, setMonthFilter] = useState("");
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionKey, setActionKey] = useState("");
@@ -82,6 +84,41 @@ export default function AdminBookingsPage() {
       setLoading(false);
     }
   }, [keyword, statusFilter]);
+
+  const filteredBookings = useMemo(() => {
+    return bookings.filter((item) => {
+      if (!item.ngayDat) return true;
+      const orderDate = new Date(item.ngayDat);
+      if (Number.isNaN(orderDate.getTime())) return true;
+
+      // Filter by Date (YYYY-MM-DD)
+      if (dateFilter) {
+        const itemDateStr = orderDate.toISOString().split("T")[0];
+        if (itemDateStr !== dateFilter) return false;
+      }
+
+      // Filter by Month (YYYY-MM)
+      if (monthFilter) {
+        const itemMonthStr = `${orderDate.getFullYear()}-${String(orderDate.getMonth() + 1).padStart(2, "0")}`;
+        if (itemMonthStr !== monthFilter) return false;
+      }
+
+      // Filter by Week (YYYY-Www)
+      if (weekFilter) {
+        // Calculate ISO week
+        const d = new Date(Date.UTC(orderDate.getFullYear(), orderDate.getMonth(), orderDate.getDate()));
+        const dayNum = d.getUTCDay() || 7;
+        d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+        const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+        const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+        const itemWeekStr = `${d.getUTCFullYear()}-W${String(weekNo).padStart(2, "0")}`;
+        
+        if (itemWeekStr !== weekFilter) return false;
+      }
+
+      return true;
+    });
+  }, [bookings, dateFilter, monthFilter, weekFilter]);
 
   useEffect(() => {
     fetchBookings();
@@ -192,7 +229,7 @@ export default function AdminBookingsPage() {
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="grid gap-3 md:grid-cols-[1fr,220px,auto,auto]">
+        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
           <Input
             placeholder="Tìm theo mã đơn, khách hàng, email, tên tour..."
             value={keywordInput}
@@ -209,10 +246,64 @@ export default function AdminBookingsPage() {
               </option>
             ))}
           </select>
-          <Button onClick={submitSearch}>Tìm kiếm</Button>
-          <Button variant="outline" onClick={refreshData}>
-            Làm mới dữ liệu
-          </Button>
+          <div className="flex flex-col gap-1">
+            <span className="text-xs text-slate-500 font-medium">Lọc theo ngày</span>
+            <Input
+              type="date"
+              className="h-10"
+              value={dateFilter}
+              onChange={(e) => {
+                setDateFilter(e.target.value);
+                setWeekFilter("");
+                setMonthFilter("");
+              }}
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <span className="text-xs text-slate-500 font-medium">Lọc theo tuần</span>
+            <Input
+              type="week"
+              className="h-10"
+              value={weekFilter}
+              onChange={(e) => {
+                setWeekFilter(e.target.value);
+                setDateFilter("");
+                setMonthFilter("");
+              }}
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <span className="text-xs text-slate-500 font-medium">Lọc theo tháng</span>
+            <Input
+              type="month"
+              className="h-10"
+              value={monthFilter}
+              onChange={(e) => {
+                setMonthFilter(e.target.value);
+                setDateFilter("");
+                setWeekFilter("");
+              }}
+            />
+          </div>
+          <div className="flex items-end gap-2 md:col-span-2 lg:col-span-3">
+            <Button onClick={submitSearch} className="h-10">Tìm kiếm</Button>
+            <Button variant="outline" onClick={refreshData} className="h-10">
+              Làm mới dữ liệu
+            </Button>
+            {(dateFilter || weekFilter || monthFilter) && (
+              <Button 
+                variant="ghost" 
+                onClick={() => {
+                  setDateFilter("");
+                  setWeekFilter("");
+                  setMonthFilter("");
+                }} 
+                className="h-10 text-red-600 hover:text-red-700 hover:bg-red-50"
+              >
+                Xóa lọc thời gian
+              </Button>
+            )}
+          </div>
         </div>
 
         {message && <p className="text-sm text-emerald-600">{message}</p>}
@@ -240,14 +331,14 @@ export default function AdminBookingsPage() {
                     Đang tải dữ liệu...
                   </td>
                 </tr>
-              ) : bookings.length === 0 ? (
+              ) : filteredBookings.length === 0 ? (
                 <tr>
                   <td colSpan={9} className="px-4 py-6 text-center text-slate-500">
                     Không có đơn hàng phù hợp.
                   </td>
                 </tr>
               ) : (
-                bookings.map((item) => (
+                filteredBookings.map((item) => (
                   <tr key={item.id} className="border-t align-top">
                     <td className="px-4 py-3 font-semibold">#{item.id}</td>
                     <td className="px-4 py-3">
@@ -263,7 +354,7 @@ export default function AdminBookingsPage() {
                     <td className="px-4 py-3">{formatDateTime(item.ngayDat)}</td>
                     <td className="px-4 py-3">{item.soLuongKhach}</td>
                     <td className="px-4 py-3 font-semibold text-blue-700">
-                      {formatCurrency(item.tongTien)}
+                      {formatPrice(item.tongTien)}
                     </td>
                     <td className="px-4 py-3">
                       <span

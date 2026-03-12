@@ -115,6 +115,12 @@ public class DanhGiaService {
                 .collect(Collectors.toList());
     }
 
+    public List<HienThiDanhGiaDTO> layTatCaDanhGia() {
+        return danhGiaRepository.findAllByOrderByNgayDanhGiaDesc().stream()
+                .map(this::convertToHienThiDTO)
+                .collect(Collectors.toList());
+    }
+
     private HienThiDanhGiaDTO convertToHienThiDTO(DanhGia dg) {
         HienThiDanhGiaDTO.HienThiDanhGiaDTOBuilder builder = HienThiDanhGiaDTO.builder()
                 .id(dg.getId())

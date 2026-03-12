@@ -38,11 +38,6 @@ export default function TourBookingWrapper({
     const [showForm, setShowForm] = useState(false);
     const [errors, setErrors] = useState({});
 
-    // Payment step
-    const [showPayment, setShowPayment] = useState(false);
-    const [paymentCountdown, setPaymentCountdown] = useState(0);
-    const [paymentMethod, setPaymentMethod] = useState("qr");    // "qr" | "bank"
-    const countdownRef = useRef(null);
 
     // User profile
     const [userProfile, setUserProfile] = useState(null);
@@ -264,31 +259,7 @@ export default function TourBookingWrapper({
     const formattedTotal = new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(totalPrice);
     const formattedCurrentPrice = new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(currentPriceVND);
 
-    // ─── Open payment step ───
-    const handleProceedToPayment = () => {
-        const token = typeof window !== "undefined" ? localStorage.getItem("accessToken") : null;
-        if (!token) {
-            alert("Bạn cần đăng nhập để đặt tour.");
-            router.push(`/dang-nhap?redirect=/tours/${tour.id}`);
-            return;
-        }
-        if (!validateAndScroll()) return;
 
-        setShowPayment(true);
-        setBookingResult(null);
-        // Start 15-minute countdown
-        setPaymentCountdown(15 * 60);
-        countdownRef.current = setInterval(() => {
-            setPaymentCountdown((prev) => {
-                if (prev <= 1) {
-                    clearInterval(countdownRef.current);
-                    setShowPayment(false);
-                    return 0;
-                }
-                return prev - 1;
-            });
-        }, 1000);
-    };
 
     // ─── Fetch Flash Sale ───
     useEffect(() => {
@@ -332,23 +303,18 @@ export default function TourBookingWrapper({
         return () => clearInterval(timer);
     }, [activeFlashSale]);
 
-    // ─── Cancel payment (nothing saved) ───
-    const handleCancelPayment = () => {
-        clearInterval(countdownRef.current);
-        setShowPayment(false);
-        setPaymentCountdown(0);
-    };
 
-    // Cleanup interval on unmount
-    useEffect(() => {
-        return () => {
-            if (countdownRef.current) clearInterval(countdownRef.current);
-        };
-    }, []);
 
     // ─── Confirm payment → Create booking ───
     const handleConfirmPayment = async () => {
-        clearInterval(countdownRef.current);
+        const token = typeof window !== "undefined" ? localStorage.getItem("accessToken") : null;
+        if (!token) {
+            alert("Bạn cần đăng nhập để đặt tour.");
+            router.push(`/dang-nhap?redirect=/tours/${tour.id}`);
+            return;
+        }
+        if (!validateAndScroll()) return;
+
         setIsBooking(true);
         setBookingResult(null);
 
@@ -370,7 +336,7 @@ export default function TourBookingWrapper({
             try {
                 const vnPayUrl = await taoThanhToanVnPay({
                     soTien: totalPrice,
-                    noiDung: `Thanh toan tour ${tour.tenTour} - Ma don: ${result.id}`,
+                    noiDung: `Thanh toan don hang ${result.id}`,
                     maDonHang: result.id
                 });
 
@@ -432,15 +398,7 @@ export default function TourBookingWrapper({
         }
         if (nameError) return;
 
-        // Bỏ qua modal thanh toán giả lập, gọi VNPay luôn
         handleConfirmPayment();
-    };
-
-    // ─── Format countdown ───
-    const formatCountdown = (seconds) => {
-        const m = Math.floor(seconds / 60).toString().padStart(2, "0");
-        const s = (seconds % 60).toString().padStart(2, "0");
-        return `${m}:${s}`;
     };
 
     return (
@@ -702,11 +660,15 @@ export default function TourBookingWrapper({
                                     {/* Proceed to Payment */}
                                     <Button
                                         size="lg"
-                                        onClick={handleProceedToPayment}
+                                        onClick={handleConfirmPayment}
                                         disabled={isBooking}
                                         className="w-full text-base font-semibold h-12 rounded-xl mt-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg shadow-blue-600/30 transition-all duration-300"
                                     >
-                                        <CreditCard className="w-5 h-5 mr-2" /> Thanh toán
+                                        {isBooking ? (
+                                            <><Loader2 className="w-5 h-5 mr-2 animate-spin" /> Đang xử lý...</>
+                                        ) : (
+                                            <><CreditCard className="w-5 h-5 mr-2" /> Thanh toán qua VNPay</>
+                                        )}
                                     </Button>
                                 </>
                             )}
@@ -714,124 +676,6 @@ export default function TourBookingWrapper({
                     </div>
                 )}
 
-                {/* ★ PAYMENT STEP */}
-                {showPayment && (
-                    <div className="bg-white rounded-2xl shadow-xl shadow-black/10 border border-gray-100 overflow-hidden">
-                        {/* Header */}
-                        <div className="px-6 py-5 border-b border-gray-100 bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
-                            <div className="flex items-center justify-between">
-                                <h2 className="text-xl font-bold flex items-center gap-2">
-                                    <CreditCard className="w-5 h-5" /> Thanh toán
-                                </h2>
-                                <div className="flex items-center gap-3">
-                                    <div className="flex items-center gap-1.5 bg-white/20 px-3 py-1.5 rounded-full text-sm">
-                                        <Clock className="w-4 h-4" />
-                                        <span className="font-mono font-bold">{formatCountdown(paymentCountdown)}</span>
-                                    </div>
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        onClick={handleCancelPayment}
-                                        className="text-white/80 hover:text-white hover:bg-white/10"
-                                    >
-                                        <X className="w-5 h-5" />
-                                    </Button>
-                                </div>
-                            </div>
-                            <p className="text-sm text-white/70 mt-1">Vui lòng thanh toán trong thời gian quy định</p>
-                        </div>
-
-                        <div className="p-6">
-                            {/* Payment method tabs */}
-                            <div className="flex gap-3 mb-6">
-                                <button
-                                    onClick={() => setPaymentMethod("qr")}
-                                    className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 font-medium text-sm transition-all ${paymentMethod === "qr"
-                                        ? "border-blue-500 bg-blue-50 text-blue-700"
-                                        : "border-gray-200 text-gray-500 hover:border-gray-300"
-                                        }`}
-                                >
-                                    <QrCode className="w-5 h-5" /> Quét mã QR
-                                </button>
-                                <button
-                                    onClick={() => setPaymentMethod("bank")}
-                                    className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 font-medium text-sm transition-all ${paymentMethod === "bank"
-                                        ? "border-blue-500 bg-blue-50 text-blue-700"
-                                        : "border-gray-200 text-gray-500 hover:border-gray-300"
-                                        }`}
-                                >
-                                    <Banknote className="w-5 h-5" /> Chuyển khoản
-                                </button>
-                            </div>
-
-                            {/* QR Code */}
-                            {paymentMethod === "qr" && (
-                                <div className="text-center">
-                                    <div className="inline-block bg-white p-4 rounded-2xl border-2 border-gray-200 shadow-sm mb-4">
-                                        {/* Simulated QR Code */}
-                                        <div className="w-48 h-48 bg-gradient-to-br from-gray-100 to-gray-50 rounded-xl flex flex-col items-center justify-center border border-gray-200">
-                                            <QrCode className="w-20 h-20 text-gray-800 mb-2" />
-                                            <p className="text-xs text-gray-500 font-medium">VietQR</p>
-                                        </div>
-                                    </div>
-                                    <p className="text-sm text-gray-500 mb-1">Quét mã để thanh toán</p>
-                                    <p className="text-2xl font-extrabold text-blue-700">{formattedTotal}</p>
-                                </div>
-                            )}
-
-                            {/* Bank Transfer */}
-                            {paymentMethod === "bank" && (
-                                <div className="space-y-3">
-                                    <div className="bg-slate-50 rounded-xl p-4 border border-slate-200">
-                                        <div className="grid grid-cols-2 gap-y-3 text-sm">
-                                            <span className="text-gray-500">Ngân hàng:</span>
-                                            <span className="font-semibold text-right">Vietcombank</span>
-                                            <span className="text-gray-500">Số tài khoản:</span>
-                                            <span className="font-semibold text-right font-mono">1234 5678 9012</span>
-                                            <span className="text-gray-500">Chủ tài khoản:</span>
-                                            <span className="font-semibold text-right">CONG TY VIET TOUR</span>
-                                            <span className="text-gray-500">Nội dung CK:</span>
-                                            <span className="font-semibold text-right text-blue-600">VT{tour.id}{Date.now().toString().slice(-6)}</span>
-                                            <span className="text-gray-500">Số tiền:</span>
-                                            <span className="font-extrabold text-right text-blue-700 text-lg">{formattedTotal}</span>
-                                        </div>
-                                    </div>
-                                    <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-center">
-                                        <p className="text-xs text-amber-700">⚠️ Vui lòng nhập đúng nội dung chuyển khoản để được xác nhận tự động</p>
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Security note */}
-                            <div className="flex items-center gap-2 mt-6 px-4 py-3 bg-emerald-50 border border-emerald-200 rounded-xl text-sm text-emerald-700">
-                                <ShieldCheck className="w-5 h-5 flex-shrink-0" />
-                                <span>Giao dịch được bảo mật bởi Viet Tour. Thông tin thanh toán hoàn toàn an toàn.</span>
-                            </div>
-
-                            {/* Action buttons */}
-                            <div className="flex gap-3 mt-6">
-                                <Button
-                                    variant="outline"
-                                    onClick={handleCancelPayment}
-                                    className="flex-1 h-12 rounded-xl text-base"
-                                >
-                                    <ArrowLeft className="w-4 h-4 mr-2" /> Huỷ thanh toán
-                                </Button>
-                                <Button
-                                    onClick={handleConfirmPayment}
-                                    disabled={isBooking}
-                                    className="flex-1 h-12 rounded-xl text-base bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 shadow-lg shadow-emerald-600/30"
-                                >
-                                    {isBooking ? (
-                                        <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Đang xử lý...</>
-                                    ) : (
-                                        <><CheckCircle2 className="w-4 h-4 mr-2" /> Thanh toán</>
-                                    )}
-                                </Button>
-                            </div>
-                        </div>
-                    </div>
-                )}
 
                 {/* Booking Result */}
                 {bookingResult && (
@@ -940,12 +784,6 @@ export default function TourBookingWrapper({
                                 <CheckCircle2 className="w-10 h-10 text-emerald-500 mx-auto mb-2" />
                                 <p className="text-sm font-medium text-emerald-700">Đã thanh toán thành công!</p>
                                 <p className="text-xs text-gray-400 mt-1">Mã đơn: #{bookingResult.orderId}</p>
-                            </div>
-                        ) : showPayment ? (
-                            <div className="text-center py-2">
-                                <Loader2 className="w-8 h-8 text-blue-500 mx-auto mb-2 animate-spin" />
-                                <p className="text-sm font-medium text-blue-700">Đang chờ thanh toán...</p>
-                                <p className="text-xs text-gray-400 mt-1 font-mono">{formatCountdown(paymentCountdown)}</p>
                             </div>
                         ) : (
                             <Button

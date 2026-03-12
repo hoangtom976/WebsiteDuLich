@@ -142,7 +142,7 @@ public class QdrantService {
                             .addAllVector(queryVector)
                             .setLimit(topK)
                             .setWithPayload(enable(true))
-                            .setScoreThreshold(0.3f) // Chỉ lấy kết quả có độ tương tự >= 0.3
+                            .setScoreThreshold(0.1f) // Chỉ lấy kết quả có độ tương tự >= 0.1
                             .build())
                     .get();
         } catch (InterruptedException | ExecutionException e) {

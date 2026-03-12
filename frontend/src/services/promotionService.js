@@ -9,6 +9,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:8
 async function serverFetchJson(path) {
   const url = `${API_BASE_URL}${path}`;
   try {
+    console.log(`Server-side fetching: ${url}`);
     const response = await fetch(url, {
       method: "GET",
       headers: { Accept: "application/json" },
@@ -16,6 +17,7 @@ async function serverFetchJson(path) {
     });
 
     if (!response.ok) {
+      console.error(`Fetch failed for ${url}: ${response.status} ${response.statusText}`);
       throw new Error(`Request failed: ${response.status}`);
     }
 
@@ -25,7 +27,11 @@ async function serverFetchJson(path) {
 
     return await response.json();
   } catch (error) {
-    console.error(`Server fetch error for ${url}:`, error);
+    console.error(`Server fetch error for ${url}:`, {
+      message: error.message,
+      stack: error.stack,
+      cause: error.cause
+    });
     throw error;
   }
 }

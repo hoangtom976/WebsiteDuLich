@@ -40,13 +40,13 @@ public class BaiVietService {
      * Tạo một bài viết mới.
      * 
      * @param yeuCau     DTO chứa thông tin bài viết mới.
-     * @param nhanVienId ID của nhân viên tạo bài.
      * @return DTO của bài viết đã được tạo.
      */
     @Transactional
-    public BaiVietPhanHoiDTO taoBaiViet(BaiVietYeuCauDTO yeuCau, Long nhanVienId) {
-        NguoiDung tacGia = nguoiDungRepository.findById(nhanVienId)
-                .orElseThrow(() -> new TaiNguyenKhongTonTaiException("Không tìm thấy nhân viên với ID: " + nhanVienId));
+    public BaiVietPhanHoiDTO taoBaiViet(BaiVietYeuCauDTO yeuCau) {
+        String email = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getName();
+        NguoiDung tacGia = nguoiDungRepository.findByEmail(email)
+                .orElseThrow(() -> new TaiNguyenKhongTonTaiException("Không tìm thấy nhân viên với email: " + email));
 
         String slug = taoSlug(yeuCau.getTieuDe());
 
@@ -156,12 +156,13 @@ public class BaiVietService {
     }
 
     @Transactional
-    public BinhLuanPhanHoiDTO themBinhLuan(Long baiVietId, BinhLuanYeuCauDTO yeuCau, Long nguoiDungId) {
+    public BinhLuanPhanHoiDTO themBinhLuan(Long baiVietId, BinhLuanYeuCauDTO yeuCau) {
+        String email = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getName();
+        NguoiDung nguoiDung = nguoiDungRepository.findByEmail(email)
+                .orElseThrow(() -> new TaiNguyenKhongTonTaiException("Không tìm thấy người dùng với email: " + email));
+        
         BaiViet baiViet = baiVietRepository.findById(baiVietId)
                 .orElseThrow(() -> new TaiNguyenKhongTonTaiException("Không tìm thấy bài viết với ID: " + baiVietId));
-        NguoiDung nguoiDung = nguoiDungRepository.findById(nguoiDungId)
-                .orElseThrow(
-                        () -> new TaiNguyenKhongTonTaiException("Không tìm thấy người dùng với ID: " + nguoiDungId));
 
         BinhLuanBaiViet binhLuan = BinhLuanBaiViet.builder()
                 .baiViet(baiViet)

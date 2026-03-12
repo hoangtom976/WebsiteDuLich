@@ -1,0 +1,452 @@
+[
+  {
+    "id": 3,
+    "tenTour": "Khám phá vịnh kỳ quan Hạ Long 2n1đ",
+    "moTa": "Trải nghiệm du thuyền trên vịnh với hàng nghìn đảo đá vôi tuyệt đẹp. Tham quan hang động, chèo kayak và thưởng thức hải sản tươi ngon.",
+    "gia": 3500000,
+    "soNgay": 2,
+    "trangThai": true,
+    "danhMucId": 8,
+    "diaDiemId": 4,
+    "tenDanhMuc": "Du lịch biển đảo",
+    "tenDiaDiem": "Vịnh Hạ Long",
+    "diaDiem": {
+      "id": 4,
+      "tenDiaDiem": "Vịnh Hạ Long",
+      "moTa": "Di sản thiên nhiên thế giới nổi tiếng với hàng nghìn đảo đá vôi và cảnh biển tuyệt đẹp.",
+      "latitude": 20.9528365,
+      "longitude": 107.0800003
+    },
+    "hinhAnh": "https://res.cloudinary.com/ddpreqmwn/image/upload/v1772684784/mzes8kgjucage3wp9mmc.webp",
+    "lichTrinhs": [
+      {
+        "id": 79,
+        "ngayThu": 1,
+        "tieuDe": "Khởi hành – Tham quan Vịnh Hạ Long",
+        "moTa": "• 07:30: Xe và hướng dẫn viên đón khách tại điểm hẹn, khởi hành đi Vịnh Hạ Long\n\n• 10:30: Dừng chân nghỉ ngơi tại trạm dừng trên đường\n\n• 12:00: Đến bến tàu, làm thủ tục lên du thuyền và bắt đầu hành trình khám phá vịnh\n\n• 12:30: Ăn trưa trên du thuyền với các món hải sản địa phương\n\n• 14:00: Tham quan Hang Sửng Sốt – một trong những hang động đẹp nhất của vịnh\n\n• 15:30: Tham quan và tắm biển tại Đảo Ti Tốp, leo lên đỉnh đảo ngắm toàn cảnh vịnh\n\n• 17:30: Trở lại du thuyền, nghỉ ngơi và ngắm hoàng hôn trên vịnh\n\n• 19:00: Ăn tối trên du thuyền\n\n• 20:30: Tham gia câu mực đêm hoặc thư giãn trên boong tàu\n\n• 22:00: Nghỉ đêm trên du thuyền",
+        "tourId": 3
+      },
+      {
+        "id": 80,
+        "ngayThu": 2,
+        "tieuDe": "Tham quan hang động – Kết thúc hành trình",
+        "moTa": "• 06:00: Ngắm bình minh trên vịnh và tập Tai Chi trên boong tàu\n\n• 07:00: Ăn sáng trên du thuyền\n\n• 08:00: Tham quan Hang Luồn, trải nghiệm chèo kayak hoặc đi thuyền nan\n\n• 09:30: Quay lại du thuyền, làm thủ tục trả phòng\n\n• 10:30: Ăn trưa nhẹ trên tàu trong khi tàu quay về bến\n\n• 11:30: Tàu cập bến, xe đón khách khởi hành về lại Hà Nội\n\n• 15:00: Về đến điểm đón ban đầu, kết thúc chương trình tour",
+        "tourId": 3
+      }
+    ],
+    "soSaoTrungBinh": 0,
+    "tongDanhGia": 0,
+    "daYeuThich": false
+  },
+  {
+    "id": 4,
+    "tenTour": "Nghỉ dưỡng thiên đường biển Phú Quốc 3n1đ",
+    "moTa": "Tận hưởng bãi biển cát trắng và làn nước trong xanh tại đảo ngọc Phú Quốc. Tham quan làng chài, chợ đêm và thưởng thức đặc sản địa phương.",
+    "gia": 4200000,
+    "soNgay": 3,
+    "trangThai": true,
+    "danhMucId": 8,
+    "diaDiemId": 5,
+    "tenDanhMuc": "Du lịch biển đảo",
+    "tenDiaDiem": "Đảo Phú Quốc",
+    "diaDiem": {
+      "id": 5,
+      "tenDiaDiem": "Đảo Phú Quốc",
+      "moTa": "Hòn đảo lớn nhất Việt Nam với bãi biển trong xanh, resort cao cấp và hải sản tươi ngon.",
+      "latitude": 10.2287856,
+      "longitude": 104.01435919843988
+    },
+    "hinhAnh": "https://res.cloudinary.com/ddpreqmwn/image/upload/v1772685609/fevyx8cs7rflxpol0uiz.jpg",
+    "lichTrinhs": [
+      {
+        "id": 81,
+        "ngayThu": 1,
+        "tieuDe": "Đến Phú Quốc – Tham quan đảo",
+        "moTa": "• 07:30: Xe và hướng dẫn viên đón khách tại điểm hẹn, di chuyển đến Sân bay Cần Thơ và tới Sân bay Quốc tế Phú Quốc và di chuyển về khách sạn nhận phòng\n\n• 10:00: Nghỉ ngơi, tự do tham quan và tắm biển\n\n• 12:00: Ăn trưa tại nhà hàng địa phương với các món hải sản tươi ngon\n\n• 14:30: Tham quan Bãi Sao – một trong những bãi biển đẹp nhất Phú Quốc\n\n• 16:30: Chụp ảnh, tắm biển và thư giãn trên bãi cát trắng\n\n• 18:30: Ăn tối tại nhà hàng\n\n• 20:00: Tự do khám phá Chợ đêm Phú Quốc",
+        "tourId": 4
+      },
+      {
+        "id": 82,
+        "ngayThu": 2,
+        "tieuDe": "Khám phá biển đảo",
+        "moTa": "• 07:00: Ăn sáng tại khách sạn\n\n• 08:30: Khởi hành tham quan Quần đảo An Thới\n\n• 09:30: Trải nghiệm cáp treo vượt biển tại Cáp treo Hòn Thơm – tuyến cáp treo dài nhất thế giới\n\n• 11:30: Vui chơi và tắm biển tại Hòn Thơm\n\n• 12:30: Ăn trưa tại nhà hàng trên đảo\n\n• 14:00: Tự do vui chơi tại công viên nước hoặc tắm biển\n\n• 16:30: Quay trở về khách sạn\n\n• 18:30: Ăn tối và nghỉ ngơi",
+        "tourId": 4
+      },
+      {
+        "id": 83,
+        "ngayThu": 3,
+        "tieuDe": "Tham quan làng chài – Kết thúc tour",
+        "moTa": "• 07:00: Ăn sáng tại khách sạn\n\n• 08:30: Tham quan Nhà thùng nước mắm Phú Quốc\n\n• 09:30: Tham quan Trang trại nuôi cấy ngọc trai Phú Quốc\n\n• 11:00: Mua sắm đặc sản địa phương\n\n• 12:00: Ăn trưa tại nhà hàng\n\n• 13:30: Bay về Cần Thơ, kết thúc hành trình tại Sân bay Quốc tế Phú Quốc",
+        "tourId": 4
+      }
+    ],
+    "soSaoTrungBinh": 0,
+    "tongDanhGia": 0,
+    "daYeuThich": false
+  },
+  {
+    "id": 5,
+    "tenTour": "Khám phá thiên nhiên Cúc Phương 2n1đ",
+    "moTa": "Trekking trong rừng nguyên sinh và tìm hiểu hệ sinh thái đa dạng. Tham quan trung tâm cứu hộ động vật và trải nghiệm thiên nhiên hoang dã.",
+    "gia": 2000000,
+    "soNgay": 2,
+    "trangThai": true,
+    "danhMucId": 9,
+    "diaDiemId": 6,
+    "tenDanhMuc": "Du lịch sinh thái",
+    "tenDiaDiem": "Vườn quốc gia Cúc Phương",
+    "diaDiem": {
+      "id": 6,
+      "tenDiaDiem": "Vườn quốc gia Cúc Phương",
+      "moTa": "Khu rừng quốc gia lâu đời với hệ sinh thái đa dạng và nhiều loài động thực vật quý hiếm.",
+      "latitude": 20.2401232,
+      "longitude": 105.7224119
+    },
+    "hinhAnh": "https://res.cloudinary.com/ddpreqmwn/image/upload/v1772685720/w605agtm4lmuhb9rvvsq.jpg",
+    "lichTrinhs": [
+      {
+        "id": 84,
+        "ngayThu": 1,
+        "tieuDe": "Khởi hành – Khám phá rừng nguyên sinh",
+        "moTa": "• 07:30: Xe và hướng dẫn viên đón khách tại điểm hẹn, khởi hành đến Vườn quốc gia Cúc Phương\n\n• 10:30: Đến nơi, tham quan Trung tâm cứu hộ linh trưởng – nơi bảo tồn nhiều loài voọc quý hiếm\n\n• 12:00: Ăn trưa tại nhà hàng địa phương gần vườn quốc gia\n\n• 13:30: Bắt đầu trekking khám phá rừng nguyên sinh Cúc Phương, tìm hiểu hệ sinh thái rừng nhiệt đới\n\n• 15:30: Tham quan Cây Chò Ngàn Năm – cây cổ thụ nổi tiếng hơn 1000 năm tuổi\n\n• 17:30: Nhận phòng khu nghỉ sinh thái, nghỉ ngơi\n\n• 18:30: Ăn tối với các món đặc sản địa phương\n\n• 20:00: Tham gia chương trình xem động vật hoang dã ban đêm trong rừng",
+        "tourId": 5
+      },
+      {
+        "id": 85,
+        "ngayThu": 2,
+        "tieuDe": "Tham quan trung tâm cứu hộ động vật",
+        "moTa": "• 06:30: Thức dậy, hít thở không khí trong lành và dạo bộ trong rừng\n\n• 07:00: Ăn sáng tại khu nghỉ\n\n• 08:30: Tham quan Động Người Xưa – nơi phát hiện dấu tích người tiền sử\n\n• 10:30: Tự do chụp ảnh, khám phá thêm cảnh quan thiên nhiên\n\n• 12:00: Ăn trưa tại nhà hàng\n\n• 13:30: Khởi hành về\n\n• 16:00: Về đến điểm đón ban đầu, kết thúc chương trình tour",
+        "tourId": 5
+      }
+    ],
+    "soSaoTrungBinh": 0,
+    "tongDanhGia": 0,
+    "daYeuThich": false
+  },
+  {
+    "id": 6,
+    "tenTour": "Trải nghiệm sinh thái Tràm Chim 1n0đ",
+    "moTa": "Khám phá hệ sinh thái rừng ngập nước đặc trưng miền Tây. Ngồi xuồng len lỏi qua rừng tràm và ngắm các loài chim quý hiếm.",
+    "gia": 1200000,
+    "soNgay": 1,
+    "trangThai": true,
+    "danhMucId": 9,
+    "diaDiemId": 7,
+    "tenDanhMuc": "Du lịch sinh thái",
+    "tenDiaDiem": "Vườn quốc gia Tràm Chim",
+    "diaDiem": {
+      "id": 7,
+      "tenDiaDiem": "Vườn quốc gia Tràm Chim",
+      "moTa": "Khu sinh thái ngập nước nổi tiếng với nhiều loài chim quý hiếm.",
+      "latitude": 10.670013,
+      "longitude": 105.564687
+    },
+    "hinhAnh": "https://res.cloudinary.com/ddpreqmwn/image/upload/v1772685781/yqw7i4jtmzh3gzi0yqv0.webp",
+    "lichTrinhs": [
+      {
+        "id": 86,
+        "ngayThu": 1,
+        "tieuDe": "Khám phá Tràm Chim",
+        "moTa": "•  07:30: Xe và hướng dẫn viên đón khách tại điểm hẹn, đến Vườn quốc gia Tràm Chim\n\n• 08:30: Đến nơi, làm thủ tục vào vườn quốc gia và nghe giới thiệu về hệ sinh thái đất ngập nước đặc trưng\n\n• 09:00: Lên xuồng máy tham quan rừng tràm, ngắm cảnh thiên nhiên và các loài chim hoang dã\n\n• 10:30: Quan sát các loài chim quý hiếm, đặc biệt là Sếu đầu đỏ vào mùa thích hợp\n\n• 12:00: Ăn trưa với các món đặc sản miền Tây tại nhà hàng sinh thái\n\n• 13:30: Tiếp tục khám phá rừng tràm, chụp ảnh và trải nghiệm không gian thiên nhiên yên bình\n\n• 15:00: Tham quan khu trưng bày và tìm hiểu về hệ động thực vật tại vườn quốc gia\n\n• 16:00: Khởi hành trở về điểm đón ban đầu\n\n• 18:00: Kết thúc hành trình tham quan sinh thái Tràm Chim",
+        "tourId": 6
+      }
+    ],
+    "soSaoTrungBinh": 0,
+    "tongDanhGia": 0,
+    "daYeuThich": false
+  },
+  {
+    "id": 7,
+    "tenTour": "Hành trình di sản Hội An 2nn1đ",
+    "moTa": "Dạo phố cổ lung linh ánh đèn lồng và tham quan các công trình kiến trúc cổ. Trải nghiệm ẩm thực đặc sản và văn hóa địa phương.",
+    "gia": 2500000,
+    "soNgay": 2,
+    "trangThai": true,
+    "danhMucId": 10,
+    "diaDiemId": 8,
+    "tenDanhMuc": "Du lịch văn hóa",
+    "tenDiaDiem": "Phố cổ Hội An",
+    "diaDiem": {
+      "id": 8,
+      "tenDiaDiem": "Phố cổ Hội An",
+      "moTa": "Di sản văn hóa thế giới với kiến trúc cổ kính và đèn lồng rực rỡ.",
+      "latitude": 15.8771291,
+      "longitude": 108.3286631
+    },
+    "hinhAnh": "https://res.cloudinary.com/ddpreqmwn/image/upload/v1772685873/tirokjjujoggtdejymdv.jpg",
+    "lichTrinhs": [
+      {
+        "id": 87,
+        "ngayThu": 1,
+        "tieuDe": "Khám phá phố cổ",
+        "moTa": "• 07:30: Xe và hướng dẫn viên đón khách tại điểm hẹn, khởi hành đến Phố cổ Hội An\n\n• 09:00: Tham quan Chùa Cầu – biểu tượng nổi tiếng của phố cổ\n\n• 10:00: Khám phá Nhà cổ Tấn Ký và tìm hiểu lịch sử thương cảng Hội An\n\n• 12:00: Ăn trưa tại nhà hàng địa phương với các đặc sản như Cao lầu và Mì Quảng\n\n• 14:00: Nhận phòng khách sạn, nghỉ ngơi\n\n• 15:30: Tự do dạo phố, chụp ảnh với các con phố đèn lồng và tham quan các cửa hàng thủ công\n\n• 17:30: Đi thuyền trên Sông Hoài và trải nghiệm thả hoa đăng\n\n• 19:00: Ăn tối tại nhà hàng\n\n• 20:30: Tự do khám phá chợ đêm Hội An và thưởng thức ẩm thực đường phố\n\n• 22:00: Nghỉ đêm tại khách sạn ở Hội An",
+        "tourId": 7
+      },
+      {
+        "id": 88,
+        "ngayThu": 2,
+        "tieuDe": "Làng nghề truyền thống",
+        "moTa": "07:00: Ăn sáng tại khách sạn\n\n• 08:30: Tham quan Làng gốm Thanh Hà và trải nghiệm làm gốm thủ công\n\n• 10:00: Tham quan Làng rau Trà Quế, tìm hiểu cách trồng rau hữu cơ\n\n• 12:00: Ăn trưa tại nhà hàng địa phương\n\n• 13:30: Mua sắm đặc sản và quà lưu niệm\n\n• 15:00: Khởi hành trở về \n\n• 16:00: Kết thúc chương trình tour",
+        "tourId": 7
+      }
+    ],
+    "soSaoTrungBinh": 0,
+    "tongDanhGia": 0,
+    "daYeuThich": false
+  },
+  {
+    "id": 8,
+    "tenTour": "Khám phá di sản cố đô Huế 2n1đ",
+    "moTa": "Tham quan Đại Nội, lăng tẩm vua Nguyễn và chùa Thiên Mụ. Thưởng thức ẩm thực cung đình và nét văn hóa đặc trưng xứ Huế.",
+    "gia": 2700000,
+    "soNgay": 2,
+    "trangThai": true,
+    "danhMucId": 10,
+    "diaDiemId": 9,
+    "tenDanhMuc": "Du lịch văn hóa",
+    "tenDiaDiem": "Cố đô Huế",
+    "diaDiem": {
+      "id": 9,
+      "tenDiaDiem": "Cố đô Huế",
+      "moTa": "Trung tâm văn hóa – lịch sử với hệ thống cung điện và lăng tẩm triều Nguyễn.",
+      "latitude": null,
+      "longitude": null
+    },
+    "hinhAnh": "https://res.cloudinary.com/ddpreqmwn/image/upload/v1772685932/fae5dok4yqlvzsegegyf.jpg",
+    "lichTrinhs": [
+      {
+        "id": 89,
+        "ngayThu": 1,
+        "tieuDe": "Đại Nội – Chùa Thiên Mụ",
+        "moTa": "• 07:30: Xe và hướng dẫn viên đón khách tại điểm hẹn, khởi hành đi tham quan cố đô Huế\n\n• 11:30: Đến Huế, đoàn dùng bữa trưa tại nhà hàng địa phương với các món đặc sản Huế\n\n• 13:30: Nhận phòng khách sạn và nghỉ ngơi\n\n• 14:30: Tham quan Đại Nội Huế – quần thể di tích lịch sử của triều Nguyễn, khám phá Ngọ Môn, Điện Thái Hòa và Tử Cấm Thành\n\n• 16:30: Tham quan Chùa Thiên Mụ – ngôi chùa cổ nổi tiếng nằm bên dòng sông Hương\n\n• 18:30: Ăn tối tại nhà hàng, thưởng thức ẩm thực đặc trưng xứ Huế\n\n• 20:00: Tự do dạo phố, tham quan Cầu Trường Tiền và ngắm cảnh sông Hương về đêm\n\n• 22:00: Nghỉ đêm tại khách sạn ở Huế",
+        "tourId": 8
+      },
+      {
+        "id": 90,
+        "ngayThu": 2,
+        "tieuDe": "Lăng tẩm vua Nguyễn",
+        "moTa": "• 06:30: Thức dậy, tận hưởng không khí trong lành và ngắm bình minh bên dòng sông Hương\n\n• 07:00: Ăn sáng tại khách sạn\n\n• 08:30: Tham quan Lăng Khải Định – công trình kiến trúc độc đáo kết hợp giữa phong cách Á và Âu\n\n• 10:30: Tham quan và mua sắm tại Chợ Đông Ba, thưởng thức các đặc sản địa phương\n\n• 12:00: Ăn trưa tại nhà hàng\n\n• 13:30: Khởi hành trở về điểm đón ban đầu\n\n• 16:30: Về đến điểm đón ban đầu, kết thúc chương trình tour",
+        "tourId": 8
+      }
+    ],
+    "soSaoTrungBinh": 0,
+    "tongDanhGia": 0,
+    "daYeuThich": false
+  },
+  {
+    "id": 9,
+    "tenTour": "Nghỉ dưỡng thành phố ngàn hoa 3n2đ",
+    "moTa": "Khám phá thành phố sương mù với khí hậu mát mẻ quanh năm. Tham quan hồ Xuân Hương, thung lũng tình yêu và vườn hoa rực rỡ.",
+    "gia": 3000000,
+    "soNgay": 3,
+    "trangThai": true,
+    "danhMucId": 11,
+    "diaDiemId": 10,
+    "tenDanhMuc": "Du lịch nghỉ dưỡng",
+    "tenDiaDiem": "Đà Lạt",
+    "diaDiem": {
+      "id": 10,
+      "tenDiaDiem": "Đà Lạt",
+      "moTa": "Thành phố cao nguyên mát mẻ quanh năm, nổi tiếng với cảnh quan lãng mạn và resort nghỉ dưỡng.",
+      "latitude": 11.9402416,
+      "longitude": 108.4375758
+    },
+    "hinhAnh": "https://res.cloudinary.com/ddpreqmwn/image/upload/v1772686039/c0e7nnmo9lwdkbqfgfuh.png",
+    "lichTrinhs": [
+      {
+        "id": 91,
+        "ngayThu": 1,
+        "tieuDe": "Đến Đà Lạt",
+        "moTa": "• 07:30: Xe và hướng dẫn viên đón khách tại điểm hẹn, khởi hành đi Đà Lạt\n\n• 11:30: Đến Đà Lạt, đoàn dùng bữa trưa tại nhà hàng địa phương\n\n• 13:30: Nhận phòng khách sạn và nghỉ ngơi\n\n• 15:00: Tham quan Quảng trường Lâm Viên – biểu tượng của thành phố với công trình hoa dã quỳ và nụ atiso khổng lồ\n\n• 16:30: Dạo bộ và chụp ảnh tại Hồ Xuân Hương – hồ nước nổi tiếng nằm ngay trung tâm thành phố\n\n• 18:30: Ăn tối tại nhà hàng\n\n• 20:00: Tự do khám phá Chợ đêm Đà Lạt, thưởng thức các món đặc sản như bánh tráng nướng, sữa đậu nành nóng\n\n• 22:00: Nghỉ đêm tại khách sạn Đà Lạt",
+        "tourId": 9
+      },
+      {
+        "id": 92,
+        "ngayThu": 2,
+        "tieuDe": "Tham quan danh thắng",
+        "moTa": "• 06:30: Thức dậy, tận hưởng không khí trong lành của thành phố sương mù\n\n• 07:00: Ăn sáng tại khách sạn\n\n• 08:30: Tham quan Núi Langbiang – nơi có thể ngắm toàn cảnh thành phố Đà Lạt từ trên cao\n\n• 10:30: Tham quan Thác Datanla, trải nghiệm máng trượt và khám phá cảnh quan thiên nhiên\n\n• 12:00: Ăn trưa tại nhà hàng\n\n• 14:00: Tham quan Vườn hoa thành phố Đà Lạt – nơi trưng bày hàng trăm loài hoa đặc trưng của thành phố ngàn hoa\n\n• 16:30: Tham quan và thưởng thức đặc sản tại Chợ Đà Lạt\n\n• 18:30: Ăn tối tại nhà hàng\n\n• 20:00: Tự do tham quan thành phố về đêm\n\n• 22:00: Nghỉ đêm tại khách sạn",
+        "tourId": 9
+      },
+      {
+        "id": 93,
+        "ngayThu": 3,
+        "tieuDe": "Thiền viện Trúc Lâm – Hồ Tuyền Lâm – Kết thúc tour",
+        "moTa": "• 06:30: Thức dậy, tận hưởng không khí trong lành của Đà Lạt\n\n• 07:00: Ăn sáng tại khách sạn\n\n• 08:30: Tham quan Thiền viện Trúc Lâm Đà Lạt – một trong những thiền viện lớn nhất Việt Nam\n\n• 10:00: Tham quan Hồ Tuyền Lâm, chụp ảnh và thư giãn giữa thiên nhiên\n\n• 12:00: Ăn trưa tại nhà hàng\n\n• 13:30: Khởi hành trở về điểm đón ban đầu\n\n• 17:30: Về đến điểm đón ban đầu, kết thúc chương trình tour",
+        "tourId": 9
+      }
+    ],
+    "soSaoTrungBinh": 0,
+    "tongDanhGia": 0,
+    "daYeuThich": false
+  },
+  {
+    "id": 10,
+    "tenTour": "Nghỉ dưỡng biển Nha Trang 3n2đ",
+    "moTa": "Thư giãn tại bãi biển đẹp và các khu resort cao cấp. Trải nghiệm lặn biển, tham quan đảo và thưởng thức hải sản tươi sống.",
+    "gia": 3800000,
+    "soNgay": 3,
+    "trangThai": true,
+    "danhMucId": 11,
+    "diaDiemId": 11,
+    "tenDanhMuc": "Du lịch nghỉ dưỡng",
+    "tenDiaDiem": "Nha Trang",
+    "diaDiem": {
+      "id": 11,
+      "tenDiaDiem": "Nha Trang",
+      "moTa": "Thành phố biển nổi tiếng với nhiều khu nghỉ dưỡng cao cấp và bãi biển đẹp.",
+      "latitude": 12.2431693,
+      "longitude": 109.1898675
+    },
+    "hinhAnh": "https://res.cloudinary.com/ddpreqmwn/image/upload/v1772686097/mj7l3vpztebacgdcp1vw.jpg",
+    "lichTrinhs": [
+      {
+        "id": 94,
+        "ngayThu": 1,
+        "tieuDe": "Khởi hành – Tháp Bà Ponagar – Biển Nha Trang",
+        "moTa": "• 07:30: Xe và hướng dẫn viên đón khách tại điểm hẹn, khởi hành đi Nha Trang\n\n• 11:30: Đến Nha Trang, đoàn dùng bữa trưa tại nhà hàng địa phương\n\n• 13:30: Nhận phòng khách sạn và nghỉ ngơi\n\n• 15:00: Tham quan Tháp Bà Ponagar – quần thể kiến trúc Chăm Pa cổ kính nổi tiếng\n\n• 16:30: Tắm biển và thư giãn tại Bãi biển Nha Trang\n\n• 18:30: Ăn tối tại nhà hàng với các món hải sản đặc trưng\n\n• 20:00: Tự do dạo biển và khám phá Chợ đêm Nha Trang\n\n• 22:00: Nghỉ đêm tại khách sạn Nha Trang",
+        "tourId": 10
+      },
+      {
+        "id": 95,
+        "ngayThu": 2,
+        "tieuDe": "VinWonders – Khám phá đảo Hòn Tre",
+        "moTa": "• 06:30: Thức dậy, tận hưởng không khí biển trong lành\n\n• 07:00: Ăn sáng tại khách sạn\n\n• 08:30: Di chuyển bằng cáp treo đến VinWonders Nha Trang – khu vui chơi giải trí nổi tiếng\n\n• 10:30: Tự do tham quan, trải nghiệm các trò chơi cảm giác mạnh và công viên nước\n\n• 12:30: Ăn trưa tại khu du lịch\n\n• 14:00: Tham quan thủy cung và các khu vui chơi trong VinWonders\n\n• 16:30: Trở về đất liền bằng cáp treo\n\n• 18:30: Ăn tối tại nhà hàng\n\n• 20:00: Tự do khám phá thành phố Nha Trang về đêm\n\n• 22:00: Nghỉ đêm tại khách sạn",
+        "tourId": 10
+      },
+      {
+        "id": 96,
+        "ngayThu": 3,
+        "tieuDe": "Nghỉ dưỡng",
+        "moTa": "• 06:30: Thức dậy và ngắm bình minh trên biển\n\n• 07:00: Ăn sáng tại khách sạn\n\n• 08:30: Tham quan Chùa Long Sơn – ngôi chùa nổi tiếng với tượng Phật trắng khổng lồ\n\n• 10:00: Tham quan và mua sắm đặc sản tại Chợ Đầm\n\n• 12:00: Ăn trưa tại nhà hàng\n\n• 13:30: Khởi hành trở về điểm đón ban đầu\n\n• 17:30: Về đến điểm đón ban đầu, kết thúc chương trình tour\n",
+        "tourId": 10
+      }
+    ],
+    "soSaoTrungBinh": 0,
+    "tongDanhGia": 0,
+    "daYeuThich": false
+  },
+  {
+    "id": 11,
+    "tenTour": "Chinh phục đỉnh Fansipan 2n1đ",
+    "moTa": "Hành trình chinh phục nóc nhà Đông Dương đầy thử thách. Ngắm nhìn cảnh núi rừng Tây Bắc hùng vĩ từ độ cao hơn 3.000m.",
+    "gia": 3200000,
+    "soNgay": 2,
+    "trangThai": true,
+    "danhMucId": 12,
+    "diaDiemId": 13,
+    "tenDanhMuc": "Du lịch khám phá",
+    "tenDiaDiem": "Đỉnh Fansipan",
+    "diaDiem": {
+      "id": 13,
+      "tenDiaDiem": "Đỉnh Fansipan",
+      "moTa": "Đỉnh núi cao nhất Đông Dương, thu hút du khách trekking và chinh phục độ cao.",
+      "latitude": null,
+      "longitude": null
+    },
+    "hinhAnh": "https://res.cloudinary.com/ddpreqmwn/image/upload/v1772686150/j2z6ctlqrafxjw5ckdko.png",
+    "lichTrinhs": [
+      {
+        "id": 97,
+        "ngayThu": 1,
+        "tieuDe": "Đến Sa Pa – Chuẩn bị hành trình",
+        "moTa": "• 07:30: Xe và hướng dẫn viên đón khách tại điểm hẹn, khởi hành đi Sa Pa\n\n• 12:00: Đến Sa Pa, đoàn dùng bữa trưa tại nhà hàng địa phương\n\n• 13:30: Nhận phòng khách sạn và nghỉ ngơi\n\n• 15:00: Tham quan Thị trấn Sa Pa, khám phá vẻ đẹp của thị trấn vùng núi Tây Bắc\n\n• 16:30: Tham quan và chụp ảnh tại Nhà thờ đá Sa Pa – công trình kiến trúc cổ kính nổi tiếng\n\n• 18:30: Ăn tối tại nhà hàng với các món đặc sản vùng núi\n\n• 20:00: Tự do khám phá Chợ đêm Sa Pa\n\n• 22:00: Nghỉ đêm tại khách sạn Sa Pa",
+        "tourId": 11
+      },
+      {
+        "id": 98,
+        "ngayThu": 2,
+        "tieuDe": "Chinh phục nóc nhà Đông Dương",
+        "moTa": "• 06:30: Thức dậy và tận hưởng không khí trong lành của vùng núi\n\n• 07:00: Ăn sáng tại khách sạn\n\n• 08:30: Di chuyển đến ga cáp treo và bắt đầu hành trình chinh phục Đỉnh Fansipan – “nóc nhà Đông Dương”\n\n• 10:30: Tham quan quần thể tâm linh và chụp ảnh tại đỉnh Fansipan\n\n• 12:00: Ăn trưa tại nhà hàng\n\n• 13:30: Khởi hành trở về điểm đón ban đầu\n\n• 18:00: Về đến điểm đón ban đầu, kết thúc chương trình tour",
+        "tourId": 11
+      }
+    ],
+    "soSaoTrungBinh": 0,
+    "tongDanhGia": 0,
+    "daYeuThich": false
+  },
+  {
+    "id": 12,
+    "tenTour": "Thám hiểm hang Sơn Đoòng 4n3đ",
+    "moTa": "Khám phá hang động lớn nhất thế giới với cảnh quan kỳ vĩ. Trải nghiệm trekking, cắm trại trong hang và khám phá hệ sinh thái độc đáo.",
+    "gia": 25000000,
+    "soNgay": 4,
+    "trangThai": true,
+    "danhMucId": 12,
+    "diaDiemId": 12,
+    "tenDanhMuc": "Du lịch khám phá",
+    "tenDiaDiem": "Hang Sơn Đoòng",
+    "diaDiem": {
+      "id": 12,
+      "tenDiaDiem": "Hang Sơn Đoòng",
+      "moTa": "Hang động tự nhiên lớn nhất thế giới với cảnh quan kỳ vĩ và hệ sinh thái độc đáo.",
+      "latitude": null,
+      "longitude": null
+    },
+    "hinhAnh": "https://res.cloudinary.com/ddpreqmwn/image/upload/v1772686206/d7xuyspbygkms2ephkom.jpg",
+    "lichTrinhs": [
+      {
+        "id": 99,
+        "ngayThu": 1,
+        "tieuDe": "Khởi hành – Phong Nha – Chuẩn bị hành trình thám hiểm",
+        "moTa": "• 07:30: Xe và hướng dẫn viên đón khách tại điểm hẹn, khởi hành đi Quảng Bình\n\n• 12:00: Đến Quảng Bình, đoàn dùng bữa trưa tại nhà hàng địa phương\n\n• 13:30: Nhận phòng khách sạn và nghỉ ngơi\n\n• 15:00: Tham quan Vườn quốc gia Phong Nha – Kẻ Bàng – di sản thiên nhiên thế giới nổi tiếng\n\n• 16:30: Hướng dẫn viên phổ biến quy định an toàn và chuẩn bị trang thiết bị cho chuyến thám hiểm\n\n• 18:30: Ăn tối tại nhà hàng\n\n• 20:00: Nghỉ ngơi, chuẩn bị cho hành trình khám phá hang động vào ngày hôm sau\n\n• 22:00: Nghỉ đêm tại khách sạn",
+        "tourId": 12
+      },
+      {
+        "id": 100,
+        "ngayThu": 2,
+        "tieuDe": "Trekking rừng – Khám phá hang Sơn Đoòng",
+        "moTa": "• 06:30: Thức dậy và ăn sáng tại khách sạn\n\n• 07:30: Khởi hành trekking xuyên rừng nguyên sinh để đến cửa hang\n\n• 10:30: Bắt đầu hành trình khám phá Hang Sơn Đoòng – hang động lớn nhất thế giới\n\n• 12:30: Ăn trưa picnic trong rừng\n\n• 14:00: Tiếp tục khám phá hệ thống thạch nhũ khổng lồ và cảnh quan kỳ vĩ trong hang\n\n• 17:30: Cắm trại trong hang và nghỉ ngơi\n\n• 18:30: Ăn tối tại khu cắm trại\n\n• 21:00: Nghỉ đêm trong hang Sơn Đoòng",
+        "tourId": 12
+      },
+      {
+        "id": 101,
+        "ngayThu": 3,
+        "tieuDe": "Khám phá “Vườn địa đàng” trong hang – Trở về Phong Nha",
+        "moTa": "• 06:30: Thức dậy và ăn sáng tại khu cắm trại\n\n• 07:30: Tham quan khu “Vườn địa đàng” – khu rừng nguyên sinh nằm trong lòng hang\n\n• 10:30: Chụp ảnh và khám phá thêm các khối thạch nhũ khổng lồ\n\n• 12:00: Ăn trưa\n\n• 13:30: Bắt đầu hành trình quay trở ra khỏi hang\n\n• 16:30: Trở về khu nghỉ và nghỉ ngơi\n\n• 18:30: Ăn tối tại nhà hàng\n\n• 20:00: Tự do nghỉ ngơi\n\n• 22:00: Nghỉ đêm tại khách sạn",
+        "tourId": 12
+      },
+      {
+        "id": 102,
+        "ngayThu": 4,
+        "tieuDe": "Tham quan Phong Nha – Kết thúc tour",
+        "moTa": "• 06:30: Thức dậy và ăn sáng tại khách sạn\n\n• 08:30: Tham quan Động Phong Nha – hang động nổi tiếng với hệ thống sông ngầm\n\n• 10:30: Tự do chụp ảnh và mua đặc sản địa phương\n\n• 12:00: Ăn trưa tại nhà hàng\n\n• 13:30: Khởi hành trở về điểm đón ban đầu\n\n• 18:00: Về đến điểm đón ban đầu, kết thúc chương trình tour",
+        "tourId": 12
+      }
+    ],
+    "soSaoTrungBinh": 0,
+    "tongDanhGia": 0,
+    "daYeuThich": false
+  },
+  {
+    "id": 14,
+    "tenTour": "Bạc Liêu- hành trình khám phá vùng đất công tử 1n0đ",
+    "moTa": "Khám Phá Nhà Công Tử Bạc Liêu: Kiệt Tác Kiến Trúc Bề Thế Vượt Thời Gian Ở Miền Tây",
+    "gia": 1000000,
+    "soNgay": 1,
+    "trangThai": true,
+    "danhMucId": 10,
+    "diaDiemId": 14,
+    "tenDanhMuc": "Du lịch văn hóa",
+    "tenDiaDiem": "Bạc Liêu",
+    "diaDiem": {
+      "id": 14,
+      "tenDiaDiem": "Bạc Liêu",
+      "moTa": "Bạc Liêu xứ sở tình yêu",
+      "latitude": 9.2824882,
+      "longitude": 105.7260685
+    },
+    "hinhAnh": "https://res.cloudinary.com/ddpreqmwn/image/upload/v1773238229/trwpqewyeko13qnouavw.jpg",
+    "lichTrinhs": [
+      {
+        "id": 78,
+        "ngayThu": 1,
+        "tieuDe": "Tham quan các địa danh nổi tiếng tại Bạc Liêu",
+        "moTa": "• 07:30: Xe và hướng dẫn viên đón khách tại điểm hẹn, khởi hành đi Bạc Liêu\n\n• 09:30: Đến Bạc Liêu, tham quan Nhà Công tử Bạc Liêu – ngôi nhà nổi tiếng gắn liền với cuộc sống xa hoa của công tử Trần Trinh Huy\n\n• 10:30: Tham quan Chùa Xiêm Cán – một trong những ngôi chùa Khmer lớn và đẹp nhất miền Tây\n\n• 12:00: Ăn trưa tại nhà hàng địa phương, thưởng thức đặc sản Bạc Liêu\n\n• 13:30: Tham quan Nhà hát Cao Văn Lầu – nơi gắn liền với nghệ thuật Đờn ca tài tử Nam Bộ\n\n• 14:30: Tham quan Cánh đồng điện gió Bạc Liêu, chụp ảnh với những turbine gió khổng lồ bên bờ biển\n\n• 15:30: Tự do mua sắm đặc sản địa phương\n\n• 16:00: Khởi hành trở về điểm đón ban đầu\n\n• 18:00: Về đến điểm đón ban đầu, kết thúc chương trình tour",
+        "tourId": 14
+      }
+    ],
+    "soSaoTrungBinh": 0,
+    "tongDanhGia": 0,
+    "daYeuThich": false
+  }
+]

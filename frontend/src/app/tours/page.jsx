@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
-import { Loader2, Search, MapPin, Clock, Star, DollarSign, RotateCcw } from "lucide-react";
+import { Loader2, Search, MapPin, Clock, Star, DollarSign, RotateCcw, Calendar } from "lucide-react";
 import TourCard from "@/components/shared/TourCard";
 import { getAllTours } from "@/services/tourService";
 import { getAllCategories } from "@/services/categoryService";
@@ -28,10 +28,14 @@ export default function ToursPage() {
   const [loading, setLoading] = useState(true);
 
   const [searchTerm, setSearchTerm] = useState(searchParams.get("q") || "");
-  const [selectedCategory, setSelectedCategory] = useState(searchParams.get("category") || "all");
-  const [priceRange, setPriceRange] = useState([500000, 50000000]);
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [priceRange, setPriceRange] = useState([
+    Number(searchParams.get("minPrice") || 500000), 
+    Number(searchParams.get("maxPrice") || 50000000)
+  ]);
   const [durationFilter, setDurationFilter] = useState("all");
   const [ratingFilter, setRatingFilter] = useState(0);
+  const [departureDate, setDepartureDate] = useState(searchParams.get("departureDate") || "");
 
   const resetFilters = () => {
     setSearchTerm("");
@@ -39,6 +43,7 @@ export default function ToursPage() {
     setPriceRange([500000, 50000000]);
     setDurationFilter("all");
     setRatingFilter(0);
+    setDepartureDate("");
   };
 
   useEffect(() => {
@@ -55,6 +60,18 @@ export default function ToursPage() {
       setAllTours(toursData);
       setFilteredTours(toursData);
       setCategories(categoriesData);
+
+      // Tự động nhận diện Loại tour (category) từ URL
+      const catParam = searchParams.get("category");
+      if (catParam && categoriesData) {
+        const matchedCat = categoriesData.find(c => 
+          c.tenDanhMuc.toLowerCase().includes(catParam.toLowerCase())
+        );
+        if (matchedCat) {
+          setSelectedCategory(String(matchedCat.id));
+        }
+      }
+
       setLoading(false);
     }
     fetchData();
@@ -65,7 +82,14 @@ export default function ToursPage() {
 
     if (searchTerm) {
       tempTours = tempTours.filter((tour) =>
-        tour.tenTour.toLowerCase().includes(searchTerm.toLowerCase()),
+        tour.tenTour.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (tour.tenDiaDiem && tour.tenDiaDiem.toLowerCase().includes(searchTerm.toLowerCase()))
+      );
+    }
+
+    if (departureDate) {
+      tempTours = tempTours.filter((tour) => 
+        tour.cacNgayKhoiHanh && tour.cacNgayKhoiHanh.includes(departureDate)
       );
     }
 
@@ -94,7 +118,7 @@ export default function ToursPage() {
     }
 
     setFilteredTours(tempTours);
-  }, [searchTerm, selectedCategory, priceRange, durationFilter, ratingFilter, allTours]);
+  }, [searchTerm, selectedCategory, priceRange, durationFilter, ratingFilter, departureDate, allTours]);
 
   if (loading) {
     return (
@@ -135,6 +159,23 @@ export default function ToursPage() {
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="rounded-lg border-slate-200 focus:ring-blue-500"
+                />
+              </div>
+            </div>
+
+            {/* Ngày khởi hành */}
+            <div className="mt-7 space-y-2">
+              <Label htmlFor="dateSearch" className="text-sm font-bold flex items-center gap-2 text-slate-700">
+                <Calendar className="h-4 w-4 text-purple-500" />
+                Ngày khởi hành
+              </Label>
+              <div className="relative">
+                <Input
+                  id="dateSearch"
+                  type="date"
+                  value={departureDate}
+                  onChange={(e) => setDepartureDate(e.target.value)}
+                  className="rounded-lg border-slate-200 focus:ring-purple-500"
                 />
               </div>
             </div>

@@ -43,4 +43,9 @@ public class DanhGiaController {
     public ResponseEntity<List<HienThiDanhGiaDTO>> layDanhGiaCuaToi() {
         return ResponseEntity.ok(danhGiaService.layDanhGiaCuaToi());
     }
+
+    @GetMapping("/tat-ca")
+    public ResponseEntity<List<HienThiDanhGiaDTO>> layTatCaDanhGia() {
+        return ResponseEntity.ok(danhGiaService.layTatCaDanhGia());
+    }
 }

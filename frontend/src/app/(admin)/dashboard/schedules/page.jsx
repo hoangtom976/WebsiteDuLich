@@ -49,6 +49,8 @@ export default function AdminSchedulesPage() {
   const [selectedTourId, setSelectedTourId] = useState("");
   const [schedules, setSchedules] = useState([]);
   const [query, setQuery] = useState("");
+  const [filterScheduleStatus, setFilterScheduleStatus] = useState("all");
+  const [filterMonth, setFilterMonth] = useState("all");
   const [loading, setLoading] = useState(true);
   const [schedulesLoading, setSchedulesLoading] = useState(false);
   const [actionKey, setActionKey] = useState("");
@@ -114,12 +116,35 @@ export default function AdminSchedulesPage() {
   );
 
   const filteredSchedules = useMemo(() => {
-    if (!query.trim()) return schedules;
-    const q = query.toLowerCase();
-    return schedules.filter((item) =>
-      `${item.id} ${item.tenTour} ${item.ngayKhoiHanh}`.toLowerCase().includes(q),
-    );
-  }, [schedules, query]);
+    return schedules.filter((item) => {
+      let matchQuery = true;
+      if (query.trim()) {
+        const q = query.toLowerCase();
+        matchQuery = `${item.id} ${item.tenTour} ${item.ngayKhoiHanh}`.toLowerCase().includes(q);
+      }
+      
+      let matchStatus = true;
+      if (filterScheduleStatus !== "all") {
+        const statusObj = getTripStatus(item.ngayKhoiHanh, item.soNgay);
+        if (filterScheduleStatus === "upcoming") matchStatus = statusObj?.label === "Chưa đến ngày đi";
+        if (filterScheduleStatus === "ongoing") matchStatus = statusObj?.label === "Đang đi";
+        if (filterScheduleStatus === "completed") matchStatus = statusObj?.label === "Đã hoàn thành";
+      }
+
+      let matchMonth = true;
+      if (filterMonth !== "all" && item.ngayKhoiHanh) {
+        const date = new Date(item.ngayKhoiHanh);
+        if (!Number.isNaN(date.getTime())) {
+          const monthStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+          matchMonth = monthStr === filterMonth;
+        } else {
+          matchMonth = false;
+        }
+      }
+
+      return matchQuery && matchStatus && matchMonth;
+    });
+  }, [schedules, query, filterScheduleStatus, filterMonth]);
 
   const addSchedule = async () => {
     if (!selectedTourId) return;
@@ -244,12 +269,53 @@ export default function AdminSchedulesPage() {
           </Button>
         </div>
 
-        <Input
-          placeholder="Tìm theo mã lịch hoặc ngày khởi hành..."
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          className="max-w-md"
-        />
+        <div className="flex flex-col sm:flex-row gap-4 mb-4">
+          <Input
+            placeholder="Tìm theo mã lịch hoặc ngày khởi hành..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            className="w-full sm:max-w-md"
+          />
+          <select
+            className="flex h-10 w-full sm:max-w-[200px] items-center justify-between rounded-md border border-slate-200 bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            value={filterScheduleStatus}
+            onChange={(e) => setFilterScheduleStatus(e.target.value)}
+          >
+            <option value="all">Mọi trạng thái</option>
+            <option value="upcoming">Chưa đến ngày đi</option>
+            <option value="ongoing">Đang đi</option>
+            <option value="completed">Đã hoàn thành</option>
+          </select>
+          <select
+            className="flex h-10 w-full sm:max-w-[200px] items-center justify-between rounded-md border border-slate-200 bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            value={filterMonth}
+            onChange={(e) => setFilterMonth(e.target.value)}
+          >
+            <option value="all">Tất cả các tháng</option>
+            {Array.from(
+              new Set(
+                schedules
+                  .map((s) => {
+                    if (!s.ngayKhoiHanh) return null;
+                    const d = new Date(s.ngayKhoiHanh);
+                    if (Number.isNaN(d.getTime())) return null;
+                    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+                  })
+                  .filter(Boolean)
+              )
+            )
+              .sort()
+              .reverse()
+              .map((monthStr) => {
+                const [y, m] = monthStr.split("-");
+                return (
+                  <option key={monthStr} value={monthStr}>
+                    Tháng {m}/{y}
+                  </option>
+                );
+              })}
+          </select>
+        </div>
 
         {selectedTour && (
           <p className="text-sm text-slate-600">

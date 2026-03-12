@@ -31,6 +31,10 @@ export default function ChiTietDonHangPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    // Timer states
+    const [timeLeft, setTimeLeft] = useState(null);
+    const [isExpired, setIsExpired] = useState(false);
+
     useEffect(() => {
         const fetchDetail = async () => {
             try {
@@ -45,6 +49,37 @@ export default function ChiTietDonHangPage() {
         };
         if (id) fetchDetail();
     }, [id]);
+
+    useEffect(() => {
+        if (!booking || booking.trangThai !== "CHO_THANH_TOAN") return;
+
+        const calculateTimeLeft = () => {
+            const orderTime = new Date(booking.ngayDat).getTime();
+            const expireTime = orderTime + 15 * 60 * 1000;
+            const now = new Date().getTime();
+            const diff = expireTime - now;
+
+            if (diff <= 0) {
+                setIsExpired(true);
+                return null;
+            }
+            return {
+                minutes: Math.floor((diff / 1000 / 60) % 60),
+                seconds: Math.floor((diff / 1000) % 60),
+            };
+        };
+
+        setTimeLeft(calculateTimeLeft());
+        const timer = setInterval(() => {
+            const remaining = calculateTimeLeft();
+            if (!remaining) {
+                clearInterval(timer);
+            }
+            setTimeLeft(remaining);
+        }, 1000);
+
+        return () => clearInterval(timer);
+    }, [booking]);
 
     if (loading) {
         return (
@@ -215,12 +250,28 @@ export default function ChiTietDonHangPage() {
                                     <span className="text-2xl font-black text-orange-600 leading-none">{formatPrice(booking.tongTien)}</span>
                                 </div>
 
-                                {booking.trangThai === "CHO_THANH_TOAN" && (
-                                    <Button className="w-full mt-6 rounded-2xl bg-blue-600 hover:bg-blue-700 h-12 font-bold shadow-lg shadow-blue-200" asChild>
-                                        <Link href={`/thanh-toan?orderId=${booking.id}`}>
-                                            Thanh toán ngay
-                                        </Link>
-                                    </Button>
+                                {booking.trangThai === "CHO_THANH_TOAN" && !isExpired && (
+                                    <div className="mt-6 space-y-3">
+                                        <div className="bg-rose-50 border border-rose-100 rounded-xl p-3 flex items-center justify-between">
+                                            <span className="text-sm font-medium text-rose-700 flex items-center gap-1.5"><Clock className="w-4 h-4" /> Thời gian còn lại:</span>
+                                            <span className="font-mono font-bold text-lg text-rose-800 flex items-center gap-1">
+                                                <div className="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></div>
+                                                {timeLeft ? `${String(timeLeft.minutes).padStart(2, '0')}:${String(timeLeft.seconds).padStart(2, '0')}` : "00:00"}
+                                            </span>
+                                        </div>
+                                        <Button className="w-full rounded-2xl bg-blue-600 hover:bg-blue-700 h-12 font-bold shadow-lg shadow-blue-200" asChild>
+                                            <Link href={`/thanh-toan?orderId=${booking.id}`}>
+                                                Thanh toán ngay
+                                            </Link>
+                                        </Button>
+                                    </div>
+                                )}
+                                {booking.trangThai === "CHO_THANH_TOAN" && isExpired && (
+                                    <div className="mt-6 bg-slate-100 border border-slate-200 rounded-xl p-4 text-center">
+                                        <XCircle className="w-8 h-8 mx-auto text-slate-400 mb-2" />
+                                        <p className="text-sm font-bold text-slate-700">Đơn hàng đã hết hạn thanh toán</p>
+                                        <p className="text-xs text-slate-500 mt-1">Hệ thống đang tiến hành hủy đơn.</p>
+                                    </div>
                                 )}
                             </CardContent>
                         </Card>

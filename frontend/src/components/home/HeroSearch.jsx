@@ -32,7 +32,15 @@ export default function HeroSearch() {
     if (filters.destination.trim()) params.set("q", filters.destination.trim());
     if (filters.departureDate)
       params.set("departureDate", filters.departureDate);
-    if (filters.budget.trim()) params.set("budget", filters.budget.trim());
+    
+    if (filters.budget) {
+      const parts = filters.budget.split("-");
+      if (parts.length === 2) {
+        params.set("minPrice", parts[0]);
+        params.set("maxPrice", parts[1]);
+      }
+    }
+
     if (filters.category.trim())
       params.set("category", filters.category.trim());
 
@@ -79,12 +87,17 @@ export default function HeroSearch() {
             <label className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-600">
               <ChevronDown size={14} /> Ngân sách
             </label>
-            <Input
-              placeholder="VD: 3-5 triệu"
-              className="h-8 border-0 bg-transparent p-0 text-black shadow-none placeholder:text-slate-500 focus-visible:ring-0"
+            <select
+              className="h-8 w-full border-0 bg-transparent p-0 text-black shadow-none focus-visible:ring-0 appearance-none outline-none cursor-pointer"
               value={filters.budget}
               onChange={(e) => handleInputChange("budget", e.target.value)}
-            />
+            >
+              <option value="">Tất cả mức giá</option>
+              <option value="0-5000000">Dưới 5 triệu</option>
+              <option value="5000000-10000000">Từ 5 - 10 triệu</option>
+              <option value="10000000-20000000">Từ 10 - 20 triệu</option>
+              <option value="20000000-999999999">Trên 20 triệu</option>
+            </select>
           </div>
 
           <div className="rounded-2xl border border-slate-200/80 bg-white/92 px-4 py-3 text-left shadow-sm">

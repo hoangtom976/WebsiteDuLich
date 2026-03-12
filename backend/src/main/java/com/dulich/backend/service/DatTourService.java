@@ -237,6 +237,7 @@ public class DatTourService {
                         .tongTien(donHang.getTongTien())
                         .trangThai(donHang.getTrangThai())
                         .soNgay(donHang.getLichKhoiHanh().getTour().getSoNgay())
+                        .tourId(donHang.getLichKhoiHanh().getTour().getId())
                         .build())
                 .collect(Collectors.toList());
     }
@@ -310,6 +311,7 @@ public class DatTourService {
             if (!DA_THANH_TOAN.equals(current)) {
                 throw new LoiBadRequestException("Chỉ duyệt đơn khi đơn đã thanh toán.");
             }
+            donDatTour.setTrangThai(DA_XAC_NHAN);
             donDatTourRepository.save(donDatTour);
 
             thongBaoService.taoThongBao(

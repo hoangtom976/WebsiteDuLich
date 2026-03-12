@@ -66,7 +66,7 @@ public class TourService {
                 .collect(Collectors.toList());
 
         List<LichKhoiHanhDTO> danhSachLich = lichKhoiHanhRepository
-                .findByTourIdAndNgayKhoiHanhGreaterThanEqual(id, LocalDate.now()).stream()
+                .findByTourIdAndNgayKhoiHanhGreaterThan(id, LocalDate.now()).stream()
                 .map(this::convertLichToDTO)
                 .collect(Collectors.toList());
 
@@ -281,6 +281,14 @@ public class TourService {
         }
 
         dto.setDaYeuThich(kiemTraYeuThich(tour.getId()));
+
+        // Lấy danh sách các ngày khởi hành tương lai
+        List<LocalDate> ngayKhoiHanhs = lichKhoiHanhRepository
+                .findByTourIdAndNgayKhoiHanhGreaterThan(tour.getId(), LocalDate.now())
+                .stream()
+                .map(LichKhoiHanh::getNgayKhoiHanh)
+                .collect(Collectors.toList());
+        dto.setCacNgayKhoiHanh(ngayKhoiHanhs);
 
         return dto;
     }

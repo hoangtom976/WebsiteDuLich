@@ -19,10 +19,8 @@ import com.dulich.backend.dto.TaiNguyenKhongTonTaiException;
 import com.dulich.backend.dto.YeuCauChatDTO;
 import com.dulich.backend.entity.PhienChat;
 import com.dulich.backend.entity.TinNhanChat;
-import com.dulich.backend.entity.Tour;
 import com.dulich.backend.repository.PhienChatRepository;
 import com.dulich.backend.repository.TinNhanChatRepository;
-import com.dulich.backend.repository.TourRepository;
 
 @Service
 public class DichVuChatbot {
@@ -32,20 +30,17 @@ public class DichVuChatbot {
         private final GroqApiService groqApiService;
         private final PhienChatRepository phienChatRepository;
         private final TinNhanChatRepository tinNhanChatRepository;
-        private final TourRepository tourRepository;
         private final HuggingFaceEmbeddingService embeddingService;
         private final QdrantService qdrantService;
 
         public DichVuChatbot(GroqApiService groqApiService,
                         PhienChatRepository phienChatRepository,
                         TinNhanChatRepository tinNhanChatRepository,
-                        TourRepository tourRepository,
                         HuggingFaceEmbeddingService embeddingService,
                         QdrantService qdrantService) {
                 this.groqApiService = groqApiService;
                 this.phienChatRepository = phienChatRepository;
                 this.tinNhanChatRepository = tinNhanChatRepository;
-                this.tourRepository = tourRepository;
                 this.embeddingService = embeddingService;
                 this.qdrantService = qdrantService;
         }
@@ -60,6 +55,7 @@ public class DichVuChatbot {
                         3. Dữ liệu: Chỉ dùng thông tin trong phần cung cấp để trả lời.
                         4. Nếu dữ liệu chứa thông tin chính sách, hãy trả lời chính xác theo nội dung.
                         5. Nếu không tìm thấy: Xin lỗi và gợi ý liên hệ hotline 1900-1234.
+                        6. NGỮ CẢNH HỘI THOẠI: Luôn ghi nhớ nội dung các câu hỏi và câu trả lời trước đó trong cuộc hội thoại. Khi khách hỏi câu tiếp theo (ví dụ: "cho tôi xem lịch trình", "giá bao nhiêu?", "tour đó có gì?"), hãy hiểu là khách đang hỏi về tour/chủ đề đã được đề cập trước đó trong hội thoại và ưu tiên trả lời về tour/chủ đề đó. Chỉ sử dụng dữ liệu hệ thống liên quan đến chủ đề đang thảo luận.
                         """;
 
         public Map<String, Object> xuLyChat(YeuCauChatDTO req) {
@@ -70,16 +66,27 @@ public class DichVuChatbot {
                 String noiDungUser = req.getCauHoi() != null ? req.getCauHoi() : "...";
                 luuTinNhan(phienChat, "USER", noiDungUser);
 
-                // 3. Tìm thông tin liên quan (RAG với vector search, fallback keyword)
-                String contextDuLieu = timKiemDuLieuLienQuan(noiDungUser);
+                // 3. Lấy lịch sử hội thoại từ DB (tối đa 10 tin nhắn gần nhất)
+                List<TinNhanChat> lichSu = tinNhanChatRepository
+                                .findByPhienChatIdOrderByThoiGianGuiAsc(phienChat.getId());
+                int maxHistory = 10;
+                if (lichSu.size() > maxHistory) {
+                        lichSu = lichSu.subList(lichSu.size() - maxHistory, lichSu.size());
+                }
 
-                // 4. Gọi Groq AI
-                String noiDungAI = goiGroqAI(noiDungUser, contextDuLieu);
+                // 4. Xây dựng câu tìm kiếm mở rộng (kết hợp ngữ cảnh hội thoại)
+                String cauHoiMoRong = xayDungCauHoiMoRong(noiDungUser, lichSu);
 
-                // 5. Lưu câu trả lời AI
+                // 5. Tìm thông tin liên quan bằng câu hỏi mở rộng
+                String contextDuLieu = timKiemDuLieuLienQuan(cauHoiMoRong);
+
+                // 6. Gọi Groq AI với lịch sử hội thoại
+                String noiDungAI = goiGroqAI(noiDungUser, contextDuLieu, lichSu);
+
+                // 7. Lưu câu trả lời AI
                 luuTinNhan(phienChat, "AI", noiDungAI);
 
-                // 6. Trả kết quả
+                // 8. Trả kết quả
                 Map<String, Object> response = new HashMap<>();
                 response.put("cauTraLoi", noiDungAI);
                 response.put("phienChatId", phienChat.getId());
@@ -141,26 +148,62 @@ public class DichVuChatbot {
         // =============== PRIVATE METHODS ===============
 
         /**
+         * Xây dựng câu hỏi mở rộng bằng cách kết hợp câu hỏi hiện tại
+         * với ngữ cảnh từ các câu hỏi trước đó trong hội thoại.
+         * VD: "lịch trình chi tiết" + history("có tour Huế không") → "lịch trình chi tiết tour Huế"
+         */
+        private String xayDungCauHoiMoRong(String cauHoiHienTai, List<TinNhanChat> lichSu) {
+                if (lichSu.size() <= 1) {
+                        // Chỉ có tin nhắn hiện tại hoặc không có lịch sử → dùng câu hỏi gốc
+                        return cauHoiHienTai;
+                }
+
+                // Lấy tối đa 2 câu hỏi USER gần nhất (không bao gồm câu hiện tại)
+                List<String> cauHoiTruoc = lichSu.stream()
+                                .filter(t -> "USER".equals(t.getNguoiGui()))
+                                .map(TinNhanChat::getNoiDung)
+                                .filter(nd -> !nd.equals(cauHoiHienTai))
+                                .collect(Collectors.toList());
+
+                if (cauHoiTruoc.isEmpty()) {
+                        return cauHoiHienTai;
+                }
+
+                // Lấy 2 câu hỏi gần nhất
+                int from = Math.max(0, cauHoiTruoc.size() - 2);
+                List<String> ganNhat = cauHoiTruoc.subList(from, cauHoiTruoc.size());
+
+                // Kết hợp: câu hỏi hiện tại + ngữ cảnh từ câu hỏi trước
+                String moRong = cauHoiHienTai + " " + String.join(" ", ganNhat);
+                logger.info("Câu hỏi mở rộng cho RAG: {}", moRong);
+                return moRong;
+        }
+
+        /**
          * Tìm kiếm dữ liệu liên quan bằng RAG (vector search).
-         * Fallback sang keyword matching nếu Qdrant không khả dụng.
          */
         private String timKiemDuLieuLienQuan(String cauHoi) {
-                // Thử RAG vector search trước
+                StringBuilder ketQua = new StringBuilder();
+
+                // RAG vector search (tìm theo ngữ nghĩa)
+                String ragResult = null;
                 try {
                         if (qdrantService.isAvailable()) {
-                                String ragResult = timKiemBangVector(cauHoi);
+                                ragResult = timKiemBangVector(cauHoi);
                                 if (ragResult != null && !ragResult.isBlank()) {
                                         logger.info("RAG vector search thành công cho câu hỏi: {}", cauHoi);
-                                        return ragResult;
+                                        ketQua.append(ragResult);
                                 }
                         }
                 } catch (Exception e) {
-                        logger.warn("RAG vector search thất bại, dùng fallback: {}", e.getMessage());
+                        logger.warn("RAG vector search thất bại: {}", e.getMessage());
                 }
 
-                // Fallback: keyword matching (logic cũ)
-                logger.info("Dùng fallback keyword search cho câu hỏi: {}", cauHoi);
-                return timKiemBangKeyword(cauHoi);
+                if (ketQua.isEmpty()) {
+                        return "Không tìm thấy dữ liệu chính xác về tour hoặc thông tin mà anh/chị đang hỏi. Vui lòng cho em biết tên địa điểm hoặc yêu cầu cụ thể hơn, hoặc gọi hotline 1900-1234 để được hỗ trợ trực tiếp.";
+                }
+
+                return ketQua.toString();
         }
 
         /**
@@ -168,7 +211,7 @@ public class DichVuChatbot {
          */
         private String timKiemBangVector(String cauHoi) {
                 // 1. Embed câu hỏi
-                List<Float> queryVector = embeddingService.embed(cauHoi);
+                List<Float> queryVector = embeddingService.embed(cauHoi.toLowerCase());
 
                 // 2. Tìm top 5 kết quả tương tự trong Qdrant
                 List<ScoredPoint> results = qdrantService.timKiem(queryVector, 5);
@@ -198,12 +241,8 @@ public class DichVuChatbot {
                         context.append("=== THÔNG TIN TOUR ===\n");
                         for (ScoredPoint point : tourResults) {
                                 context.append(String.format(
-                                                "- Tour: %s\n  Giá: %s VNĐ\n  Nơi đến: %s\n  Số ngày: %s\n  Mô tả: %s\n  (Độ liên quan: %.2f)\n\n",
-                                                getPayloadString(point, "tenTour"),
-                                                getPayloadString(point, "gia"),
-                                                getPayloadString(point, "diaDiem"),
-                                                getPayloadString(point, "soNgay"),
-                                                catNgan(getPayloadString(point, "moTa")),
+                                                "[Thông tin Tour]:\n%s\n(Độ liên quan: %.2f)\n\n",
+                                                getPayloadString(point, "noiDung"),
                                                 point.getScore()));
                         }
                 }
@@ -223,40 +262,7 @@ public class DichVuChatbot {
                 return context.toString();
         }
 
-        /**
-         * Tìm kiếm bằng keyword (logic cũ, dùng làm fallback)
-         */
-        private String timKiemBangKeyword(String cauHoi) {
-                String tuKhoa = cauHoi.toLowerCase().trim();
-                List<Tour> all = tourRepository.findAll();
-                List<Tour> matches = new ArrayList<>();
 
-                for (Tour t : all) {
-                        if (!Boolean.TRUE.equals(t.getTrangThai()))
-                                continue;
-
-                        String tenTour = t.getTenTour() != null ? t.getTenTour().toLowerCase().trim() : "";
-                        String tenDiaDiem = (t.getDiaDiem() != null && t.getDiaDiem().getTenDiaDiem() != null)
-                                        ? t.getDiaDiem().getTenDiaDiem().toLowerCase().trim()
-                                        : "";
-
-                        boolean matchTenTour = !tenTour.isEmpty()
-                                        && (tenTour.contains(tuKhoa) || tuKhoa.contains(tenTour));
-                        boolean matchDiaDiem = !tenDiaDiem.isEmpty()
-                                        && (tenDiaDiem.contains(tuKhoa) || tuKhoa.contains(tenDiaDiem));
-
-                        if (matchTenTour || matchDiaDiem) {
-                                matches.add(t);
-                        }
-                }
-
-                if (matches.isEmpty()) {
-                        return "Không tìm thấy dữ liệu chính xác. Dưới đây là 3 tour phổ biến nhất:\n"
-                                        + formatList(tourRepository.timTourPhoBien());
-                }
-
-                return formatList(matches.stream().limit(3).collect(Collectors.toList()));
-        }
 
         private String getPayloadString(ScoredPoint point, String key) {
                 io.qdrant.client.grpc.JsonWithInt.Value val = point.getPayloadMap().get(key);
@@ -295,32 +301,42 @@ public class DichVuChatbot {
                 java.util.Objects.requireNonNull(tinNhanChatRepository.save(t));
         }
 
-        private String formatList(List<Tour> list) {
-                if (list == null || list.isEmpty())
-                        return "";
-                return list.stream().map(t -> String.format(
-                                "- Tour: %s\n  Giá: %s VNĐ\n  Nơi đến: %s\n  Mô tả: %s",
-                                t.getTenTour(),
-                                t.getGia(),
-                                (t.getDiaDiem() != null ? t.getDiaDiem().getTenDiaDiem() : "N/A"),
-                                catNgan(t.getMoTa()))).collect(Collectors.joining("\n\n"));
-        }
 
-        private String catNgan(String s) {
-                if (s == null)
-                        return "Chưa có mô tả";
-                return s.length() > 150 ? s.substring(0, 150) + "..." : s;
-        }
 
-        private String goiGroqAI(String question, String context) {
-                String prompt = String.format("""
-                                [Dữ liệu hệ thống]:
-                                %s
 
-                                [Câu hỏi]: "%s"
-                                """, context, question);
+
+        private String goiGroqAI(String question, String context, List<TinNhanChat> lichSu) {
                 try {
-                        return groqApiService.generateContentWithSystem(SYSTEM_INSTRUCTION, prompt);
+                        // Xây dựng danh sách messages từ lịch sử hội thoại
+                        List<Map<String, String>> messages = new ArrayList<>();
+
+                        // Thêm lịch sử hội thoại trước đó (không bao gồm tin nhắn hiện tại vì nó đã được lưu)
+                        // Bỏ tin nhắn cuối cùng vì đó chính là câu hỏi hiện tại
+                        List<TinNhanChat> lichSuTruoc = lichSu.size() > 1
+                                        ? lichSu.subList(0, lichSu.size() - 1)
+                                        : new ArrayList<>();
+
+                        for (TinNhanChat tinNhan : lichSuTruoc) {
+                                Map<String, String> msg = new HashMap<>();
+                                msg.put("role", "USER".equals(tinNhan.getNguoiGui()) ? "user" : "assistant");
+                                msg.put("content", tinNhan.getNoiDung());
+                                messages.add(msg);
+                        }
+
+                        // Thêm câu hỏi hiện tại kèm context RAG
+                        String currentPrompt = String.format("""
+                                        [Dữ liệu hệ thống]:
+                                        %s
+
+                                        [Câu hỏi]: "%s"
+                                        """, context, question);
+
+                        Map<String, String> currentMsg = new HashMap<>();
+                        currentMsg.put("role", "user");
+                        currentMsg.put("content", currentPrompt);
+                        messages.add(currentMsg);
+
+                        return groqApiService.generateContentWithMessages(SYSTEM_INSTRUCTION, messages);
                 } catch (Exception e) {
                         logger.error("Error calling Groq AI", e);
                         return "Lỗi: " + e.getMessage();

@@ -18,3 +18,10 @@ export const getDashboardStatistics = async () => {
   const response = await api.get("/thong-ke/dashboard");
   return normalizeStats(response.data);
 };
+
+export const getRevenueStatistics = async (loai = "ngay") => {
+  const response = await api.get("/thong-ke/doanh-thu", {
+    params: { loai }
+  });
+  return response.data;
+};

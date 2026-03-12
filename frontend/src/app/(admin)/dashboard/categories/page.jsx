@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -33,6 +33,17 @@ export default function AdminCategoriesPage() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [editingId, setEditingId] = useState(null);
   const [editingForm, setEditingForm] = useState(EMPTY_FORM);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredCategories = useMemo(() => {
+    if (!searchQuery.trim()) return categories;
+    const lower = searchQuery.toLowerCase();
+    return categories.filter(
+      (c) =>
+        c.tenDanhMuc.toLowerCase().includes(lower) ||
+        (c.moTa && c.moTa.toLowerCase().includes(lower))
+    );
+  }, [categories, searchQuery]);
 
   const fetchCategories = useCallback(async () => {
     setLoading(true);
@@ -154,6 +165,14 @@ export default function AdminCategoriesPage() {
       {error && <p className="text-sm text-red-600">{error}</p>}
 
       <Card>
+        <div className="p-4 border-b">
+          <Input
+            placeholder="Tìm kiếm danh mục..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full sm:max-w-sm"
+          />
+        </div>
         <CardContent className="p-0">
           <div className="overflow-auto rounded-lg border">
             <table className="w-full min-w-[700px] text-sm">
@@ -172,14 +191,14 @@ export default function AdminCategoriesPage() {
                       Đang tải dữ liệu...
                     </td>
                   </tr>
-                ) : categories.length === 0 ? (
+                ) : filteredCategories.length === 0 ? (
                   <tr>
                     <td colSpan={4} className="px-4 py-6 text-center text-slate-500">
                       Chưa có danh mục.
                     </td>
                   </tr>
                 ) : (
-                  categories.map((item) => (
+                  filteredCategories.map((item) => (
                     <tr key={item.id} className="border-t">
                       <td className="px-4 py-3">{item.id}</td>
                       <td className="px-4 py-3 font-medium">

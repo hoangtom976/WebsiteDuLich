@@ -79,7 +79,7 @@ public class TaiLieuRagService {
             for (int i = 0; i < chunks.size(); i++) {
                 String chunk = chunks.get(i);
                 try {
-                    List<Float> vector = embeddingService.embed(chunk);
+                    List<Float> vector = embeddingService.embed(chunk.toLowerCase());
 
                     Map<String, io.qdrant.client.grpc.JsonWithInt.Value> payload = new HashMap<>();
                     payload.put("loai", value("tai_lieu"));

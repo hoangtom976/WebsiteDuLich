@@ -18,4 +18,5 @@ public class LichSuDatTourDTO {
     private BigDecimal tongTien;
     private String trangThai;
     private Integer soNgay;
+    private Long tourId;
 }

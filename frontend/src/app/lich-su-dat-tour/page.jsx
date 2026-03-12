@@ -18,6 +18,49 @@ const STATUS_MAP = {
     "DA_HUY": { label: "Đã hủy", color: "bg-rose-100 text-rose-700 border-rose-200" },
 };
 
+function CountdownTimer({ ngayDat, onExpire }) {
+    const [timeLeft, setTimeLeft] = useState(null);
+
+    useEffect(() => {
+        const calculateTimeLeft = () => {
+            if (!ngayDat) return 0;
+            const bookingDate = new Date(ngayDat);
+            const now = new Date();
+            const diff = 5 * 60 * 1000 - (now - bookingDate);
+            
+            if (diff <= 0) {
+                onExpire?.();
+                return 0;
+            }
+            return Math.floor(diff / 1000);
+        };
+
+        setTimeLeft(calculateTimeLeft());
+
+        const timer = setInterval(() => {
+            const remaining = calculateTimeLeft();
+            setTimeLeft(remaining);
+            if (remaining <= 0) {
+                clearInterval(timer);
+            }
+        }, 1000);
+
+        return () => clearInterval(timer);
+    }, [ngayDat, onExpire]);
+
+    if (timeLeft === null || timeLeft <= 0) return null;
+
+    const minutes = Math.floor(timeLeft / 60);
+    const seconds = timeLeft % 60;
+
+    return (
+        <div className="flex items-center gap-1.5 text-xs font-bold text-red-600 animate-pulse bg-red-50 px-2.5 py-1 rounded-full border border-red-100">
+            <CreditCard className="h-3 w-3" />
+            <span>Thanh toán trong {minutes}:{seconds.toString().padStart(2, '0')}</span>
+        </div>
+    );
+}
+
 function getTripStatus(ngayKhoiHanh, soNgay) {
     if (!ngayKhoiHanh) return null;
     const today = new Date();
@@ -104,6 +147,40 @@ export default function LichSuDatTourPage() {
     );
 }
 
+function BookingAction({ booking }) {
+    const [isExpired, setIsExpired] = useState(false);
+
+    useEffect(() => {
+        const checkExpiration = () => {
+            const bookingDate = new Date(booking.ngayDat);
+            const now = new Date();
+            const expired = (now - bookingDate) > 5 * 60 * 1000;
+            setIsExpired(expired);
+        };
+
+        checkExpiration();
+        const interval = setInterval(checkExpiration, 1000);
+        return () => clearInterval(interval);
+    }, [booking.ngayDat]);
+
+    return (
+        <div className="flex flex-row md:flex-col items-center justify-center gap-2 border-t border-slate-100 bg-slate-50/50 p-4 md:border-l md:border-t-0 md:min-w-[140px]">
+            <Button variant="outline" size="sm" className="w-full rounded-full text-xs font-bold" asChild>
+                <Link href={`/ho-so/don-hang/${booking.id}`}>Chi tiết</Link>
+            </Button>
+            {booking.trangThai === "CHO_THANH_TOAN" && (
+                isExpired ? (
+                    <span className="text-[10px] font-bold text-rose-500 uppercase">Đã quá hạn</span>
+                ) : (
+                    <Button size="sm" className="w-full rounded-full text-xs font-bold bg-blue-600 hover:bg-blue-700" asChild>
+                        <Link href={`/thanh-toan?orderId=${booking.id}`}>Thanh toán</Link>
+                    </Button>
+                )
+            )}
+        </div>
+    );
+}
+
 function BookingList({ bookings, loading }) {
     if (loading) {
         return (
@@ -143,9 +220,16 @@ function BookingList({ bookings, loading }) {
                                     <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
                                         Mã đơn: #{booking.id}
                                     </span>
-                                    <Badge variant="outline" className={`rounded-full px-3 py-0.5 text-[10px] font-bold ${STATUS_MAP[booking.trangThai]?.color || ""}`}>
-                                        {STATUS_MAP[booking.trangThai]?.label || booking.trangThai}
-                                    </Badge>
+                                    <div className="flex items-center gap-2">
+                                        <Badge variant="outline" className={`rounded-full px-3 py-0.5 text-[10px] font-bold ${STATUS_MAP[booking.trangThai]?.color || ""}`}>
+                                            {STATUS_MAP[booking.trangThai]?.label || booking.trangThai}
+                                        </Badge>
+                                        {booking.trangThai === "CHO_THANH_TOAN" && (
+                                            <CountdownTimer 
+                                                ngayDat={booking.ngayDat} 
+                                            />
+                                        )}
+                                    </div>
                                     {(() => {
                                         const tripStatus = getTripStatus(booking.ngayKhoiHanh, booking.soNgay);
                                         return tripStatus ? (
@@ -176,16 +260,7 @@ function BookingList({ bookings, loading }) {
                                 </div>
                             </div>
 
-                            <div className="flex flex-row md:flex-col items-center justify-center gap-2 border-t border-slate-100 bg-slate-50/50 p-4 md:border-l md:border-t-0 md:min-w-[140px]">
-                                <Button variant="outline" size="sm" className="w-full rounded-full text-xs font-bold" asChild>
-                                    <Link href={`/ho-so/don-hang/${booking.id}`}>Chi tiết</Link>
-                                </Button>
-                                {booking.trangThai === "CHO_THANH_TOAN" && (
-                                    <Button size="sm" className="w-full rounded-full text-xs font-bold bg-blue-600 hover:bg-blue-700" asChild>
-                                        <Link href={`/thanh-toan?orderId=${booking.id}`}>Thanh toán</Link>
-                                    </Button>
-                                )}
-                            </div>
+                            <BookingAction booking={booking} />
                         </div>
                     </CardContent>
                 </Card>

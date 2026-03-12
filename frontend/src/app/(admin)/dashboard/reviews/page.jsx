@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { getAdminTours } from "@/services/adminTourService";
-import { getAdminReviewsByTour, replyAdminReview } from "@/services/adminReviewService";
+import { getAdminReviewsByTour, getAllAdminReviews, replyAdminReview } from "@/services/adminReviewService";
 
 function extractApiError(error, fallback) {
   const status = error?.response?.status;
@@ -33,7 +33,7 @@ function renderStars(count) {
 
 export default function AdminReviewsPage() {
   const [tours, setTours] = useState([]);
-  const [selectedTourId, setSelectedTourId] = useState("");
+  const [selectedTourId, setSelectedTourId] = useState("all");
   const [reviews, setReviews] = useState([]);
   const [query, setQuery] = useState("");
   const [replyMap, setReplyMap] = useState({});
@@ -49,10 +49,8 @@ export default function AdminReviewsPage() {
     try {
       const data = await getAdminTours();
       setTours(data);
-      if (data.length > 0) {
-        setSelectedTourId((prev) => (prev ? prev : String(data[0].id)));
-      } else {
-        setSelectedTourId("");
+      if (!selectedTourId) {
+        setSelectedTourId("all");
       }
     } catch (err) {
       setError(extractApiError(err, "Không thể tải danh sách tour."));
@@ -62,14 +60,15 @@ export default function AdminReviewsPage() {
   }, []);
 
   const loadReviewsByTour = useCallback(async (tourId) => {
-    if (!tourId) {
-      setReviews([]);
-      return;
-    }
     setReviewsLoading(true);
     setError("");
     try {
-      const data = await getAdminReviewsByTour(Number(tourId));
+      let data;
+      if (!tourId || tourId === "all") {
+        data = await getAllAdminReviews();
+      } else {
+        data = await getAdminReviewsByTour(Number(tourId));
+      }
       setReviews(data);
     } catch (err) {
       setError(extractApiError(err, "Không thể tải danh sách đánh giá."));
@@ -150,9 +149,9 @@ export default function AdminReviewsPage() {
             className="h-10 rounded-md border px-3 text-sm"
             value={selectedTourId}
             onChange={(e) => setSelectedTourId(e.target.value)}
-            disabled={loading || tours.length === 0}
+            disabled={loading}
           >
-            <option value="">Chọn tour</option>
+            <option value="all">Tất cả các tour</option>
             {tours.map((tour) => (
               <option key={tour.id} value={tour.id}>
                 #{tour.id} - {tour.tenTour}
@@ -166,9 +165,14 @@ export default function AdminReviewsPage() {
           />
         </div>
 
-        {selectedTour && (
+        {selectedTourId !== "all" && selectedTour && (
           <p className="text-sm text-slate-600">
             Tour đang xem: <span className="font-semibold">{selectedTour.tenTour}</span>
+          </p>
+        )}
+        {selectedTourId === "all" && (
+          <p className="text-sm text-slate-600">
+            Đang xem: <span className="font-semibold">Tất cả các tour</span>
           </p>
         )}
 

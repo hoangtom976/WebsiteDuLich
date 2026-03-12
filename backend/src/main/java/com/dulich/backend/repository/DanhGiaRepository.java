@@ -14,6 +14,8 @@ public interface DanhGiaRepository extends JpaRepository<DanhGia, Long> {
 
     List<DanhGia> findByNguoiDungIdOrderByNgayDanhGiaDesc(Long nguoiDungId);
 
+    List<DanhGia> findAllByOrderByNgayDanhGiaDesc();
+
     boolean existsByNguoiDungIdAndTourId(Long userId, Long tourId);
 
     boolean existsByTourId(Long tourId);

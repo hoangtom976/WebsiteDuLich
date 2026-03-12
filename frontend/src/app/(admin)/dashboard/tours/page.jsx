@@ -34,9 +34,7 @@ const EMPTY_FORM = {
   trangThai: true,
 };
 
-function formatCurrency(value) {
-  return `${new Intl.NumberFormat("vi-VN").format(Number(value || 0) * 1000000)} đ`;
-}
+import { formatPrice } from "@/lib/utils";
 
 function extractApiError(error, fallback) {
   const status = error?.response?.status;
@@ -58,6 +56,10 @@ export default function AdminToursPage() {
   const [actionKey, setActionKey] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+
+  const [filterCategory, setFilterCategory] = useState("all");
+  const [filterLocation, setFilterLocation] = useState("all");
+  const [filterStatus, setFilterStatus] = useState("all");
 
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState("create");
@@ -96,12 +98,21 @@ export default function AdminToursPage() {
   }, [fetchData]);
 
   const filtered = useMemo(() => {
-    return tours.filter((tour) =>
-      `${tour.tenTour} ${tour.tenDanhMuc} ${tour.tenDiaDiem}`
+    return tours.filter((tour) => {
+      const matchQuery = `${tour.tenTour} ${tour.tenDanhMuc} ${tour.tenDiaDiem}`
         .toLowerCase()
-        .includes(query.toLowerCase()),
-    );
-  }, [tours, query]);
+        .includes(query.toLowerCase());
+      
+      const matchCategory = filterCategory === "all" || String(tour.danhMucId) === filterCategory;
+      const matchLocation = filterLocation === "all" || String(tour.diaDiemId) === filterLocation;
+      
+      let matchStatus = true;
+      if (filterStatus === "active") matchStatus = tour.trangThai === true;
+      if (filterStatus === "inactive") matchStatus = tour.trangThai === false;
+
+      return matchQuery && matchCategory && matchLocation && matchStatus;
+    });
+  }, [tours, query, filterCategory, filterLocation, filterStatus]);
 
   const resetModalImageState = () => {
     setModalImages([]);
@@ -326,12 +337,43 @@ export default function AdminToursPage() {
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        <Input
-          placeholder="Tìm theo tên tour, danh mục, địa điểm..."
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          className="max-w-md"
-        />
+        <div className="flex flex-col sm:flex-row gap-4 mb-4">
+          <Input
+            placeholder="Tìm theo tên tour, danh mục, địa điểm..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            className="w-full sm:max-w-[280px]"
+          />
+          <select
+            className="flex h-10 w-full sm:max-w-[180px] items-center justify-between rounded-md border border-slate-200 bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            value={filterCategory}
+            onChange={(e) => setFilterCategory(e.target.value)}
+          >
+            <option value="all">Tất cả danh mục</option>
+            {categories.map((c) => (
+              <option key={c.id} value={String(c.id)}>{c.tenDanhMuc}</option>
+            ))}
+          </select>
+          <select
+            className="flex h-10 w-full sm:max-w-[180px] items-center justify-between rounded-md border border-slate-200 bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            value={filterLocation}
+            onChange={(e) => setFilterLocation(e.target.value)}
+          >
+            <option value="all">Tất cả địa điểm</option>
+            {locations.map((l) => (
+              <option key={l.id} value={String(l.id)}>{l.tenDiaDiem}</option>
+            ))}
+          </select>
+          <select
+            className="flex h-10 w-full sm:max-w-[150px] items-center justify-between rounded-md border border-slate-200 bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value)}
+          >
+            <option value="all">Mọi trạng thái</option>
+            <option value="active">Đang hiển thị</option>
+            <option value="inactive">Đang ẩn</option>
+          </select>
+        </div>
 
         {message && <p className="text-sm text-emerald-600">{message}</p>}
         {error && <p className="text-sm text-red-600">{error}</p>}
@@ -371,7 +413,7 @@ export default function AdminToursPage() {
                     <td className="px-4 py-3">{tour.tenDanhMuc || "-"}</td>
                     <td className="px-4 py-3">{tour.tenDiaDiem || "-"}</td>
                     <td className="px-4 py-3">{formatDuration(tour.soNgay)}</td>
-                    <td className="px-4 py-3 font-semibold text-blue-700">{formatCurrency(tour.gia)}</td>
+                    <td className="px-4 py-3 font-semibold text-blue-700">{formatPrice(tour.gia)}</td>
                     <td className="px-4 py-3">
                       <span
                         className={`rounded-full px-2 py-1 text-xs font-semibold ${tour.trangThai

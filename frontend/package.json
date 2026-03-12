@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --webpack",
+    "dev": "cross-env NODE_OPTIONS='--no-deprecation' next dev --webpack",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"
@@ -22,12 +22,14 @@
     "react-dom": "19.2.3",
     "react-hook-form": "^7.71.2",
     "react-markdown": "^10.1.0",
+    "recharts": "^3.8.0",
     "sonner": "^2.0.7",
     "swiper": "^12.1.2",
     "tailwind-merge": "^3.5.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "cross-env": "^10.1.0",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
     "shadcn": "^3.8.5",

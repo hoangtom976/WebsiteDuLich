@@ -6,7 +6,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.dulich.backend.dto.DashboardThongKeDTO;
+import com.dulich.backend.dto.DoanhThuDTO;
 import com.dulich.backend.service.ThongKeService;
+
+import java.util.List;
 
 import lombok.RequiredArgsConstructor;
 
@@ -20,5 +23,11 @@ public class ThongKeController {
     @GetMapping("/dashboard")
     public ResponseEntity<DashboardThongKeDTO> layThongKeDashboard() {
         return ResponseEntity.ok(thongKeService.layThongKeTongQuan());
+    }
+
+    @GetMapping("/doanh-thu")
+    public ResponseEntity<List<DoanhThuDTO>> layThongKeDoanhThu(
+            @org.springframework.web.bind.annotation.RequestParam(defaultValue = "ngay") String loai) {
+        return ResponseEntity.ok(thongKeService.layThongKeDoanhThu(loai));
     }
 }

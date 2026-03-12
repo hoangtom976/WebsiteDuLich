@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 @Data
@@ -43,4 +44,7 @@ public class TourDTO {
     private Double soSaoTrungBinh;
     private Integer tongDanhGia;
     private Boolean daYeuThich;
+
+    // Danh sách ngày khởi hành trong tương lai để frontend dùng cho việc filter
+    private List<LocalDate> cacNgayKhoiHanh;
 }

@@ -17,6 +17,11 @@ export const getAdminReviewsByTour = async (tourId) => {
   return Array.isArray(response.data) ? response.data.map(normalizeReview) : [];
 };
 
+export const getAllAdminReviews = async () => {
+  const response = await api.get("/danh-gia/tat-ca");
+  return Array.isArray(response.data) ? response.data.map(normalizeReview) : [];
+};
+
 export const replyAdminReview = async ({ danhGiaId, noiDung }) => {
   const response = await api.post("/danh-gia/phan-hoi", {
     danhGiaId,
