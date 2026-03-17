@@ -60,7 +60,7 @@ export default function FeaturedCategories() {
     }, []);
 
     return (
-        <section className="bg-white py-8 sm:py-12">
+        <section className="bg-white py-2 sm:py-4">
             <div className="mx-auto max-w-7xl px-6 lg:px-8">
                 <SectionHeader
                     title="Khám phá theo danh mục"

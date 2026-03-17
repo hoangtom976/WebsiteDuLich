@@ -2,8 +2,11 @@ package com.dulich.backend.service;
 
 import com.dulich.backend.dto.HienThiDanhGiaDTO;
 import com.dulich.backend.dto.TraLoiDanhGiaDTO;
+import com.dulich.backend.dto.TourChoDanhGiaDTO;
 import com.dulich.backend.dto.VietDanhGiaDTO;
 import com.dulich.backend.entity.DanhGia;
+import com.dulich.backend.entity.DonDatTour;
+import com.dulich.backend.entity.HinhAnhTour;
 import com.dulich.backend.entity.NguoiDung;
 import com.dulich.backend.entity.PhanHoiDanhGia;
 import com.dulich.backend.entity.Tour;
@@ -11,6 +14,7 @@ import com.dulich.backend.dto.LoiBadRequestException;
 import com.dulich.backend.dto.TaiNguyenKhongTonTaiException;
 import com.dulich.backend.repository.DanhGiaRepository;
 import com.dulich.backend.repository.DonDatTourRepository;
+import com.dulich.backend.repository.HinhAnhTourRepository;
 import com.dulich.backend.repository.NguoiDungRepository;
 import com.dulich.backend.repository.PhanHoiDanhGiaRepository;
 import com.dulich.backend.repository.TourRepository;
@@ -19,7 +23,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,6 +38,7 @@ public class DanhGiaService {
     private final DonDatTourRepository donDatTourRepository;
     private final NguoiDungRepository nguoiDungRepository;
     private final TourRepository tourRepository;
+    private final HinhAnhTourRepository hinhAnhTourRepository;
 
     @Transactional
     public String vietDanhGia(VietDanhGiaDTO req) {
@@ -43,9 +51,12 @@ public class DanhGiaService {
             throw new LoiBadRequestException("ID tour không được để trống");
         }
 
-        // Validation 1: Kiểm tra đã đi tour chưa
-        boolean daDiTour = donDatTourRepository.existsByNguoiDungIdAndLichKhoiHanh_Tour_IdAndTrangThai(
-                nguoiDung.getId(), tourId, "DA_THANH_TOAN");
+        // Validation 1: Kiểm tra đã đi tour chưa (cho phép thanh toán, xác nhận, hoặc hoàn thành)
+        boolean daDiTour = donDatTourRepository.findByNguoiDungIdOrderByNgayDatDesc(nguoiDung.getId()).stream()
+                .anyMatch(d -> d.getLichKhoiHanh().getTour().getId().equals(tourId)
+                        && ("DA_THANH_TOAN".equals(d.getTrangThai()) 
+                            || "DA_XAC_NHAN".equals(d.getTrangThai())
+                            || "DA_HOAN_THANH".equals(d.getTrangThai())));
 
         if (!daDiTour) {
             throw new LoiBadRequestException("Bạn phải trải nghiệm tour trước khi đánh giá");
@@ -119,6 +130,57 @@ public class DanhGiaService {
         return danhGiaRepository.findAllByOrderByNgayDanhGiaDesc().stream()
                 .map(this::convertToHienThiDTO)
                 .collect(Collectors.toList());
+    }
+
+    public List<TourChoDanhGiaDTO> layTourChoDanhGia() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        NguoiDung nguoiDung = nguoiDungRepository.findByEmail(email)
+                .orElseThrow(() -> new TaiNguyenKhongTonTaiException("Không tìm thấy người dùng: " + email));
+
+        // Lấy tất cả đơn đã thanh toán/xác nhận/hoàn thành của user
+        List<DonDatTour> donDaThanhToan = donDatTourRepository
+                .findByNguoiDungIdOrderByNgayDatDesc(nguoiDung.getId())
+                .stream()
+                .filter(d -> "DA_THANH_TOAN".equals(d.getTrangThai()) 
+                          || "DA_XAC_NHAN".equals(d.getTrangThai())
+                          || "DA_HOAN_THANH".equals(d.getTrangThai()))
+                .collect(Collectors.toList());
+
+        // Lấy danh sách tour unique, loại bỏ tour đã đánh giá
+        Set<Long> tourIdsDaDanhGia = danhGiaRepository
+                .findByNguoiDungIdOrderByNgayDanhGiaDesc(nguoiDung.getId())
+                .stream()
+                .map(dg -> dg.getTour().getId())
+                .collect(Collectors.toSet());
+
+        Set<Long> tourIdsProcessed = new HashSet<>();
+        List<TourChoDanhGiaDTO> result = new ArrayList<>();
+
+        for (DonDatTour don : donDaThanhToan) {
+            Tour tour = don.getLichKhoiHanh().getTour();
+            Long tourId = tour.getId();
+
+            if (tourIdsProcessed.contains(tourId) || tourIdsDaDanhGia.contains(tourId)) {
+                continue;
+            }
+            tourIdsProcessed.add(tourId);
+
+            // Lấy ảnh đầu tiên của tour
+            String anhTour = null;
+            List<HinhAnhTour> hinhAnhs = hinhAnhTourRepository.findByTourId(tourId);
+            if (hinhAnhs != null && !hinhAnhs.isEmpty()) {
+                anhTour = hinhAnhs.get(0).getUrlHinhAnh();
+            }
+
+            result.add(TourChoDanhGiaDTO.builder()
+                    .tourId(tourId)
+                    .tenTour(tour.getTenTour())
+                    .ngayKhoiHanh(don.getLichKhoiHanh().getNgayKhoiHanh())
+                    .anhTour(anhTour)
+                    .build());
+        }
+
+        return result;
     }
 
     private HienThiDanhGiaDTO convertToHienThiDTO(DanhGia dg) {

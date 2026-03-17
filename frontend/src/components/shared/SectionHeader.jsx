@@ -23,7 +23,7 @@ export default function SectionHeader({
             <Icon className={`h-5 w-5 ${iconColor}`} />
           </div>
         )}
-        <h2 className="text-2xl font-black tracking-tight text-slate-900 sm:text-3xl lg:text-4xl">
+        <h2 className="text-xl font-black tracking-tight text-slate-900 sm:text-2xl lg:text-3xl">
           {title}
         </h2>
       </div>

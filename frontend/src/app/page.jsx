@@ -1,4 +1,4 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import { ShieldCheck, Wallet, Headset, Star, Flame, Clock, BookOpen, Map, Sparkles, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import TourCard from "@/components/shared/TourCard";
@@ -17,7 +17,7 @@ async function PopularToursSection() {
   const popularTours = await getPopularTours();
 
   return (
-    <section className="bg-white py-6 sm:py-8">
+    <section className="bg-white py-2 sm:py-4">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <SectionHeader
           title="Tour nổi bật"
@@ -44,7 +44,7 @@ async function NewestToursSection() {
   const newestTours = await getAllTours();
 
   return (
-    <section className="bg-slate-50/50 py-6 sm:py-8">
+    <section className="bg-slate-50/50 py-2 sm:py-4">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <SectionHeader
           title="Tour mới nhất"
@@ -106,14 +106,13 @@ function WhyChooseUs() {
   ];
 
   return (
-    <section className="relative overflow-hidden bg-white py-6 sm:py-8">
+    <section className="relative overflow-hidden bg-white py-2 sm:py-4">
       <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-transparent via-amber-200 to-transparent opacity-30" />
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <SectionHeader
           title="Vì sao chọn Việt Tour?"
           subtitle="Chúng tôi cam kết mang lại giá trị thực và những kỷ niệm khó quên cho mỗi chuyến đi của bạn."
           badgeText="Giá trị cốt lõi"
-          centered={true}
         />
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
           {reasons.map((reason) => (
@@ -161,7 +160,7 @@ async function LuxuryBanner() {
 
   return (
     <section
-      className="relative bg-fixed bg-cover bg-center py-10 sm:py-12"
+      className="relative bg-fixed bg-cover bg-center py-6 sm:py-8"
       style={{ backgroundImage: `url('${bgImage}')` }}
     >
       <div className="absolute inset-0 bg-black/50" />
@@ -187,7 +186,7 @@ async function FlashDealHomeSection() {
   if (!deal) return null;
 
   return (
-    <section className="bg-gray-50 py-4 sm:py-6">
+    <section className="bg-gray-50 py-1 sm:py-2">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <FlashDealSection deal={deal} />
       </div>
@@ -195,10 +194,18 @@ async function FlashDealHomeSection() {
   );
 }
 
+import { getAllReviews } from "@/services/reviewService";
+
 async function CustomerReviewsSection() {
-  const reviews = (await getPopularTours())
-    .flatMap((tour) => tour.danhGia || [])
-    .slice(0, 5);
+  let reviews = [];
+  try {
+    const allReviews = await getAllReviews();
+    reviews = allReviews
+      .filter((r) => r.soSao >= 4) // Chỉ chọn đánh giá 4-5 sao
+      .slice(0, 4); // Lấy 4 đánh giá mới nhất
+  } catch (error) {
+    console.error("Lỗi khi tải đánh giá trang chủ:", error);
+  }
 
   if (!reviews || reviews.length === 0) return null;
 
@@ -209,7 +216,7 @@ async function TravelBlog() {
   const recentPosts = await getRecentPosts(3);
 
   return (
-    <section className="bg-white py-6 sm:py-8">
+    <section className="bg-white py-2 sm:py-4">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <SectionHeader
           title="Cẩm nang du lịch"

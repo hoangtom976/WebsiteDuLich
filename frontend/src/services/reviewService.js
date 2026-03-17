@@ -16,6 +16,18 @@ async function serverFetchJson(path) {
 
   return response.json();
 }
+export const getAllReviews = async () => {
+  try {
+    if (typeof window === "undefined") {
+      return await serverFetchJson(`/danh-gia/tat-ca`);
+    }
+    const response = await api.get(`/danh-gia/tat-ca`);
+    return response.data;
+  } catch (error) {
+    console.error(`Failed to fetch all reviews:`, error);
+    return [];
+  }
+};
 
 export const getReviewsByTourId = async (tourId) => {
   try {
@@ -38,4 +50,19 @@ export const getMyReviews = async () => {
     console.error("Failed to fetch my reviews:", error);
     return [];
   }
+};
+
+export const getToursForReview = async () => {
+  try {
+    const response = await api.get("/danh-gia/tour-cho-danh-gia");
+    return response.data;
+  } catch (error) {
+    console.error("Failed to fetch tours for review:", error);
+    return [];
+  }
+};
+
+export const submitReview = async ({ tourId, soSao, binhLuan }) => {
+  const response = await api.post("/danh-gia", { tourId, soSao, binhLuan });
+  return response.data;
 };

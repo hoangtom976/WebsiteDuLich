@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { Mountain, MapPin, Phone, Mail, Send, Facebook, Instagram, Twitter, Youtube } from "lucide-react";
+import { Mountain, MapPin, Phone, Mail, Send, Facebook, Instagram, Twitter, Youtube, Plane, Building2, Truck, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getAllCategories } from "@/services/categoryService";
 
@@ -106,35 +106,24 @@ export default function PremiumFooter() {
             </ul>
           </div>
 
-          {/* Cột 4: Đăng ký nhận ưu đãi */}
-          <div className="space-y-6">
-            <h4 className="text-lg font-black text-white uppercase tracking-wider">Nhận ưu đãi du lịch</h4>
-            <p className="text-sm leading-relaxed text-slate-300">
-              Đăng ký email để nhận thông tin khuyến mãi và các tour mới nhất.
-            </p>
-            <div className="relative group">
-              <input
-                type="email"
-                placeholder="Email của bạn..."
-                className="w-full h-12 bg-white/5 border border-white/10 rounded-xl px-4 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 transition-all placeholder:text-slate-500"
-              />
-              <button className="absolute right-1 top-1 h-10 px-4 bg-amber-500 text-slate-900 rounded-lg font-black text-xs uppercase hover:bg-amber-600 transition-colors flex items-center gap-2">
-                Đăng ký
-                <Send className="h-3.5 w-3.5" />
-              </button>
-            </div>
-            <div className="flex items-center gap-4 pt-4 border-t border-white/10">
-              {Object.entries({
-                facebook: { Icon: Facebook, href: "https://facebook.com/viettour" },
-                instagram: { Icon: Instagram, href: "https://instagram.com/viettour" },
-                twitter: { Icon: Twitter, href: "https://twitter.com/viettour" },
-                youtube: { Icon: Youtube, href: "https://youtube.com/viettour" }
-              }).map(([key, { Icon, href }]) => (
-                <Link key={key} href={href} target="_blank" rel="noopener noreferrer" className="h-10 w-10 flex items-center justify-center rounded-full bg-white/5 hover:bg-amber-500 hover:text-slate-900 transition-all duration-300">
-                  <Icon className="h-5 w-5" />
-                </Link>
+          {/* Cột 4: Đối tác & thương hiệu */}
+          <div>
+            <h4 className="mb-6 text-lg font-black text-white uppercase tracking-wider">Đối tác & thương hiệu</h4>
+            <ul className="space-y-4">
+              {[
+                { name: "Hãng hàng không", href: "/doi-tac/hang-hang-khong", Icon: Plane },
+                { name: "Khách sạn đối tác", href: "/doi-tac/khach-san", Icon: Building2 },
+                { name: "Công ty vận chuyển", href: "/doi-tac/van-chuyen", Icon: Truck },
+                { name: "Công ty du lịch liên kết", href: "/doi-tac/du-lich-lien-ket", Icon: Globe }
+              ].map((item) => (
+                <li key={item.name}>
+                  <Link href={item.href} className="text-sm hover:text-amber-500 transition-colors flex items-center gap-2 group">
+                    <span className="h-1.5 w-1.5 rounded-full bg-slate-500 group-hover:bg-amber-500 transition-all" />
+                    {item.name}
+                  </Link>
+                </li>
               ))}
-            </div>
+            </ul>
           </div>
         </div>
 

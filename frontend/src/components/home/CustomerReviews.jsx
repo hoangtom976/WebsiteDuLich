@@ -1,85 +1,90 @@
 "use client";
 
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Autoplay, Pagination } from "swiper/modules";
-import "swiper/css";
-import "swiper/css/pagination";
-import { Star, Quote, MessageSquareQuote } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Star, Quote, MessageSquareQuote, MapPin, User } from "lucide-react";
 import SectionHeader from "@/components/shared/SectionHeader";
+import Link from "next/link";
 
 export default function CustomerReviews({ reviews }) {
+  if (!reviews || reviews.length === 0) return null;
+
   return (
-    <section className="py-10 sm:py-16 bg-slate-50/50 relative overflow-hidden">
+    <section className="bg-slate-50/50 relative overflow-hidden">
       <div className="absolute top-0 right-0 w-64 h-64 bg-amber-200/20 blur-3xl rounded-full" />
       <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-200/20 blur-3xl rounded-full" />
 
-      <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10 py-2">
         <SectionHeader
           title="Khách Hàng Nói Gì Về Chúng Tôi"
-          subtitle="Những chia sẻ chân thực từ những du khách đã đồng hành cùng Việt Tour trên mọi nẻo đường."
+          subtitle="Những đánh giá chân thực và trải nghiệm tuyệt vời nhất từ khách hàng."
           icon={MessageSquareQuote}
-          badgeText="Đánh giá"
+          badgeText="Phản hồi"
           iconBg="bg-rose-50"
           iconColor="text-rose-500"
         />
-        <Swiper
-          modules={[Pagination, Autoplay]}
-          spaceBetween={30}
-          slidesPerView={1}
-          pagination={{ clickable: true }}
-          autoplay={{ delay: 5000 }}
-          breakpoints={{
-            768: { slidesPerView: 2 },
-            1024: { slidesPerView: 3 },
-          }}
-        >
-          {(reviews || []).map((review) => (
-            <SwiperSlide key={review.id} className="pb-16 h-auto">
-              <div className="group bg-white p-8 rounded-[2rem] shadow-[0_4px_20px_rgba(0,0,0,0.03)] h-full min-h-[300px] border border-slate-100 transition-all duration-500 hover:shadow-[0_20px_50px_rgba(0,0,0,0.1)] hover:-translate-y-2 flex flex-col relative overflow-hidden">
-                <div className="absolute top-6 right-8 opacity-[0.05] group-hover:opacity-[0.1] transition-opacity duration-500">
-                  <Quote className="w-16 h-16 text-slate-900" />
-                </div>
 
-                <div className="flex items-center mb-6 relative z-10">
-                  <div className="relative">
-                    <Avatar className="h-14 w-14 border-2 border-amber-100 p-0.5">
-                      <AvatarImage
-                        src={`https://i.pravatar.cc/150?u=${review.tenNguoiDung}`}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+          {reviews.map((review) => (
+            <Link
+              key={review.id}
+              href={`/tours/${review.tourId}`}
+              className="group bg-white p-5 rounded-2xl shadow-sm border border-slate-100 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 flex flex-col relative overflow-hidden"
+            >
+              <div className="absolute top-4 right-4 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity duration-300">
+                <Quote className="w-10 h-10 text-slate-900" />
+              </div>
+
+              <div className="flex items-center mb-4 relative z-10">
+                <div className="relative">
+                  <div className="h-10 w-10 rounded-full bg-slate-100 flex items-center justify-center border border-slate-200 text-slate-500 group-hover:bg-amber-50 group-hover:text-amber-500 transition-colors">
+                    <User className="h-5 w-5" />
+                  </div>
+                  <div className="absolute -bottom-0.5 -right-0.5 bg-white rounded-full p-0.5 shadow-sm border border-slate-100">
+                    <div className="bg-emerald-500 w-2.5 h-2.5 rounded-full border border-white" />
+                  </div>
+                </div>
+                <div className="ml-3">
+                  <h4 className="font-bold text-slate-900 text-sm tracking-tight line-clamp-1">
+                    {review.tenNguoiDung}
+                  </h4>
+                  <div className="flex gap-0.5 mt-0.5">
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        className={`w-3 h-3 ${i < review.soSao ? "text-amber-500 fill-amber-500" : "text-slate-200"}`}
                       />
-                      <AvatarFallback className="bg-amber-500 text-white font-bold">
-                        {review.tenNguoiDung.charAt(0)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="absolute -bottom-1 -right-1 bg-white rounded-full p-1 shadow-sm">
-                      <div className="bg-emerald-500 w-3 h-3 rounded-full border-2 border-white" />
-                    </div>
+                    ))}
                   </div>
-                  <div className="ml-4">
-                    <p className="font-extrabold text-slate-900 text-lg tracking-tight">{review.tenNguoiDung}</p>
-                    <div className="flex gap-0.5 mt-1">
-                      {[...Array(5)].map((_, i) => (
-                        <Star
-                          key={i}
-                          className={`w-3.5 h-3.5 ${i < review.soSao ? "text-amber-500 fill-amber-500" : "text-slate-200"}`}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                </div>
-                <div className="relative z-10 flex-1">
-                  <p className="text-slate-600 italic leading-relaxed text-base font-medium">
-                    "{review.binhLuan}"
-                  </p>
-                </div>
-                <div className="mt-6 pt-6 border-t border-slate-50 flex items-center justify-between">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Khách hàng xác thực</span>
                 </div>
               </div>
-            </SwiperSlide>
+
+              <div className="relative z-10 flex-1 mb-4">
+                <p className="text-slate-600 italic text-sm font-medium line-clamp-3">
+                  "{review.binhLuan}"
+                </p>
+              </div>
+
+              <div className="mt-auto pt-4 border-t border-slate-100 flex flex-col gap-2 relative z-10">
+                <div className="flex items-center justify-between">
+                  <span className="text-[9px] font-bold text-emerald-600 uppercase tracking-wider bg-emerald-50 px-1.5 py-0.5 rounded">
+                    Xác thực
+                  </span>
+                  <span className="text-[10px] text-slate-400 font-medium">
+                    {new Date(review.ngayDanhGia).toLocaleDateString("vi-VN")}
+                  </span>
+                </div>
+
+                {review.tenTour && (
+                  <div className="flex items-center gap-1.5 text-[11px] font-bold text-blue-600 bg-blue-50 group-hover:bg-blue-100 px-2 py-1.5 rounded-lg transition-colors">
+                    <MapPin className="w-3 h-3 shrink-0" />
+                    <span className="truncate">{review.tenTour}</span>
+                  </div>
+                )}
+              </div>
+            </Link>
           ))}
-        </Swiper>
+        </div>
       </div>
     </section>
   );
 }
+

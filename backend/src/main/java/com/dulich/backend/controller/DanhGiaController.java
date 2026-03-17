@@ -2,6 +2,7 @@ package com.dulich.backend.controller;
 
 import com.dulich.backend.dto.HienThiDanhGiaDTO;
 import com.dulich.backend.dto.TraLoiDanhGiaDTO;
+import com.dulich.backend.dto.TourChoDanhGiaDTO;
 import com.dulich.backend.dto.VietDanhGiaDTO;
 import com.dulich.backend.service.DanhGiaService;
 import jakarta.validation.Valid;
@@ -33,15 +34,17 @@ public class DanhGiaController {
 
     @GetMapping("/tour/{tourId}")
     public ResponseEntity<List<HienThiDanhGiaDTO>> layDanhGiaCuaTour(@PathVariable Long tourId) {
-        // API này public, lỗi sẽ được GlobalExceptionHandler bắt nếu có (ví dụ tour
-        // không tồn tại)
-        // Hoặc có thể dùng try-catch nếu muốn custom response
         return ResponseEntity.ok(danhGiaService.layDanhGiaCuaTour(tourId));
     }
 
     @GetMapping("/cua-toi")
     public ResponseEntity<List<HienThiDanhGiaDTO>> layDanhGiaCuaToi() {
         return ResponseEntity.ok(danhGiaService.layDanhGiaCuaToi());
+    }
+
+    @GetMapping("/tour-cho-danh-gia")
+    public ResponseEntity<List<TourChoDanhGiaDTO>> layTourChoDanhGia() {
+        return ResponseEntity.ok(danhGiaService.layTourChoDanhGia());
     }
 
     @GetMapping("/tat-ca")
