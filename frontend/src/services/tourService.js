@@ -13,7 +13,7 @@ async function serverFetchJson(path) {
     });
 
     if (!response.ok) {
-      if (response.status === 204) return null;
+      if (response.status === 204 || response.status === 404) return null;
       throw new Error(`Request failed: ${response.status}`);
     }
 
@@ -67,7 +67,9 @@ export const getTourById = async (id) => {
     const response = await api.get(`/tour/${id}`);
     return response.data;
   } catch (error) {
-    console.error(`Failed to fetch tour with id ${id}:`, error);
+    if (error.response?.status !== 404) {
+      console.warn(`Could not fetch tour with id ${id}`);
+    }
     return null;
   }
 };

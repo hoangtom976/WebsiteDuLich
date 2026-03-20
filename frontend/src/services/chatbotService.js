@@ -19,3 +19,8 @@ export const deleteChatHistory = async (phienChatId) => {
     const response = await api.delete(`/chatbot/lich-su/${phienChatId}`);
     return response.data;
 };
+
+export const getUserChatSessions = async (userId) => {
+    const response = await api.get(`/chatbot/nguoi-dung/${userId}/phien-chat`);
+    return response.data;
+};

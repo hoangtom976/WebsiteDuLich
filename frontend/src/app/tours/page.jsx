@@ -64,9 +64,7 @@ export default function ToursPage() {
       // Tự động nhận diện Loại tour (category) từ URL
       const catParam = searchParams.get("category");
       if (catParam && categoriesData) {
-        const matchedCat = categoriesData.find(c => 
-          c.tenDanhMuc.toLowerCase().includes(catParam.toLowerCase())
-        );
+        const matchedCat = categoriesData.find(c => String(c.id) === catParam);
         if (matchedCat) {
           setSelectedCategory(String(matchedCat.id));
         }

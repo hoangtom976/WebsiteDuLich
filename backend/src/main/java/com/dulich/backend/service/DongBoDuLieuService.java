@@ -2,6 +2,7 @@ package com.dulich.backend.service;
 
 import com.dulich.backend.entity.Tour;
 import com.dulich.backend.repository.TourRepository;
+import com.dulich.backend.util.VNCharacterUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -68,14 +69,16 @@ public class DongBoDuLieuService {
                 List<Float> vector = embeddingService.embed(text.toLowerCase());
 
                 // 3. Tạo payload
+                String tenTour = tour.getTenTour() != null ? tour.getTenTour() : "";
+                String diaDiem = (tour.getDiaDiem() != null && tour.getDiaDiem().getTenDiaDiem() != null)
+                        ? tour.getDiaDiem().getTenDiaDiem() : "";
                 Map<String, io.qdrant.client.grpc.JsonWithInt.Value> payload = new HashMap<>();
                 payload.put("loai", value("tour"));
                 payload.put("tourId", value(tour.getId()));
-                payload.put("tenTour", value(tour.getTenTour() != null ? tour.getTenTour() : ""));
+                payload.put("tenTour", value(tenTour));
+                payload.put("tenTourKhongDau", value(VNCharacterUtils.removeDiacritics(tenTour)));
                 payload.put("gia", value(tour.getGia() != null ? tour.getGia().toString() : "0"));
-                payload.put("diaDiem", value(tour.getDiaDiem() != null && tour.getDiaDiem().getTenDiaDiem() != null
-                        ? tour.getDiaDiem().getTenDiaDiem()
-                        : ""));
+                payload.put("diaDiem", value(diaDiem));
                 payload.put("moTa", value(tour.getMoTa() != null ? tour.getMoTa() : ""));
                 payload.put("soNgay", value(tour.getSoNgay() != null ? tour.getSoNgay().toString() : ""));
                 payload.put("noiDung", value(text));
@@ -106,14 +109,26 @@ public class DongBoDuLieuService {
      */
     private String taoTextMoTa(Tour tour) {
         StringBuilder sb = new StringBuilder();
-        sb.append("Tour: ").append(tour.getTenTour() != null ? tour.getTenTour() : "N/A");
+        String tenTour = tour.getTenTour() != null ? tour.getTenTour() : "N/A";
+        sb.append("Tour: ").append(tenTour);
+
+        // Thêm tên không dấu để matching tốt hơn
+        String tenKhongDau = VNCharacterUtils.removeDiacritics(tenTour);
+        if (!tenKhongDau.equals(tenTour)) {
+            sb.append(" (").append(tenKhongDau).append(")");
+        }
 
         if (tour.getDanhMuc() != null && tour.getDanhMuc().getTenDanhMuc() != null) {
             sb.append(" | Danh mục: ").append(tour.getDanhMuc().getTenDanhMuc());
         }
 
         if (tour.getDiaDiem() != null && tour.getDiaDiem().getTenDiaDiem() != null) {
-            sb.append(" | Địa điểm: ").append(tour.getDiaDiem().getTenDiaDiem());
+            String diaDiem = tour.getDiaDiem().getTenDiaDiem();
+            sb.append(" | Địa điểm: ").append(diaDiem);
+            String diaDiemKhongDau = VNCharacterUtils.removeDiacritics(diaDiem);
+            if (!diaDiemKhongDau.equals(diaDiem)) {
+                sb.append(" (").append(diaDiemKhongDau).append(")");
+            }
         }
 
         if (tour.getGia() != null) {
@@ -134,11 +149,11 @@ public class DongBoDuLieuService {
         // Bổ sung lịch trình chi tiết vào text embedding
         List<LichTrinhTour> lichTrinhs = lichTrinhTourRepository.findByTourIdOrderByNgayThuAsc(tour.getId());
         if (lichTrinhs != null && !lichTrinhs.isEmpty()) {
-            sb.append(" | Lịch trình chi tiết tour \"").append(tour.getTenTour()).append("\": ");
+            sb.append(" | Lịch trình chi tiết tour \"").append(tenTour).append("\": ");
             String chiTietLichTrinh = lichTrinhs.stream()
                     .map(lt -> String.format("Ngày %d của tour \"%s\" - %s: %s", 
                             lt.getNgayThu(), 
-                            tour.getTenTour() != null ? tour.getTenTour() : "N/A",
+                            tenTour,
                             lt.getTieuDe() != null ? lt.getTieuDe() : "", 
                             lt.getMoTa() != null ? lt.getMoTa() : ""))
                     .collect(Collectors.joining(". "));

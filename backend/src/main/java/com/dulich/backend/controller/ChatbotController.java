@@ -46,6 +46,16 @@ public class ChatbotController {
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("/nguoi-dung/{nguoiDungId}/phien-chat")
+    public ResponseEntity<?> layPhienChatCuaNguoiDung(@PathVariable Long nguoiDungId) {
+        return ResponseEntity.ok(dichVuChatbot.layCacPhienChatCuaNguoiDung(nguoiDungId));
+    }
+
+    @GetMapping("/debug-search")
+    public ResponseEntity<?> debugSearch(@RequestParam String q) {
+        return ResponseEntity.ok(dichVuChatbot.debugSearch(q));
+    }
+
     // ============ ADMIN - RAG ENDPOINTS ============
 
     /**

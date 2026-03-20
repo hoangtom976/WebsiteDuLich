@@ -77,9 +77,9 @@ public class CauHinhBaoMat {
                         .requestMatchers("/api/voucher/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_STAFF")
                         .requestMatchers("/api/thong-ke/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_STAFF")
                         .requestMatchers("/api/yeu-thich/**").authenticated()
-                        .requestMatchers("/api/chatbot/dong-bo", "/api/chatbot/upload-tai-lieu",
-                                "/api/chatbot/tai-lieu/**")
-                        .hasAuthority("ROLE_ADMIN")
+                        .requestMatchers("/api/chatbot/upload-tai-lieu",
+                                "/api/chatbot/tai-lieu/**",
+                                "/api/chatbot/dong-bo").hasAuthority("ROLE_ADMIN")
                         .requestMatchers("/api/chatbot/**").permitAll()
                         .requestMatchers("/api/quan-tri/chat/thong-ke-rag", "/api/quan-tri/chat/tai-lieu")
                         .hasAnyAuthority("ROLE_ADMIN", "ROLE_STAFF")

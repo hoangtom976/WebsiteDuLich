@@ -11,7 +11,96 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { MessageSquare, X, Send, Bot, User, Loader2 } from "lucide-react";
-import { askChatbot, getSuggestedQuestions } from "@/services/chatbotService";
+import { askChatbot, getSuggestedQuestions, getUserChatSessions, getChatHistory } from "@/services/chatbotService";
+import { getAuthState } from "@/lib/auth-client";
+import { getTourById } from "@/services/tourService";
+import TourCard from "./TourCard";
+
+// =============== ChatMessage Component ===============
+function ChatMessage({ content, role }) {
+  const [cleanContent, setCleanContent] = useState("");
+  const [tourIds, setTourIds] = useState([]);
+  const [tours, setTours] = useState({});
+  const [isLoadingTours, setIsLoadingTours] = useState(false);
+
+  useEffect(() => {
+    // Parser to extract all [TOURID:id] tags and clean the text
+    const regex = /\[TOURID:(\d+)\]/g;
+    let match;
+    const ids = [];
+    let text = content;
+
+    while ((match = regex.exec(content)) !== null) {
+      ids.push(parseInt(match[1]));
+    }
+
+    // Remove the tags from the text
+    text = text.replace(regex, '').trim();
+    
+    setCleanContent(text);
+    setTourIds(ids);
+  }, [content]);
+
+  useEffect(() => {
+    const fetchTours = async () => {
+      if (tourIds.length === 0) return;
+      setIsLoadingTours(true);
+      
+      const tourData = {};
+      for (const id of tourIds) {
+        if (!tours[id]) { // Avoid refetching if already fetched
+          try {
+            const tour = await getTourById(id);
+            if (tour) {
+              tourData[id] = tour;
+            }
+          } catch (error) {
+            console.error("Failed to fetch tour data for chatbot:", error);
+          }
+        }
+      }
+      
+      if (Object.keys(tourData).length > 0) {
+         setTours(prev => ({ ...prev, ...tourData }));
+      }
+      setIsLoadingTours(false);
+    };
+
+    fetchTours();
+  }, [tourIds]);
+
+  const renderText = (text) => {
+    return text.split('\n').map((line, i) => (
+      <span key={i}>
+        {line}
+        <br />
+      </span>
+    ));
+  };
+
+  return (
+    <div className="flex flex-col gap-2">
+      <div>{renderText(cleanContent)}</div>
+      
+      {/* Render TourCards if tour tags are found */}
+      {tourIds.length > 0 && (
+        <div className="flex flex-col gap-3 mt-2 w-full max-w-[280px]">
+           {isLoadingTours && Object.keys(tours).length === 0 && (
+              <div className="flex items-center gap-2 text-xs text-green-600">
+                <Loader2 className="w-3 h-3 animate-spin"/> Đang tải thông tin tour...
+              </div>
+           )}
+           {tourIds.map(id => tours[id] ? (
+              <div key={id} className="w-[260px] transform origin-top-left scale-[0.85] -mb-12">
+                <TourCard tour={tours[id]} />
+              </div>
+           ) : null)}
+        </div>
+      )}
+    </div>
+  );
+}
+// =====================================================
 
 export default function Chatbox() {
   const [isOpen, setIsOpen] = useState(false);
@@ -20,17 +109,59 @@ export default function Chatbox() {
   const [isLoading, setIsLoading] = useState(false);
   const [phienChatId, setPhienChatId] = useState(null);
   const [suggestions, setSuggestions] = useState([]);
+  const [isInitializingDialog, setIsInitializingDialog] = useState(false);
 
   const messagesEndRef = useRef(null);
+  const auth = getAuthState();
 
-  // Fetch suggestions on first open if no messages
+  // Handle initialization on open
   useEffect(() => {
-    if (isOpen && messages.length === 0 && suggestions.length === 0) {
-      getSuggestedQuestions()
-        .then(data => setSuggestions(data))
-        .catch(err => console.error("Could not fetch suggestions", err));
-    }
-  }, [isOpen]);
+    const initializeChatbox = async () => {
+      if (!isOpen || messages.length > 0) return;
+      
+      setIsInitializingDialog(true);
+      try {
+        let hasHistory = false;
+        
+        // 1. If logged in, look for existing chat sessions
+        if (auth.isLoggedIn && auth.user?.id) {
+          const sessions = await getUserChatSessions(auth.user.id);
+          if (sessions && sessions.length > 0) {
+            // Get the most recent session
+            const latestSession = sessions[0];
+            const history = await getChatHistory(latestSession.id);
+            
+            if (history && history.length > 0) {
+               setPhienChatId(latestSession.id);
+               // Map backend format to frontend format {role, content}
+               const formattedHistory = history.map(msg => ({
+                  role: msg.nguoiGui,
+                  content: msg.noiDung
+               }));
+               setMessages(formattedHistory);
+               hasHistory = true;
+            }
+          }
+        }
+        
+        // 2. Fetch suggestions if no history
+        if (!hasHistory) {
+          try {
+            const sugs = await getSuggestedQuestions();
+            setSuggestions(sugs);
+          } catch (err) {
+             console.error("Could not fetch suggestions", err);
+          }
+        }
+      } catch (error) {
+        console.error("Error initializing chatbox:", error);
+      } finally {
+        setIsInitializingDialog(false);
+      }
+    };
+
+    initializeChatbox();
+  }, [isOpen, auth.isLoggedIn, auth.user?.id]);
 
   // Scroll to bottom on new message
   useEffect(() => {
@@ -50,7 +181,7 @@ export default function Chatbox() {
       const requestData = {
         cauHoi: text,
         phienChatId: phienChatId,
-        nguoiDungId: null // Can be updated later with actual user ID if auth is implemented
+        nguoiDungId: auth.isLoggedIn && auth.user?.id ? auth.user.id : null
       };
 
       const response = await askChatbot(requestData);
@@ -71,16 +202,6 @@ export default function Chatbox() {
   const onSubmit = (e) => {
     e.preventDefault();
     handleSend(inputValue);
-  };
-
-  const renderMessageContent = (content) => {
-    // Preserve line breaks from backend response
-    return content.split('\n').map((line, i) => (
-      <span key={i}>
-        {line}
-        <br />
-      </span>
-    ));
   };
 
   return (
@@ -120,7 +241,12 @@ export default function Chatbox() {
               </div>
             </CardHeader>
             <CardContent className="p-4 flex-1 overflow-y-auto bg-gray-50 flex flex-col gap-4">
-              {messages.length === 0 ? (
+              {isInitializingDialog ? (
+                <div className="flex flex-col items-center justify-center h-full space-y-4">
+                   <Loader2 className="w-8 h-8 text-green-500 animate-spin" />
+                   <p className="text-sm text-gray-500">Đang tải hộp thoại...</p>
+                </div>
+              ) : messages.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-center space-y-4">
                   <Bot className="w-12 h-12 text-gray-300" />
                   <p className="text-sm text-gray-500">
@@ -153,12 +279,12 @@ export default function Chatbox() {
                       </div>
                     )}
                     <div
-                      className={`max-w-[75%] p-3 rounded-2xl text-sm ${msg.role === "USER"
+                      className={`max-w-[85%] p-3 rounded-2xl text-sm ${msg.role === "USER"
                           ? "bg-green-500 text-white rounded-br-none"
                           : "bg-white border text-gray-700 rounded-bl-none shadow-sm"
                         }`}
                     >
-                      {renderMessageContent(msg.content)}
+                      <ChatMessage content={msg.content} role={msg.role} />
                     </div>
                     {msg.role === "USER" && (
                       <div className="w-8 h-8 rounded-full flex-shrink-0 bg-gray-200 flex items-center justify-center mb-1">

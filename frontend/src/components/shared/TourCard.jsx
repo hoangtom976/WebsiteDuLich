@@ -20,12 +20,14 @@ export default function TourCard({ tour }) {
     total: tour.tongDanhGia || 0
   };
 
+  const displayImage = tour.hinhAnh || (tour.danhSachAnh && tour.danhSachAnh.length > 0 ? tour.danhSachAnh[0] : null);
+
   return (
     <Link href={`/tours/${tour.id}`} className="block h-full">
       <Card className="group flex h-full flex-col overflow-hidden rounded-xl border border-slate-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
         <div className="relative aspect-[3/2] w-full overflow-hidden">
           <img
-            src={tour.hinhAnh ? (tour.hinhAnh.startsWith('http') ? tour.hinhAnh : `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8081/api'}/files/image/${tour.hinhAnh}`) : fallbackImage}
+            src={displayImage ? (displayImage.startsWith('http') ? displayImage : `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8081/api'}/files/image/${displayImage}`) : fallbackImage}
             alt={tour.tenTour}
             className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
             onError={(e) => {

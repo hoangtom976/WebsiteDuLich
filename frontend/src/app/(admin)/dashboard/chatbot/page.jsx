@@ -323,6 +323,11 @@ export default function AdminChatbotPage() {
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
+                  
+                  <div className="text-xs text-indigo-600 font-medium flex items-center gap-1">
+                      <User className="w-3 h-3" />
+                      {session.tenNguoiDung || "Khách ẩn danh"}
+                  </div>
 
                   <div className="flex items-center justify-between text-xs text-slate-500 mt-auto">
                     <span className="flex items-center gap-1">
