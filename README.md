@@ -1,8 +1,8 @@
 # 🌏 Hệ Thống Đặt Tour Du Lịch & Hỗ Trợ Khách Hàng Với AI (RAG Chatbot)
 
-> **Báo cáo đồ án nội bộ / Hướng dẫn dự án chuyên sâu**
-> 
-> Một nền tảng đặt tour hiện đại tích hợp trí tuệ nhân tạo, tối ưu hóa trải nghiệm người dùng từ tìm kiếm, đặt chỗ đến thanh toán trực tuyến.
+> **Đồ án 2 — Nguyễn Vy Khang — MSSV: 220825**
+>
+> Một nền tảng đặt tour du lịch hiện đại tích hợp trí tuệ nhân tạo, tối ưu hóa trải nghiệm người dùng từ tìm kiếm, đặt chỗ đến thanh toán trực tuyến.
 
 ---
 
@@ -26,89 +26,202 @@ Dự án **WebsiteDuLich** là hệ thống quản lý và đặt tour trực tu
 - **Bảng điều khiển (Dashboard)**: Thống kê doanh thu, số lượng đơn hàng và người dùng mới thông qua các biểu đồ trực quan.
 - **Quản lý nội dung**: Quản lý kho tour, bài viết blog, danh mục và địa điểm.
 - **Quản lý kinh doanh**: Cấu hình Flash Sale, quản lý Voucher và duyệt lịch khởi hành.
-- **Chăm sóc khách hàng**: Quản lý đánh giá và giám sát tương tác của Chatbot.
+- **Quản lý Chatbot AI**: Đồng bộ dữ liệu tour vào Vector Database, upload tài liệu bổ sung (.txt) và giám sát lịch sử hội thoại.
 - **Xuất báo cáo**: Hỗ trợ xuất dữ liệu tour và đơn hàng ra định dạng Excel (Apache POI).
 
 ---
 
 ## 🛠️ Công Nghệ Sử Dụng
 
-### Backend
-- **Framework**: Java 21 & Spring Boot 3.2.3
-- **Database**: MySQL 8.0 (Relational Data) & **Qdrant** (Vector Database cho AI)
-- **Security**: Spring Security & JSON Web Token (JWT)
-- **AI Stack**: Groq API (Llama 3.3 70B), HuggingFace (Embedding Model), RAG Architecture
-- **Infrastucture**: Cloudinary (Lưu trữ hình ảnh), Spring Mail (Hệ thống thông báo), Apache POI (Xử lý Excel)
-
-### Frontend
-- **Framework**: Next.js 16 (React 19)
-- **Styling**: Tailwind CSS 4 & Shadcn UI
-- **State Management**: React Hook Form & Axios
-- **Data Visualization**: Recharts
-- **Components**: Lucide Icons, Sonner (Toasts), Swiper (Carousel)
+| Thành phần | Công nghệ |
+|---|---|
+| **Backend Framework** | Java 21, Spring Boot 3.2.3 |
+| **Frontend Framework** | Next.js 16 (React 19) |
+| **Cơ sở dữ liệu** | MySQL 8.0 |
+| **Vector Database** | Qdrant |
+| **Bảo mật** | Spring Security, JSON Web Token (JWT) |
+| **AI / LLM** | Groq API (Llama 3.3 70B) |
+| **Embedding Model** | HuggingFace (`paraphrase-multilingual-MiniLM-L12-v2`) |
+| **Thanh toán** | VNPAY |
+| **Lưu trữ hình ảnh** | Cloudinary |
+| **Gửi Email** | Spring Mail (Gmail SMTP) |
+| **Thời tiết** | OpenWeatherMap API |
+| **Giao diện** | Tailwind CSS 4, Shadcn UI, Recharts, Lucide Icons |
+| **Xuất Excel** | Apache POI |
 
 ---
 
 ## 📐 Kiến Trúc RAG Chatbot
 
 Hệ thống sử dụng mô hình **Retrieval-Augmented Generation (RAG)** để đảm bảo chatbot không bị "ảo giác" (hallucination):
-1. **Embedding**: Dữ liệu tour được chuyển đổi sang dạng Vector thông qua model của HuggingFace.
+
+```
+Người dùng đặt câu hỏi
+        │
+        ▼
+┌─────────────────────┐
+│  HuggingFace API    │ ──► Chuyển câu hỏi thành Vector
+└─────────────────────┘
+        │
+        ▼
+┌─────────────────────┐
+│  Qdrant Vector DB   │ ──► Tìm kiếm tour tương đồng (Hybrid Search)
+└─────────────────────┘
+        │
+        ▼
+┌─────────────────────┐
+│  Groq LLM API       │ ──► Biên soạn câu trả lời dựa trên dữ liệu tour thực tế
+└─────────────────────┘
+        │
+        ▼
+  Trả lời khách hàng
+```
+
+1. **Embedding**: Dữ liệu tour được chuyển đổi sang dạng Vector 384 chiều thông qua model `paraphrase-multilingual-MiniLM-L12-v2` của HuggingFace.
 2. **Storage**: Vector được lưu trữ tại Qdrant Vector DB.
-3. **Retrieval**: Khi người dùng hỏi, hệ thống thực hiện **Hybrid Search** (kết hợp tương đồng vector và keyword) để tìm ra tour phù hợp nhất.
-4. **Augmentation**: Dữ liệu tour tìm được được đưa vào context để Groq (LLM) biên soạn câu trả lời cuối cùng cho khách hàng.
+3. **Retrieval**: Khi người dùng hỏi, hệ thống thực hiện **Hybrid Search** (kết hợp tương đồng vector và keyword matching) để tìm ra tour phù hợp nhất.
+4. **Augmentation**: Dữ liệu tour tìm được được đưa vào context để Groq (LLM Llama 3.3 70B) biên soạn câu trả lời cuối cùng cho khách hàng.
 
 ---
 
-## 🚀 Hướng Dẫn Cài Đặt Chi Tiết
+## 📁 Cấu Trúc Thư Mục
+
+```
+WebsiteDuLich/
+├── backend/                        # Spring Boot Backend
+│   ├── src/main/java/com/dulich/backend/
+│   │   ├── config/                 # Cấu hình (CORS, Security, Cloudinary, VNPAY...)
+│   │   ├── controller/             # REST API Controllers
+│   │   ├── dto/                    # Data Transfer Objects
+│   │   ├── entity/                 # JPA Entities
+│   │   ├── repository/             # Spring Data Repositories
+│   │   ├── service/                # Business Logic & AI Services
+│   │   └── util/                   # Tiện ích (Xử lý tiếng Việt, ...)
+│   ├── src/main/resources/
+│   │   └── application.properties  # Cấu hình ứng dụng
+│   ├── Dockerfile                  # Docker build cho Backend
+│   └── pom.xml                     # Maven dependencies
+│
+├── frontend/                       # Next.js Frontend
+│   ├── src/
+│   │   ├── app/                    # App Router Pages
+│   │   ├── components/             # React Components
+│   │   ├── lib/                    # API Client (Axios)
+│   │   └── services/               # Service Layers
+│   ├── package.json
+│   └── next.config.mjs
+│
+└── README.md
+```
+
+---
+
+## 🚀 Hướng Dẫn Cài Đặt (Localhost)
 
 ### 1. Yêu Cầu Hệ Thống
-- **Java**: JDK 21 trở lên.
-- **Node.js**: Phiên bản 18.x hoặc 20.x (khuyên dùng).
-- **Cơ sở dữ liệu**: MySQL 8 và Docker (để chạy Qdrant).
-- **Cổng mặc định**: 
-  - Backend: `8081`
-  - Frontend: `3000`
-  - Qdrant: `6333`, `6334`
+- **Java**: JDK 21 trở lên
+- **Node.js**: Phiên bản 18.x hoặc 20.x
+- **MySQL**: Phiên bản 8.0
+- **Docker**: Để chạy Qdrant Vector Database
+- **Maven**: Để build Backend
 
 ### 2. Thiết Lập Cơ Sở Dữ Liệu
-1. Tạo một database mới trong MySQL:
-   ```sql
-   CREATE DATABASE dat_tour_du_lich CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-   ```
-2. Chạy Qdrant bằng Docker (nếu chưa có):
-   ```bash
-   docker run -p 6333:6333 -p 6334:6334 qdrant/qdrant
-   ```
+
+Tạo database MySQL:
+```sql
+CREATE DATABASE dat_tour_du_lich CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
+
+Chạy Qdrant bằng Docker:
+```bash
+docker run -p 6333:6333 -p 6334:6334 qdrant/qdrant
+```
 
 ### 3. Cấu Hình & Chạy Backend
-1. Di chuyển vào thư mục backend: `cd backend`
-2. Cập nhật các thông tin trong `src/main/resources/application.properties`:
-   - MySQL config (Username/Password)
-   - API Keys (Groq, HuggingFace, OpenWeatherMap, Cloudinary)
-3. Chạy ứng dụng:
-   ```bash
-   mvn spring-boot:run
-   ```
+
+```bash
+cd backend
+```
+
+Cập nhật thông tin trong `src/main/resources/application.properties`:
+- Tài khoản MySQL (`spring.datasource.username`, `spring.datasource.password`)
+- API Keys: Groq, HuggingFace, OpenWeatherMap
+- Cấu hình Cloudinary (lưu trữ hình ảnh)
+
+Chạy ứng dụng:
+```bash
+mvn spring-boot:run
+```
+Backend sẽ khởi chạy tại: `http://localhost:8081`
 
 ### 4. Cấu Hình & Chạy Frontend
-1. Di chuyển vào thư mục frontend: `cd frontend`
-2. Cài đặt dependencies:
-   ```bash
-   npm install
-   ```
-3. Chạy chế độ phát triển:
-   ```bash
-   npm run dev
-   ```
 
+```bash
+cd frontend
+npm install
+npm run dev
+```
+Frontend sẽ khởi chạy tại: `http://localhost:3000`
+
+### 5. Đồng Bộ Dữ Liệu AI
+
+Sau khi Backend và Qdrant đã chạy, truy cập trang **Dashboard Admin → Chatbot AI → Đồng bộ Tour** để nạp dữ liệu tour vào Vector Database cho Chatbot hoạt động.
+
+---
+
+## ☁️ Hướng Dẫn Triển Khai (Deploy)
+
+### Nền tảng triển khai
+
+| Thành phần | Nền tảng | Mô tả |
+|---|---|---|
+| **Frontend** | [Vercel](https://vercel.com) | Hosting Next.js, tự động deploy từ GitHub |
+| **Backend** | [Render](https://render.com) | Docker-based Web Service cho Spring Boot |
+| **MySQL** | [Aiven](https://aiven.io) | Managed MySQL trên Cloud |
+| **Vector DB** | [Qdrant Cloud](https://cloud.qdrant.io) | Managed Qdrant cho AI Chatbot |
+
+### Biến Môi Trường trên Render (Backend)
+
+| Biến | Mô tả |
+|---|---|
+| `SERVER_PORT` | Cổng chạy ứng dụng (mặc định: `8080`) |
+| `SPRING_DATASOURCE_URL` | JDBC URL kết nối MySQL Aiven |
+| `SPRING_DATASOURCE_USERNAME` | Tài khoản MySQL |
+| `SPRING_DATASOURCE_PASSWORD` | Mật khẩu MySQL |
+| `QDRANT_HOST` | Hostname của Qdrant Cloud (không có `https://`) |
+| `QDRANT_PORT` | Cổng gRPC Qdrant Cloud (`6334`) |
+| `QDRANT_API_KEY` | API Key của Qdrant Cloud |
+| `HUGGINGFACE_API_TOKEN` | Access Token của HuggingFace |
+
+### Biến Môi Trường trên Vercel (Frontend)
+
+| Biến | Mô tả |
+|---|---|
+| `NEXT_PUBLIC_API_URL` | URL API Backend trên Render (ví dụ: `https://xxx.onrender.com/api`) |
+
+---
+
+## 📊 Cổng Mặc Định
+
+| Dịch vụ | Cổng |
+|---|---|
+| Backend (Spring Boot) | `8081` (localhost) / `8080` (Render) |
+| Frontend (Next.js) | `3000` (localhost) |
+| Qdrant REST API | `6333` |
+| Qdrant gRPC | `6334` |
+| MySQL | `3306` (localhost) |
+
+---
 
 ## 📝 Thông Tin Liên Hệ
 
-- **Sinh viên thực hiện**: Nguyễn Vy Khang
-- **Mã số sinh viên**: 220825
-- **Email**: hoangtom976@gmail.com
-- **Lớp**: DH22KPM01
+| Thông tin | Chi tiết |
+|---|---|
+| **Sinh viên thực hiện** | Nguyễn Vy Khang |
+| **Mã số sinh viên** | 220825 |
+| **Email** | hoangtom976@gmail.com |
+| **Lớp** | DH22KPM01 |
 
 ---
 
-*Dự án này được phát triển với mục đích học tập và nghiên cứu công nghệ mới.*
+*Dự án này được phát triển với mục đích học tập và nghiên cứu công nghệ mới trong khuôn khổ Đồ án 2.*
