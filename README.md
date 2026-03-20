@@ -213,6 +213,17 @@ Sau khi Backend và Qdrant đã chạy, truy cập trang **Dashboard Admin → C
 
 ---
 
+## 🔑 Tài Khoản Dùng Thử
+
+| Vai trò | Tên hiển thị | Email | Mật khẩu |
+|---|---|---|---|
+| **Quản trị viên (Admin)** | admintest | `admin@example.com` | `123456` |
+| **Khách hàng** | Nguyễn Vy Khang | `hoangtom976@gmail.com` | `654321` |
+
+> **Lưu ý**: Tài khoản Admin có quyền truy cập toàn bộ Dashboard quản trị bao gồm: Quản lý Tour, Đơn hàng, Chatbot AI, Flash Sale, Voucher, Blog và Hệ thống người dùng.
+
+---
+
 ## 📝 Thông Tin Liên Hệ
 
 | Thông tin | Chi tiết |
