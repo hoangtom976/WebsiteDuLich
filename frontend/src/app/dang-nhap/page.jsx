@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -25,7 +25,7 @@ import {
 } from "@/lib/auth-client";
 import { getCurrentUserProfile } from "@/services/userService";
 
-export default function LoginForm() {
+function LoginFormContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [error, setError] = useState("");
@@ -130,5 +130,13 @@ export default function LoginForm() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function LoginForm() {
+  return (
+    <Suspense fallback={<div className="flex min-h-[calc(100vh-150px)] items-center justify-center bg-gray-50">Đang tải dữ liệu...</div>}>
+      <LoginFormContent />
+    </Suspense>
   );
 }

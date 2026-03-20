@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Loader2, Search, MapPin, Clock, Star, DollarSign, RotateCcw, Calendar } from "lucide-react";
 import TourCard from "@/components/shared/TourCard";
@@ -19,7 +19,7 @@ const getActualTourPrice = (price) => {
   return p < 10000 ? p * 1000000 : p;
 };
 
-export default function ToursPage() {
+function ToursPageContent() {
   const searchParams = useSearchParams();
   const [allTours, setAllTours] = useState([]);
   const [filteredTours, setFilteredTours] = useState([]);
@@ -313,5 +313,13 @@ export default function ToursPage() {
         </section>
       </div>
     </div>
+  );
+}
+
+export default function ToursPage() {
+  return (
+    <Suspense fallback={<div className="flex h-[50vh] items-center justify-center">Đang tải danh sách tour...</div>}>
+      <ToursPageContent />
+    </Suspense>
   );
 }
