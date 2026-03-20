@@ -51,7 +51,7 @@ export default function BlogSidebar({ popularPosts = [], categories = [], relate
                         <Link key={tour.id} href={`/tours/${tour.id}`} className="group block">
                             <div className="relative h-40 rounded-xl overflow-hidden mb-3">
                                 <img
-                                    src={tour.hinhAnh ? (tour.hinhAnh.startsWith('http') ? tour.hinhAnh : `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8081/api'}/files/image/${tour.hinhAnh}`) : fallbackImage}
+                                    src={tour.hinhAnh ? (tour.hinhAnh.startsWith('http') ? tour.hinhAnh : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8081/api'}/files/image/${tour.hinhAnh}`) : fallbackImage}
                                     alt={tour.tenTour}
                                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                                     onError={(e) => {

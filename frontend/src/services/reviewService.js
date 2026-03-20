@@ -1,7 +1,7 @@
 import api from "@/lib/api";
 
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8081/api";
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:8081/api";
 
 async function serverFetchJson(path) {
   const response = await fetch(`${API_BASE_URL}${path}`, {

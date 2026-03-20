@@ -146,12 +146,12 @@ async function LuxuryBanner() {
       const firstImage = tour.danhSachAnh[0];
       return firstImage.startsWith('http')
         ? firstImage
-        : `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8081/api'}/files/image/${firstImage}`;
+        : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8081/api'}/files/image/${firstImage}`;
     }
     if (tour?.hinhAnh) {
       return tour.hinhAnh.startsWith('http')
         ? tour.hinhAnh
-        : `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8081/api'}/files/image/${tour.hinhAnh}`;
+        : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8081/api'}/files/image/${tour.hinhAnh}`;
     }
     return "https://images.unsplash.com/photo-1599708149101-01748aeb896b?q=80&w=1920&auto=format&fit=crop";
   };

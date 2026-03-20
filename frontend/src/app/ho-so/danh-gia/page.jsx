@@ -66,7 +66,7 @@ function ReviewForm({ tour, onSuccess, onCancel }) {
         }
     };
 
-    const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8081/api";
+    const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8081/api";
     const tourImage = tour.anhTour
         ? (tour.anhTour.startsWith("http") ? tour.anhTour : `${apiBase}/files/image/${tour.anhTour}`)
         : null;
@@ -162,7 +162,7 @@ export default function MyReviewsPage() {
         fetchData();
     };
 
-    const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8081/api";
+    const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8081/api";
 
     return (
         <div className="min-h-screen bg-slate-50 py-12">
