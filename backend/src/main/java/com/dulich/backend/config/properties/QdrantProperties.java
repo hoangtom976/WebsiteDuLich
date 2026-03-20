@@ -11,4 +11,5 @@ public class QdrantProperties {
     private String host = "localhost";
     private int port = 6334;
     private String collectionName = "tours";
+    private String apiKey = "";
 }

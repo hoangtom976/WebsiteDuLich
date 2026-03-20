@@ -40,12 +40,15 @@ public class QdrantService {
     @PostConstruct
     public void init() {
         try {
-            client = new QdrantClient(
-                    QdrantGrpcClient.newBuilder(
-                            qdrantProperties.getHost(),
-                            qdrantProperties.getPort(),
-                            false // không dùng TLS
-                    ).build());
+            var builder = QdrantGrpcClient.newBuilder(
+                    qdrantProperties.getHost(),
+                    qdrantProperties.getPort(),
+                    true // đổi thành true để dùng TLS cho Qdrant Cloud
+            );
+            if (qdrantProperties.getApiKey() != null && !qdrantProperties.getApiKey().isEmpty()) {
+                builder.withApiKey(qdrantProperties.getApiKey());
+            }
+            client = new QdrantClient(builder.build());
             logger.info("Đã kết nối Qdrant tại {}:{}", qdrantProperties.getHost(), qdrantProperties.getPort());
             khoiTaoCollection();
         } catch (Exception e) {
