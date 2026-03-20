@@ -1,6 +1,6 @@
 # 🌏 Hệ Thống Đặt Tour Du Lịch & Hỗ Trợ Khách Hàng Với AI (RAG Chatbot)
 
-> **Đồ án 2 — Nguyễn Vy Khang — MSSV: 220825**
+> **Đồ án 2 — Nguyễn Vỹ Khang — MSSV: 220825**
 >
 > Một nền tảng đặt tour du lịch hiện đại tích hợp trí tuệ nhân tạo, tối ưu hóa trải nghiệm người dùng từ tìm kiếm, đặt chỗ đến thanh toán trực tuyến.
 
@@ -218,7 +218,7 @@ Sau khi Backend và Qdrant đã chạy, truy cập trang **Dashboard Admin → C
 | Vai trò | Tên hiển thị | Email | Mật khẩu |
 |---|---|---|---|
 | **Quản trị viên (Admin)** | admintest | `admin@example.com` | `123456` |
-| **Khách hàng** | Nguyễn Vy Khang | `hoangtom976@gmail.com` | `654321` |
+| **Khách hàng** | Nguyễn Vỹ Khang | `hoangtom976@gmail.com` | `654321` |
 
 > **Lưu ý**: Tài khoản Admin có quyền truy cập toàn bộ Dashboard quản trị bao gồm: Quản lý Tour, Đơn hàng, Chatbot AI, Flash Sale, Voucher, Blog và Hệ thống người dùng.
 
