@@ -28,7 +28,7 @@ export default async function TourDetailPage({ params }) {
   const formattedPrice = formatPrice(tour.gia);
 
   const coverImage = tour.danhSachAnh && tour.danhSachAnh.length > 0
-    ? (tour.danhSachAnh[0].startsWith("http") ? tour.danhSachAnh[0] : `${process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8081/api"}/files/image/${tour.danhSachAnh[0]}`)
+    ? (tour.danhSachAnh[0].startsWith("http") ? tour.danhSachAnh[0] : `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8081/api"}/files/image/${tour.danhSachAnh[0]}`)
     : "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?q=80&w=1200&auto=format&fit=crop";
 
   /* ═══════════ LEFT COLUMN CONTENT (Server-rendered) ═══════════ */
@@ -134,7 +134,7 @@ export default async function TourDetailPage({ params }) {
         <div className="p-4">
           <TourGallery
             images={(tour.danhSachAnh || []).map(img =>
-              img.startsWith("http") ? img : `${process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8081/api"}/files/image/${img}`
+              img.startsWith("http") ? img : `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8081/api"}/files/image/${img}`
             )}
           />
         </div>

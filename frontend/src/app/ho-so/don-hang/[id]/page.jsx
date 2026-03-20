@@ -143,7 +143,7 @@ export default function ChiTietDonHangPage() {
                                         <img
                                             src={booking.hinhAnh?.startsWith('http')
                                                 ? booking.hinhAnh
-                                                : `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8081/api'}/files/image/${booking.hinhAnh}`}
+                                                : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8081/api'}/files/image/${booking.hinhAnh}`}
                                             alt={booking.tenTour}
                                             className="h-full w-full object-cover"
                                             onError={(e) => e.target.src = "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?q=80&w=800&auto=format&fit=crop"}
