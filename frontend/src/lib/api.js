@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://localhost:8081/api",
+  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:8081/api",
 });
 
 // Thêm một interceptor để tự động gắn token vào header của mỗi request
