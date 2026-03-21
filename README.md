@@ -6,6 +6,21 @@
 
 ---
 
+## 📑 Mục Lục
+
+- [📖 Giới Thiệu Dự Án](#-giới-thiệu-dự-án)
+- [✨ Tính Năng Nổi Bật](#-tính-năng-nổi-bật)
+- [🛠️ Công Nghệ Sử Dụng](#️-công-nghệ-sử-dụng)
+- [📐 Kiến Trúc RAG Chatbot](#-kiến-trúc-rag-chatbot)
+- [📁 Cấu Trúc Thư Mục](#-cấu-trúc-thư-mục)
+- [🚀 Hướng Dẫn Cài Đặt (Localhost)](#-hướng-dẫn-cài-đặt-localhost)
+- [☁️ Hướng Dẫn Triển Khai (Deploy)](#️-hướng-dẫn-triển-khai-deploy)
+- [📊 Cổng Mặc Định](#-cổng-mặc-định)
+- [🔑 Tài Khoản Dùng Thử](#-tài-khoản-dùng-thử)
+- [📝 Thông Tin Liên Hệ](#-thông-tin-liên-hệ)
+
+---
+
 ## 📖 Giới Thiệu Dự Án
 
 Dự án **WebsiteDuLich** là hệ thống quản lý và đặt tour trực tuyến toàn diện, được thiết kế để giải quyết nhu cầu du lịch ngày càng tăng cao. Hệ thống không chỉ cung cấp các tính năng truyền thống mà còn tích hợp **AI Chatbot dựa trên kiến trúc RAG (Retrieval-Augmented Generation)** để tư vấn lộ trình và giải đáp thắc mắc của khách hàng một cách thông minh và chính xác dựa trên dữ liệu thực tế của hệ thống.
@@ -228,7 +243,7 @@ Sau khi Backend và Qdrant đã chạy, truy cập trang **Dashboard Admin → C
 
 | Thông tin | Chi tiết |
 |---|---|
-| **Sinh viên thực hiện** | Nguyễn Vy Khang |
+| **Sinh viên thực hiện** | Nguyễn Vỹ Khang |
 | **Mã số sinh viên** | 220825 |
 | **Email** | hoangtom976@gmail.com |
 | **Lớp** | DH22KPM01 |
