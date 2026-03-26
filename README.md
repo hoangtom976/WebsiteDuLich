@@ -6,6 +6,16 @@
 
 ---
 
+> 🚨 **LƯU Ý QUAN TRỌNG DÀNH CHO GIẢNG VIÊN VÀ HỘI ĐỒNG CHẤM THI:**
+> - Máy chủ (Backend) của hệ thống đang được triển khai trên nền tảng **Render (Gói Miễn Phí)**.
+> - Nếu trang web không có ai truy cập trong vòng 15 phút, máy chủ sẽ tự động chạy chế độ "Ngủ đông". 
+> - Do đó, **ở lần truy cập đầu tiên, trang web có thể xoay RẤT LÂU (mất từ 2 - 3 phút) để khởi động lại máy chủ**. Kính mong Hội đồng kiên nhẫn chờ đợi, KHÔNG ĐÓNG TAB trình duyệt. 
+> - Nếu quá 3 phút trình duyệt văng lỗi 504 Timeout, chỉ cần bấm **Tải lại trang (F5)** là hệ thống sẽ tải bình thường, các thao tác sau đó sẽ báo thành công ngay lập tức với tốc độ cực nhanh mượt mà.
+> 
+> 🌐 **LINK TRUY CẬP WEBSITE DEMO:** [**https://website-du-lich.vercel.app**](https://website-du-lich.vercel.app/)
+
+---
+
 ## 📑 Mục Lục
 
 - [📖 Giới Thiệu Dự Án](#-giới-thiệu-dự-án)
