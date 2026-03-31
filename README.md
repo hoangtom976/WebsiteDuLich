@@ -2,8 +2,9 @@
 # 🌏 Hệ Thống Đặt Tour Du Lịch & Hỗ Trợ Khách Hàng Với AI (RAG Chatbot)
 
 > **Đồ án 2 — Nguyễn Vỹ Khang — MSSV: 220825**
-> Đường link vào website: website-du-lich.vercel.app
-> Một nền tảng đặt tour du lịch hiện đại tích hợp trí tuệ nhân tạo, tối ưu hóa trải nghiệm người dùng từ tìm kiếm, đặt chỗ đến thanh toán trực tuyến.
+>
+Đường link vào website: website-du-lich.vercel.app
+Một nền tảng đặt tour du lịch hiện đại tích hợp trí tuệ nhân tạo, tối ưu hóa trải nghiệm người dùng từ tìm kiếm, đặt chỗ đến thanh toán trực tuyến.
 
 > 🚨 **LƯU Ý QUAN TRỌNG KHI MUỐN VÀO TRANG WEB:**
 > - Máy chủ (Backend) của hệ thống đang được triển khai trên nền tảng **Render (Gói Miễn Phí)**.
