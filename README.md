@@ -4,7 +4,7 @@
 > **Đồ án 2 — Nguyễn Vỹ Khang — MSSV: 220825**
 >
 Đường link vào website: website-du-lich.vercel.app
-Một nền tảng đặt tour du lịch hiện đại tích hợp trí tuệ nhân tạo, tối ưu hóa trải nghiệm người dùng từ tìm kiếm, đặt chỗ đến thanh toán trực tuyến.
+>
 
 > 🚨 **LƯU Ý QUAN TRỌNG KHI MUỐN VÀO TRANG WEB:**
 > - Máy chủ (Backend) của hệ thống đang được triển khai trên nền tảng **Render (Gói Miễn Phí)**.
@@ -13,7 +13,15 @@ Một nền tảng đặt tour du lịch hiện đại tích hợp trí tuệ nh
 > - Nếu quá 3 phút trình duyệt văng lỗi 504 Timeout, chỉ cần bấm **Tải lại trang (F5)** là hệ thống sẽ tải bình thường, các thao tác sau đó sẽ báo thành công ngay lập tức với tốc độ cực nhanh mượt mà.
 
 ---
+## 🔑 Tài Khoản Dùng Thử
 
+| Vai trò | Tên hiển thị | Email | Mật khẩu |
+|---|---|---|---|
+| **Quản trị viên (Admin)** | admintest | `admin@example.com` | `123456` |
+| **Khách hàng** | Nguyễn Vỹ Khang | `hoangtom976@gmail.com` | `654321` |
+
+> **Lưu ý**: Tài khoản Admin có quyền truy cập toàn bộ Dashboard quản trị bao gồm: Quản lý Tour, Đơn hàng, Chatbot AI, Flash Sale, Voucher, Blog và Hệ thống người dùng.
+---
 ## 📑 Mục Lục
 
 - [📖 Giới Thiệu Dự Án](#-giới-thiệu-dự-án)
